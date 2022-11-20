@@ -5,7 +5,7 @@ export const theme = {
   colors: {
     ...DefaultTheme.colors,
     text: "#000000",
-    label: "gba(60, 60, 67, 0.6)",
+    label: "#3C3C43",
     primary: "#92050B",
     secondary: "#414757",
     error: "#f13a59",

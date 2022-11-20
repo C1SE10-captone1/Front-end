@@ -1,101 +1,109 @@
 import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
   SafeAreaView,
-  Alert,
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  StatusBar,
   Image,
-  // Button,
+  PermissionsAndroid,
   TouchableOpacity,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
-import Paragraph from "../components/Paragraph";
-import Button from "../components/Button";
+import React, { useEffect, useRef, useState } from "react";
+// import Button from "../components/Button";
 import { theme } from "../core/theme";
-import BackButton from "../components/BackButton";
-import { Input, CheckBox } from "react-native-elements";
+import { CheckBox } from "react-native-elements";
+import * as ImagePicker from "expo-image-picker";
+
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 
 const AnswerKey = ({ navigation }) => {
-  const [answer, setAnswer] = useState([]);
-  const [A, setA] = useState("");
-  const [B, setB] = useState("");
-  const [C, setC] = useState("");
-  const [D, setD] = useState("");
+  const [imageFromGellary, setImageFromGellary] = useState(null);
+  const [imageFromCamera, setImageFromCamera] = useState(null);
 
-  const checkedA = () => {
-    setA(true);
-    setB(false);
-    setC(false);
-    setD(false);
-    console.log(A);
-  };
-  const checkedB = () => {
-    setA(false);
-    setB(true);
-    setC(false);
-    setD(false);
-    console.log(B);
-  };
-  const checkedC = () => {
-    setA(false);
-    setB(false);
-    setC(true);
-    setD(false);
-  };
-  const checkedD = () => {
-    setA(false);
-    setB(false);
-    setC(false);
-    setD(true);
+  // select image from gallery
+  const pickImage = async () => {
+    // try {
+    // const granted = await PermissionsAndroid.request(
+    // PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+    //   {
+    //     title: "InstaGrade App Gellary Permission",
+    //     message:
+    //       "InstaGrade App needs access to your gellary " +
+    //       "so you can take awesome pictures.",
+    //     buttonNeutral: "Ask Me Later",
+    //     buttonNegative: "Cancel",
+    //     buttonPositive: "OK",
+    //   }
+    // );
+
+    // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      // aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.cancelled) {
+      setImageFromGellary(result.uri);
+    }
+    // }
+    // } catch (err) {
+    //   console.warn(err);
+    // }
   };
 
-  const list = [];
-  for (let i = 0; i < 20; i++) {
-    list.push(
-      <>
-        <View style={{ flexDirection: "row" }}>
-          <Text style={{ alignContent: "center", justifyContent: "center" }}>
-            {i + 1}
-          </Text>
-          <CheckBox
-            title="A"
-            center
-            checked={A}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            onPress={checkedA}
-          />
-          <CheckBox
-            title="B"
-            center
-            checked={B}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            onPress={checkedB}
-          />
-          <CheckBox
-            title="C"
-            center
-            checked={C}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            onPress={checkedC}
-          />
-          <CheckBox
-            title="D"
-            center
-            checked={D}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            onPress={checkedD}
-          />
-          {/* <Text>{`\n`}</Text> */}
-        </View>
-      </>
-    );
-  }
+  // take image from camera
+  const takeFromCamera = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "InstaGrade App Camera Permission",
+          message:
+            "InstaGrade App needs access to your camera " +
+            "so you can take awesome pictures.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        let result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          allowsEditing: true,
+          // aspect: [4, 3],
+          quality: 1,
+        });
+        console.log("click on camera");
+        console.log(result);
+
+        if (!result.cancelled) {
+          setImageFromCamera(result.uri);
+        }
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const answerRow = (choiceQue) => {
+    for (let i = 0; i < choiceQue; i++) {
+      for (let j = 0; j < 4; j++) {}
+      list.push(
+        <>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={{ alignContent: "center", justifyContent: "center" }}>
+              {i + 1}
+            </Text>
+          </View>
+        </>
+      );
+    }
+  };
 
   const Save = () => {
     console.log("click save");
@@ -162,6 +170,7 @@ const AnswerKey = ({ navigation }) => {
 
       {/* Select from gallery */}
       <TouchableOpacity
+        onPress={pickImage}
         style={{
           marginTop: 20,
           flexDirection: "row",
@@ -191,7 +200,15 @@ const AnswerKey = ({ navigation }) => {
         <View style={{ flexDirection: "column" }}>
           <Text>Select from gallery</Text>
         </View>
-        <View style={{ paddingLeft: "40%" }}>
+        <View style={{ flexDirection: "column", paddingLeft: "20%" }}>
+          {imageFromGellary && (
+            <Image
+              source={{ uri: imageFromGellary }}
+              style={{ width: 40, height: 40 }}
+            />
+          )}
+        </View>
+        <View style={{ paddingLeft: "9%" }}>
           <Image
             source={require("../assets/Arrow.png")}
             resizeMode="contain"
@@ -207,6 +224,7 @@ const AnswerKey = ({ navigation }) => {
 
       {/* Take from camera */}
       <TouchableOpacity
+        onPress={takeFromCamera}
         style={{
           marginTop: 5,
           flexDirection: "row",
@@ -236,7 +254,15 @@ const AnswerKey = ({ navigation }) => {
         <View style={{ flexDirection: "column" }}>
           <Text>Take from camera</Text>
         </View>
-        <View style={{ paddingLeft: "40%" }}>
+        <View style={{ flexDirection: "column", paddingLeft: "20%" }}>
+          {imageFromCamera && (
+            <Image
+              source={{ uri: imageFromCamera }}
+              style={{ width: 40, height: 40 }}
+            />
+          )}
+        </View>
+        <View style={{ paddingLeft: "9%" }}>
           <Image
             source={require("../assets/Arrow.png")}
             resizeMode="contain"
@@ -253,7 +279,7 @@ const AnswerKey = ({ navigation }) => {
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
           <View style={styles.box}>
-            <View style={{ flexDirection: "column" }}>{list}</View>
+            {/* <View style={{ flexDirection: "column" }}>{list}</View> */}
             {/* <CheckBox
               title="A"
               center

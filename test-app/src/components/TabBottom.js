@@ -41,10 +41,6 @@ const TabBottom = () => {
           headerTitleStyle: {
             fontWeight: "bold",
           },
-          headerTitle: {
-            justifyContent: "center",
-            alignItems: "center",
-          },
           tabBarIcon: ({ focused }) => (
             <View style={styles.view}>
               <Image
@@ -72,8 +68,6 @@ const TabBottom = () => {
           headerTitleStyle: {
             fontWeight: "bold",
           },
-          justifyContent: "center",
-          alignItems: "center",
           tabBarIcon: ({ focused }) => (
             <View style={styles.view}>
               <Image

@@ -39,6 +39,6 @@ const styles = StyleSheet.create({
   error: {
     fontSize: 13,
     color: theme.colors.error,
-    paddingTop: 8,
+    paddingTop: 2,
   },
 });
