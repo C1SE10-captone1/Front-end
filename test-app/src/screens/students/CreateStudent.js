@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import Background from "../../components/Background";
 import Paragraph from "../../components/Paragraph";
 import Button from "../../components/Button";
 import { theme } from "../../core/theme";
@@ -30,22 +29,27 @@ const CreateStudent = ({ route, navigation }) => {
   const Done = async () => {
     setLoading(true);
     var check = true;
-    // const checkStudentCode = studentCodeValidator(studentCode.value);
-    // const checkName = nameValidator(name.value);
+    console.log(name.value, " ", studentCode.value);
+    const checkStudentCode = studentCodeValidator(studentCode.value);
+    const checkName = nameValidator(name.value);
 
-    // if (checkStudentCode || checkName) {
-    //   var check = false;
-    //   setName({ value: name.value, error: checkName });
-    //   setStudentCode({ value: studentCode.value, error: checkStudentCode });
-    //   return;
-    // }
+    if (checkStudentCode || checkName) {
+      var check = false;
+      setName({ value: name.value, error: checkName });
+      setStudentCode({ value: studentCode.value, error: checkStudentCode });
+      return;
+    }
+    console.log("error: ", studentCode.error);
     console.log("click done");
     let { data: students, error } = await supabase
       .from("students")
       .select("*")
-      .eq("class_id", classId);
-    eq("classes.uid", currentUser.uid);
+      .eq("class_id", classId)
+      .eq("is_delete", false);
+    // .eq("classes.is_delete", false);
+    // .eq("classes.uid", currentUser.uid);
 
+    console.log(students);
     for (let i; i < students.length; i++) {
       if (students[i].student_code === studentCode) {
         check = false;
@@ -91,6 +95,8 @@ const CreateStudent = ({ route, navigation }) => {
             onPress: () => {
               setName({ value: "", error: "" });
               setStudentCode({ value: "", error: "" });
+              setLoading(false);
+              return;
             },
           },
         ]);
@@ -110,6 +116,9 @@ const CreateStudent = ({ route, navigation }) => {
         {
           text: "Yes",
           onPress: () => {
+            setName({ value: "", error: "" });
+            setStudentCode({ value: "", error: "" });
+            setLoading(false);
             return;
           },
         },
@@ -122,23 +131,13 @@ const CreateStudent = ({ route, navigation }) => {
 
   const chooseFile = () => {};
   return (
-    <KeyboardAvoidingView behavior="height" enabled style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Paragraph style={{ paddingTop: 30, paddingLeft: 20 }}>
-          <BackButton goBack={navigation.goBack} />
-          {/* <Header>Student</Header> */}
-        </Paragraph>
-        {/* <Background> */}
-        {/* <ScrollView> */}
-        <View
-          style={{
-            justifyContent: "center",
-            alignContent: "center",
-            marginVertical: 50,
-          }}
-        >
-          <Text style={styles.title}>Create Student</Text>
-        </View>
+    <SafeAreaView>
+      <Paragraph style={{ paddingTop: 30, paddingLeft: 20 }}>
+        <BackButton goBack={navigation.goBack} />
+        {/* <Header>Class</Header> */}
+      </Paragraph>
+      <ScrollView>
+        <Text style={styles.title}>Create Student</Text>
         <View style={styles.container}>
           {/* input name class code */}
           <View style={styles.box}>
@@ -158,8 +157,8 @@ const CreateStudent = ({ route, navigation }) => {
           <View style={styles.box}>
             <TextInput
               keyboardType="text"
-              label="Name Student"
-              returnKeyType="next"
+              label="Student Name"
+              returnKeyType="done"
               value={name.value}
               onChangeText={(text) => setName({ value: text, error: "" })}
               error={!!name.error}
@@ -172,28 +171,22 @@ const CreateStudent = ({ route, navigation }) => {
         <View style={{}}>
           <Button
             mode="outlined"
-            style={{}}
+            style={{ marginTop: 50 }}
             color={theme.colors.yelow}
             onPress={chooseFile}
           >
             Import file student(s)
           </Button>
-          <Button mode="outlined" style={styles.btn_cancel} onPress={Cancel}>
+          <Button mode="outlined" onPress={Cancel}>
             Cancel
           </Button>
-          <Button
-            mode="outlined"
-            style={styles.btn_done}
-            color={"#000000"}
-            onPress={Done}
-          >
+          <Button mode="outlined" color={"#000000"} onPress={Done}>
             Create Student
           </Button>
         </View>
-        {/* </ScrollView> */}
         {/* </Background> */}
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -204,27 +197,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    top: "2%",
-    left: "3%",
+    // left: "3%",
     fontWeight: "bold",
     fontSize: 40,
     marginBottom: 30,
-    marginHorizontal: "10%",
+    // margin: "20%",
+    marginHorizontal: "15%",
+    marginVertical: "15%",
     color: theme.colors.primary,
   },
   box: {
-    // maxWidth: "100%",
-    marginHorizontal: 40,
+    maxWidth: "80%",
     marginTop: 20,
-    // marginLeft: "10%",
-    // marginRight: "10%",
+    marginLeft: "10%",
+    marginRight: "10%",
+    flexDirection: "row",
   },
-  box_child: {
-    maxWidth: "44%",
-    flexDirection: "column",
-  },
-  btn_cancel: {
-    marginTop: 10,
-  },
-  btn_done: {},
 });

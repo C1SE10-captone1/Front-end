@@ -8,19 +8,51 @@ import {
   Image,
   PermissionsAndroid,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 // import Button from "../components/Button";
 import { theme } from "../core/theme";
 import { CheckBox } from "react-native-elements";
 import * as ImagePicker from "expo-image-picker";
+import { supabase } from "../utils/supabase-service";
 
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+const AnswerKey = ({ route, navigation }) => {
+  let colection = {
+    question: "",
+    answer: "",
+  };
 
-const AnswerKey = ({ navigation }) => {
+  const examId = route.params.id;
+  const examName = route.params.name;
+  const examOptions = route.params.options;
+  const currentUser = supabase.auth.user();
+  const [answers, setAnswers] = useState(colection);
+
   const [imageFromGellary, setImageFromGellary] = useState(null);
   const [imageFromCamera, setImageFromCamera] = useState(null);
 
+  const loadExamDetails = async () => {
+    let { data: exams, error } = await supabase
+      .from("exams")
+      .select(
+        `id, name, date_exam, scale, option, description,
+          class_id,
+          classes (
+          id, name, class_code
+        )
+      `
+      )
+      .eq("id", examId)
+      .eq("is_delete", false)
+      .eq("classes.uid", currentUser.id);
+    // console.log("answer key: ", exams);
+    // console.log("answer key: ", answers);
+  };
+  useEffect(() => {
+    loadExamDetails();
+    answerRow();
+  }, []);
   // select image from gallery
   const pickImage = async () => {
     // try {
@@ -84,26 +116,101 @@ const AnswerKey = ({ navigation }) => {
         if (!result.cancelled) {
           setImageFromCamera(result.uri);
         }
+
+        console.log(imageFromCamera.uri);
       }
     } catch (err) {
       console.warn(err);
     }
   };
 
-  const answerRow = (choiceQue) => {
-    for (let i = 0; i < choiceQue; i++) {
-      for (let j = 0; j < 4; j++) {}
-      list.push(
-        <>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={{ alignContent: "center", justifyContent: "center" }}>
-              {i + 1}
-            </Text>
-          </View>
-        </>
+  const list = [];
+  const answerRow = () => {
+    for (let i = 1; i <= examOptions; i++) {
+      list.push({ ...colection });
+    }
+    console.log("row: ", list);
+    for (let i = 1; i <= examOptions; i++) {
+      return (
+        <View>
+          <Text style={{ flexDirection: "column" }}>{i}</Text>
+          <CheckBox
+            title="A"
+            center
+            checked={list.answer}
+            checkedIcon="dot-circle-o"
+            uncheckedIcon="circle-o"
+            // onPress={checkedA}
+          />
+          <CheckBox
+            title="B"
+            center
+            // checked={B}
+            checked={list[i].answer}
+            checkedIcon="dot-circle-o"
+            uncheckedIcon="circle-o"
+            // onPress={checkedB}
+          />
+          <CheckBox
+            title="C"
+            center
+            // checked={C}
+            checked={list[i].answer}
+            checkedIcon="dot-circle-o"
+            uncheckedIcon="circle-o"
+            // onPress={checkedC}
+          />
+          <CheckBox
+            title="D"
+            center
+            // checked={D}
+            checked={list[i].answer}
+            checkedIcon="dot-circle-o"
+            uncheckedIcon="circle-o"
+            // onPress={checkedD}
+          />
+        </View>
       );
     }
   };
+  // return (
+  //   <View>
+  //      <Text style={{ flexDirection: "column" }}>{index}</Text>
+  //     <CheckBox
+  //       title="A"
+  //       center
+  //       // checked={A}
+  //       checkedIcon="dot-circle-o"
+  //       uncheckedIcon="circle-o"
+  //       // onPress={checkedA}
+  //     />
+  //     <CheckBox
+  //       title="B"
+  //       center
+  //       // checked={B}
+  //       checkedIcon="dot-circle-o"
+  //       uncheckedIcon="circle-o"
+  //       // onPress={checkedB}
+  //     />
+  //     <CheckBox
+  //       title="C"
+  //       center
+  //       // checked={C}
+  //       checkedIcon="dot-circle-o"
+  //       uncheckedIcon="circle-o"
+  //       // onPress={checkedC}
+  //     />
+  //     <CheckBox
+  //       title="D"
+  //       center
+  //       // checked={D}
+  //       checkedIcon="dot-circle-o"
+  //       uncheckedIcon="circle-o"
+  //       // onPress={checkedD}
+  //     />
+  //     <Text key={index}>{item.label}</Text>
+  //   </View>
+  // );
 
   const Save = () => {
     console.log("click save");
@@ -153,7 +260,7 @@ const AnswerKey = ({ navigation }) => {
               fontSize: 22,
             }}
           >
-            Final Exam
+            {examName}
           </Text>
         </View>
 
@@ -279,39 +386,12 @@ const AnswerKey = ({ navigation }) => {
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
           <View style={styles.box}>
-            {/* <View style={{ flexDirection: "column" }}>{list}</View> */}
-            {/* <CheckBox
-              title="A"
-              center
-              checked={A}
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              onPress={checkedA}
-            />
-            <CheckBox
-              title="B"
-              center
-              checked={B}
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              onPress={checkedB}
-            />
-            <CheckBox
-              title="C"
-              center
-              checked={C}
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              onPress={checkedC}
-            />
-            <CheckBox
-              title="D"
-              center
-              checked={D}
-              checkedIcon="dot-circle-o"
-              uncheckedIcon="circle-o"
-              onPress={checkedD}
-            />*/}
+            {/* <FlatList
+            keyExtractor={}
+            data
+            /> */}
+            <Text>ac</Text>
+            {list}
           </View>
         </View>
       </ScrollView>
@@ -326,11 +406,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   box: {
-    // backgroundColor: theme.colors.background,
-    // marginLeft: "10%",
-    // width: "80%",
-    // height: "10%",
-    // marginRight: "10%",
+    backgroundColor: theme.colors.error,
+    marginLeft: "10%",
+    width: "80%",
+    marginRight: "10%",
     flexDirection: "row",
   },
 });

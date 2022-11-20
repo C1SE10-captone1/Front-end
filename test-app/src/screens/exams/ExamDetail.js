@@ -35,7 +35,7 @@ const ExamDetail = ({ route, navigation }) => {
         `id, name, date_exam, scale, option, description,
             class_id,
             classes (
-            id, name
+            id, name, class_code
           )
         `
       )
@@ -71,7 +71,7 @@ const ExamDetail = ({ route, navigation }) => {
   const Delete = () => {
     Alert.alert(
       "Confirm delete!",
-      "Are you sure delete Exam " + exam.map((e) => e.name) + " ?",
+      "Are you sure delete Exam " + exam[0].name + " ?",
       [
         {
           text: "Yes",
@@ -128,7 +128,7 @@ const ExamDetail = ({ route, navigation }) => {
           style={{
             flexDirection: "column",
             alignContent: "center",
-            minWidth: "40%",
+            minWidth: "30%",
           }}
         >
           <Image
@@ -156,7 +156,7 @@ const ExamDetail = ({ route, navigation }) => {
               fontSize: 22,
             }}
           >
-            Exam
+            Exam Detail
           </Text>
         </View>
       </View>
@@ -170,6 +170,9 @@ const ExamDetail = ({ route, navigation }) => {
             return (
               <View>
                 <View style={styles.content}>
+                  <Text style={styles.name_exam}>
+                    {item.classes.name} ({item.classes.class_code})
+                  </Text>
                   <Text style={styles.name_exam}>{item.name}</Text>
                 </View>
                 <View style={styles.date}>
@@ -201,7 +204,14 @@ const ExamDetail = ({ route, navigation }) => {
         </View>
         <TouchableOpacity
           style={styles.btn}
-          onPress={() => navigation.navigate("AnswerKey")}
+          onPress={() =>
+            navigation.navigate("AnswerKey", {
+              id: examId,
+              name: exam[0].name,
+              options: exam[0].option,
+              // scale: exam[0].scale,
+            })
+          }
         >
           <View style={{ flexDirection: "column" }}>
             <Image
@@ -241,7 +251,14 @@ const ExamDetail = ({ route, navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.btn}
-          onPress={() => navigation.navigate("AnswerStudent")}
+          onPress={() =>
+            navigation.navigate("AnswerStudent", {
+              id: examId,
+              name: exam[0].name,
+              options: exam[0].option,
+              // scale: exam[0].scale,
+            })
+          }
         >
           <View style={{ flexDirection: "column" }}>
             <Image

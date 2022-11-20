@@ -50,13 +50,8 @@ export default function ({
       setErrorE(emailError);
       setErrorP(passwordError);
       return;
-    }
-
-    const {user, error } = await supabase.auth.signIn({ email: email, password: password });
-
-    console.log(user);
-    console.log(error);
-
+    }else {
+      const {user, error } = await supabase.auth.signIn({ email: email, password: password });
 
     if (!error && !user) {
       setLoading(false);
@@ -66,6 +61,7 @@ export default function ({
       setLoading(false);
       alert(error.message);
     }
+    setLoading(false)
 
     if (user) {
       navigation.reset({
@@ -74,6 +70,7 @@ export default function ({
       });
       // navigation.navigate("TabBottom");
     }
+  }
   };
 
   return (
@@ -145,7 +142,7 @@ export default function ({
                   label="Password"
                   returnKeyType="done"
                   value={password}
-                  onChangeText={(text) => setPassword(text)}
+                  onChangeText={(text: React.SetStateAction<string | undefined>) => setPassword(text)}
                   error={!!errorP}
                   errorText={errorP}
                   autoCapitalize="none"

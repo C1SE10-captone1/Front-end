@@ -32,6 +32,7 @@ const ClassScreen = ({ navigation }) => {
   const [classList, setClassList] = useState(colection);
   const currentUser = supabase.auth.user();
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const loadClasses = async () => {
     let { data: classes, error } = await supabase
@@ -46,16 +47,16 @@ const ClassScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    console.log("useEffet");
     loadClasses();
-  }, []);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  }, [currentUser]);
 
-  const filterClasses = () => {
-    console.log("alert: ", classList);
-    classList.filter((e) => {
-      e.name.toLocaleLowerCase().includes(search.toLocaleLowerCase());
-    });
-  };
+  const filterClasses = () =>
+    classList.filter((e) =>
+      e.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+    );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -86,125 +87,124 @@ const ClassScreen = ({ navigation }) => {
             />
           </TouchableOpacity>
         </View>
-        {/* <Text>{search}</Text> */}
-        {/* {filterClasses.length > 0 ? ( */}
-        <FlatList
-          data={classList}
-          nestedScrollEnabled
-          scrollEnabled
-          // scrollToOverflowEnabled
-          style={{ maxHeight: "90%" }}
-          keyExtractor={(item) => item.id.toFixed()}
-          showsVerticalScrollIndicator
-          renderItem={({ item, index }) => {
-            return (
-              <View>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate("ClassDetail", {
-                      id: item.id,
-                    })
-                  }
-                >
-                  <View style={styles.row}>
-                    {/* column image */}
-                    <View style={{ flexDirection: "column" }}>
-                      <View style={{ flexDirection: "row" }}>
-                        <Image
-                          source={require("../../assets/img_class.png")}
-                          resizeMode="contain"
-                          style={{
-                            width: 70,
-                            height: 70,
-                          }}
-                        />
+
+        {filterClasses().length > 0 ? (
+          <FlatList
+            data={filterClasses()}
+            nestedScrollEnabled
+            scrollEnabled
+            // scrollToOverflowEnabled
+            style={{ maxHeight: "90%" }}
+            keyExtractor={(item) => item.id.toFixed()}
+            showsVerticalScrollIndicator
+            renderItem={({ item, index }) => {
+              return (
+                <View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("ClassDetail", {
+                        id: item.id,
+                      })
+                    }
+                  >
+                    <View style={styles.row}>
+                      {/* column image */}
+                      <View style={{ flexDirection: "column" }}>
+                        <View style={{ flexDirection: "row" }}>
+                          <Image
+                            source={require("../../assets/img_class.png")}
+                            resizeMode="contain"
+                            style={{
+                              width: 70,
+                              height: 70,
+                            }}
+                          />
+                        </View>
+                        <StatusBar style="auto" />
                       </View>
-                      <StatusBar style="auto" />
-                    </View>
-                    {/* column text */}
-                    <View
-                      style={{
-                        flexDirection: "column",
-                        paddingLeft: 20,
-                        width: "99%",
-                      }}
-                    >
-                      {/* row name class */}
+                      {/* column text */}
                       <View
                         style={{
-                          flexDirection: "row",
-                          // flex: 1,
-                          flexWrap: "wrap",
-                          paddingRight: 50,
-                          // width: "95%",
+                          flexDirection: "column",
+                          paddingLeft: 20,
+                          width: "99%",
                         }}
                       >
-                        <View
-                          style={{ flexDirection: "column", display: "flex" }}
-                        >
-                          {/* <Text style={styles.row_title}>{item.name}</Text> */}
-                        </View>
-                      </View>
-                      {/* row class code */}
-                      <View style={{ flexDirection: "row", marginVertical: 3 }}>
+                        {/* row name class */}
                         <View
                           style={{
-                            flexDirection: "column",
-                            // justifyContent: "center",
-                            // alignItems: "center",
+                            flexDirection: "row",
+                            // flex: 1,
+                            flexWrap: "wrap",
+                            // paddingRight: 50,
+                            // width: "95%",
                           }}
                         >
-                          <Text
+                          <View
+                            style={{ flexDirection: "column", display: "flex" }}
+                          >
+                            <Text style={styles.row_title}>{item.name}</Text>
+                          </View>
+                        </View>
+                        {/* row class code */}
+                        <View
+                          style={{ flexDirection: "row", marginVertical: 3 }}
+                        >
+                          <View
                             style={{
-                              fontSize: 18,
-                              // paddingLeft: 5,
-                              // justifyContent: "center",
-                              // flex: 0.9,
-                              // flexWrap: "wrap",
+                              flexDirection: "column",
                             }}
                           >
-                            ({item.class_code})
-                          </Text>
+                            <Text
+                              style={{
+                                fontSize: 18,
+                                // paddingLeft: 5,
+                                // justifyContent: "center",
+                                // flex: 0.9,
+                                // flexWrap: "wrap",
+                              }}
+                            >
+                              ({item.class_code})
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      {/* row semester and school year */}
-                      <View style={{ flexDirection: "row" }}>
-                        <View style={{ flexDirection: "column" }}>
-                          <Text>Semester: {item.semester} </Text>
-                        </View>
+                        {/* row semester and school year */}
+                        <View style={{ flexDirection: "row" }}>
+                          <View style={{ flexDirection: "column" }}>
+                            <Text>Semester: {item.semester} </Text>
+                          </View>
 
-                        <View
-                          style={{
-                            flexDirection: "column",
-                            paddingLeft: 40,
-                          }}
-                        >
-                          <Text>{item.school_year}</Text>
+                          <View
+                            style={{
+                              flexDirection: "column",
+                              paddingLeft: 40,
+                            }}
+                          >
+                            <Text>{item.school_year}</Text>
+                          </View>
                         </View>
                       </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        />
-        {/*  )
-         : (
-           <View
-        //     style={{
-        //       flex: 1,
-        //       flexDirection: "row",
-        //       alignContent: "center",
-        //       justifyContent: "center",
-        //     }}
-        //   >
-        //     <Text style={{ color: theme.colors.label, fontWeight: "900" }}>
-        //       Not found class.
-        //     </Text>
-           </View>
-         )} */}
+                  </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignContent: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text style={{ color: theme.colors.label, fontWeight: "900" }}>
+              Not found class.
+            </Text>
+          </View>
+        )}
       </View>
 
       <TouchableOpacity
@@ -267,6 +267,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     flex: 1,
     flexWrap: "wrap",
+    paddingRight: 90,
     // colors: "#000000",
   },
   row: {
@@ -301,5 +302,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     position: "absolute",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 7,
+    },
+    shadowOpacity: 0.41,
+    shadowRadius: 9.11,
+
+    elevation: 14,
   },
 });

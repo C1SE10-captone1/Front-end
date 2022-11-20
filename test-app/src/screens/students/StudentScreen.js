@@ -24,7 +24,7 @@ let colection = {
 const StudentScreen = ({ route, navigation }) => {
   const classId = route.params.id;
   const currentUser = supabase.auth.user();
-  const [students, setStudents] = useState(colection);
+  const [students, setStudents] = useState(colection || null);
   const loadStudent = async () => {
     let { data: student, error } = await supabase
       .from("students")
@@ -38,7 +38,12 @@ const StudentScreen = ({ route, navigation }) => {
       .eq("is_delete", false)
       .eq("classes.is_delete", false)
       .order("full_name", { ascending: true });
-    setStudents(student);
+
+    if (student.length === 0) {
+      setStudents(null);
+    } else {
+      setStudents(student);
+    }
   };
 
   useEffect(() => {
@@ -94,139 +99,88 @@ const StudentScreen = ({ route, navigation }) => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <FlatList
-          keyExtractor={(item) => item.id.toFixed()}
-          data={students}
-          nestedScrollEnabled
-          scrollEnabled
-          showsVerticalScrollIndicator
-          renderItem={({ item, index }) => {
-            return (
-              <View>
-                <TouchableOpacity>
-                  <View style={styles.row}>
-                    <View style={{ flexDirection: "column" }}>
-                      <View style={{ flexDirection: "row" }}>
-                        <Image
-                          source={require("../../assets/person.png")}
-                          resizeMode="contain"
-                          style={{
-                            width: 50,
-                            height: 50,
-                          }}
-                        />
+        {students === null ? (
+          <View
+            style={{
+              justifyContent: "center",
+              alignContent: "center",
+              width: "100%",
+              height: "100%",
+              paddingLeft: "12%",
+            }}
+          >
+            <Text style={{ fontSize: 24 }}>No student for this class yet!</Text>
+          </View>
+        ) : (
+          <FlatList
+            keyExtractor={(item) => item.id.toFixed()}
+            data={students}
+            nestedScrollEnabled
+            scrollEnabled
+            showsVerticalScrollIndicator
+            renderItem={({ item, index }) => {
+              return (
+                <View>
+                  <View>
+                    <View style={styles.row}>
+                      <View style={{ flexDirection: "column" }}>
+                        <View style={{ flexDirection: "row" }}>
+                          <Image
+                            source={require("../../assets/person.png")}
+                            resizeMode="contain"
+                            style={{
+                              width: 50,
+                              height: 50,
+                            }}
+                          />
+                        </View>
+                        <StatusBar style="auto" />
                       </View>
-                      <StatusBar style="auto" />
-                    </View>
-                    <View style={{ flexDirection: "column", paddingLeft: 20 }}>
-                      <View style={{ flexDirection: "row" }}>
-                        <Text style={styles.row_title}>{item.full_name}</Text>
+                      <View style={{ flexDirection: "row", paddingLeft: 20 }}>
+                        <View style={{ flexDirection: "column", width: "85%" }}>
+                          <Text style={styles.row_title}>{item.full_name}</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "column",
+                            width: "5%",
+                            display: "flex",
+                            top: "30%",
+                            right: 10,
+                            position: "absolute",
+                          }}
+                        >
+                          <TouchableOpacity
+                            onPress={() =>
+                              navigation.navigate("StudentDetail", {
+                                id: item.id,
+                              })
+                            }
+                          >
+                            <Image
+                              source={require("../../assets/Arrow.png")}
+                              resizeMode="contain"
+                              style={{
+                                width: 16,
+                                height: 16,
+                              }}
+                            />
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     </View>
                   </View>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        />
+                </View>
+              );
+            }}
+          />
+        )}
       </View>
-
-      {/* <ScrollView style={{ width: "100%" }}>
-
-        <TouchableOpacity>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "column" }}>
-              <View style={{ flexDirection: "row" }}>
-                <Image
-                  source={require("../../assets/person.png")}
-                  resizeMode="contain"
-                  style={{
-                    width: 70,
-                    height: 70,
-                  }}
-                />
-              </View>
-              <StatusBar style="auto" />
-            </View>
-            <View style={{ flexDirection: "column", paddingLeft: 30 }}>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.row_title}>Nguyen Van B</Text>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "column" }}>
-              <View style={{ flexDirection: "row" }}>
-                <Image
-                  source={require("../../assets/person.png")}
-                  resizeMode="contain"
-                  style={{
-                    width: 70,
-                    height: 70,
-                  }}
-                />
-              </View>
-              <StatusBar style="auto" />
-            </View>
-            <View style={{ flexDirection: "column", paddingLeft: 30 }}>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.row_title}>Nguyen Van E</Text>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "column" }}>
-              <View style={{ flexDirection: "row" }}>
-                <Image
-                  source={require("../../assets/person.png")}
-                  resizeMode="contain"
-                  style={{
-                    width: 70,
-                    height: 70,
-                  }}
-                />
-              </View>
-              <StatusBar style="auto" />
-            </View>
-            <View style={{ flexDirection: "column", paddingLeft: 30 }}>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.row_title}>Nguyen Van C</Text>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <View style={styles.row}>
-            <View style={{ flexDirection: "column" }}>
-              <View style={{ flexDirection: "row" }}>
-                <Image
-                  source={require("../../assets/person.png")}
-                  resizeMode="contain"
-                  style={{
-                    width: 70,
-                    height: 70,
-                  }}
-                />
-              </View>
-              <StatusBar style="auto" />
-            </View>
-            <View style={{ flexDirection: "column", paddingLeft: 30 }}>
-              <View style={{ flexDirection: "row" }}>
-                <Text style={styles.row_title}>Nguyen Van D</Text>
-              </View>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </ScrollView> */}
 
       {/* button add new student */}
       <TouchableOpacity
         style={styles.btn_new}
-        onPress={() => navigation.navigate("CreateStudent", { id: classId })}
+        onPress={() => navigation.navigate("CreateStudent")}
       >
         <Image
           source={require("../../assets/Vector.png")}
@@ -288,5 +242,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     position: "absolute",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 7,
+    },
+    shadowOpacity: 0.41,
+    shadowRadius: 9.11,
+
+    elevation: 14,
   },
 });

@@ -45,8 +45,11 @@ const ExamScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    loadExams().then();
-  }, [navigation]);
+    loadExams();
+    setTimeout(async () => {
+      setLoading(false);
+    }, 2000);
+  }, [currentUser]);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ minHeight: "90%" }}>
@@ -188,5 +191,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
     position: "absolute",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 7,
+    },
+    shadowOpacity: 0.41,
+    shadowRadius: 9.11,
+
+    elevation: 14,
   },
 });
