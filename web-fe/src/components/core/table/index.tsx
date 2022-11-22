@@ -11,8 +11,8 @@ const MyTable = <T extends object = object>(props: MyTableProps<T>) => {
 
   const defaultPagination = {
     size: 'default',
-    showQuickJumper: true,
-    showSizeChanger: true,
+    showQuickJumper: false,
+    showSizeChanger: false,
     pageSizeOptions: ['10', '20', '50', '100', '200'],
     defaultPageSize: 20,
   };

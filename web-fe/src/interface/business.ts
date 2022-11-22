@@ -1,8 +1,8 @@
 export interface BuniesssUser {
-  key: string;
-  firstName: string;
-  lastName: string;
-  age: number;
-  address: string;
-  tags: string[];
+  id: string;
+  name: string;
+  description: string;
+  is_delete: boolean;
+  create_at: Date;
+  update_at: Date;
 }

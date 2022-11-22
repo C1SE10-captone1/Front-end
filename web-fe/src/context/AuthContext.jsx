@@ -17,9 +17,9 @@ export const AuthContextProvider = ({ children }) => {
 
     const c = await session.getSession();
 
-    console.log(c);
+    // console.log(c);
     setCurrentUser(c?.data?.session?.user ?? null);
-
+    console.log('password : ', currentUser);
     setLoading(false);
 
     // xem lai

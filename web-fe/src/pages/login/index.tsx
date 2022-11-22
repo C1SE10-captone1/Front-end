@@ -4,6 +4,7 @@ import './index.less';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
+import { supabase } from './../../config/supabase';
 
 // const initialValues: LoginParams = {
 //   username: 'guest',
@@ -22,6 +23,9 @@ const LoginForm: FC = () => {
 
     try {
       const { error } = await signIn({ email, password });
+      const { data, err } = await supabase.from('auth.users').select('*');
+
+      console.log(data);
 
       if (error) throw error;
       toast.success('Login success.', {

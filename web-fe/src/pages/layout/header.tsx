@@ -147,7 +147,12 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
           {currentUser ? (
             <Dropdown overlay={menu}>
               <span className="user-action">
-                <img src={Avator} className="user-avator" alt="avator" />
+                <img
+                  src="https://walkersarewelcome.org.uk/wp-content/uploads/computer-icons-google-account-icon-design-login-png-favpng-jFjxPac6saRuDE3LiyqsYTEZM.jpg"
+                  className="user-avator"
+                  alt="avator"
+                  style={{ height: '20px', width: '20px' }}
+                />
               </span>
             </Dropdown>
           ) : (

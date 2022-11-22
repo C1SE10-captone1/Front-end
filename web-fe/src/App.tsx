@@ -4,7 +4,7 @@ import { localeConfig, LocaleFormatter } from './locales';
 import { ConfigProvider, Spin } from 'antd';
 import { ThemeSwitcherProvider } from 'react-css-theme-switcher';
 import enUS from 'antd/es/locale/en_US';
-import zhCN from 'antd/es/locale/zh_CN';
+import zhCN from 'antd/es/locale/vi_VN';
 import moment from 'moment';
 import 'moment/locale/zh-cn';
 import RenderRouter from './routes';
@@ -59,7 +59,7 @@ const App: React.FC = () => {
     if (locale === 'en_US') {
       moment.locale('en');
     } else if (locale === 'zh_CN') {
-      moment.locale('zh-cn');
+      moment.locale('vi_vn');
     }
   }, [locale]);
 

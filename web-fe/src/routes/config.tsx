@@ -26,7 +26,7 @@ const WrapperRouteComponent: FC<WrapperRouteProps> = ({ titleId, ...props }) => 
 
   const isAdmin = false;
 
-  console.log(currentUser);
+  // console.log(currentUser);
 
   if (loading) {
     return <> loading Server please wait a minute </>;

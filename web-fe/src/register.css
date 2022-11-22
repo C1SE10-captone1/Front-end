@@ -61,3 +61,13 @@
     font-size: 12px;
     margin-top: 10px;
 }
+.button-delete-modal {
+    color: 'red';
+  }
+
+  /* .ant-layout-sider{
+    width: 220px ;
+    min-width: 220px;
+    max-width: 220px;
+    flex: 0 0 220px;
+  } */
