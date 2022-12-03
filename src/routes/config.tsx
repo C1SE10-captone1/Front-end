@@ -25,7 +25,7 @@ const WrapperRouteComponent: FC<WrapperRouteProps> = ({ titleId, ...props }) => 
   // isAdmin && isLoggedIn => vào đc /admin/....
   const isAdmin = currentUser?.role === 'admin';
 
-  console.log('🚀 ~ file: config.tsx ~ line 27 ~ isAdmin', isAdmin);
+  // console.log('🚀 ~ file: config.tsx ~ line 27 ~ isAdmin', isAdmin);
 
   // console.log(currentUser);
 

@@ -72,8 +72,8 @@ export const getFullDate = (date: string): string => {
 const BusinessWithSearchPage: FC = () => {
   const [form] = Form.useForm();
   const [page, setpage] = useState(1);
-  const [page1, setpage1] = useState(1);
   const [paginationSize, setPaginationSize] = useState(3);
+  const [page1, setpage1] = useState(1);
   const [paginationSize1, setPaginationSize1] = useState(2);
   const columns = [
     {
