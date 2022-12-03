@@ -73,7 +73,7 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
       <Menu.Item key="1">
         <span>
           <UserOutlined />
-          <span onClick={() => navigate('/dashboard')}>
+          <span onClick={() => navigate('profile')}>
             <LocaleFormatter id="header.avator.account" />
           </span>
         </span>

@@ -18,11 +18,18 @@ const BusinessWithTabsPage = lazy(() => import(/* webpackChunkName: "with-tabs" 
 
 import Register from './../pages/register/Register';
 import Admin_page from './../pages/admin/Admin_page';
+import Account from './../pages/profile/Account';
+import PersonalAvatar from './../pages/profile/PersonalAvatar';
+import ForgotPassword from './../pages/forgot-password/ForgotPassword';
 
 const routeList: RouteObject[] = [
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPassword />,
   },
   {
     path: '/register',
@@ -35,6 +42,10 @@ const routeList: RouteObject[] = [
       {
         path: '',
         element: <Navigate to="documentation" />,
+      },
+      {
+        path: 'profile',
+        element: <PersonalAvatar/>,
       },
       {
         path: 'documentation',
@@ -64,23 +75,25 @@ const routeList: RouteObject[] = [
         path: 'business/with-tabs',
         element: <WrapperRouteComponent element={<BusinessWithTabsPage />} titleId="title.account" />,
       },
+
     ],
   },
   {
     path: '/admin',
     element: <WrapperRouteComponent element={<LayoutPage />} titleId="" />,
     children: [
-      // {
-      //   path: '',
-      //   element: <Navigate to="documentation" />,
-      // },
-      // {
-      //   path: 'documentation',
-      //   element: <WrapperRouteComponent element={<Documentation />} titleId="title.documentation" />,
-      // },
+    //   // {
+    //   //   path: '',
+    //   //   element: <Navigate to="documentation" />,
+    //   // },
+    //   // {
+    //   //   path: 'documentation',
+    //   //   element: <WrapperRouteComponent element={<Documentation />} titleId="title.documentation" />,
+    //   // },
       {
         path: '',
-        element: <Admin_page />,
+    element: <Admin_page />,
+    //     element: <Admin_page />,
       },
     ],
   },

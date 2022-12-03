@@ -12,6 +12,8 @@ import { Outlet, useLocation } from 'react-router';
 import { setUserItem } from '@/stores/user.store';
 import { useDispatch, useSelector } from 'react-redux';
 import { getFirstPathCode } from '@/utils/getFirstPathCode';
+import { css } from '@emotion/react';
+import { Footer } from 'antd/lib/layout/layout';
 
 const { Sider, Content } = Layout;
 const WIDTH = 992;
@@ -93,17 +95,19 @@ const LayoutPage: FC = () => {
   }, [newUser]);
 
   return (
-    <Layout className="layout-page">
+    <>
+    <Layout className="layout-page" style={{overflow: "hidden"}} >
       <HeaderComponent collapsed={collapsed} toggle={toggle} />
       <Layout>
         {!isMobile ? (
-          <Sider
+          <Sider 
             className="layout-page-sider"
             trigger={null}
             collapsible
             collapsedWidth={isMobile ? 0 : 80}
             collapsed={collapsed}
             breakpoint="md"
+            style={{height:"100vh"}}
           >
             <MenuComponent
               menuList={menuList}
@@ -131,7 +135,7 @@ const LayoutPage: FC = () => {
             />
           </Drawer>
         )}
-        <Content className="layout-page-content">
+        <Content className="layout-page-content"  style={{height:"100vh",left: 0, backgroundColor: '#EEEEEE',paddingBottom:'10px'}}>
           <TagsView />
           <Suspense fallback={null}>
             <Outlet />
@@ -139,7 +143,21 @@ const LayoutPage: FC = () => {
         </Content>
       </Layout>
     </Layout>
+    {/* <Footer style={{height:'160px',backgroundColor:'#EEEEEE',marginTop:'20px'}}>hello</Footer> */}
+    </>
   );
 };
-
+const styles = css`
+  // .layout-page-sider{
+  // overflow: auto,
+  // height: 100vh,
+  // left: 0,
+  // background-color: #393f4a,
+  // z-index: 3 ,
+  // border-right : 0
+  // }
+  // .layout-page-content{
+  //   height: 1200px
+  // }
+`;
 export default LayoutPage;

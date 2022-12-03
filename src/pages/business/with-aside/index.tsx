@@ -1,5 +1,5 @@
 import MyButton from '@/components/basic/button';
-import { DeleteOutlined, DownOutlined, EditOutlined, PlusCircleFilled, UploadOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownOutlined, EditOutlined, PlusCircleFilled, RollbackOutlined, UploadOutlined } from '@ant-design/icons';
 import { css } from '@emotion/react';
 import { Button, Dropdown, Input, Menu, Space, Table, Upload, Form, Modal, Select, Progress } from 'antd';
 import { FC, useContext, useEffect, useState } from 'react';
@@ -10,6 +10,10 @@ import './style.css';
 import { toast } from 'react-hot-toast';
 import { error } from 'console';
 import { read, utils, writeFile } from 'xlsx';
+
+import { difference, differenceBy, differenceWith, uniq, uniqBy } from 'lodash';
+
+import ImgGuideUpLoad from './img/Untitled1.png';
 
 const { Search } = Input;
 // const handleMenuClick = e => {
@@ -36,6 +40,8 @@ const BusinessWithAsidePage: FC = () => {
   const [students, setstudents] = useState([]);
   const [page, setPage] = useState(1);
   const [paginationSize, setPaginationSize] = useState(4);
+  const [page1, setpage1] = useState(1);
+  const [paginationSize1, setPaginationSize1] = useState(2);
   const columns = [
     {
       title: '#',
@@ -69,6 +75,44 @@ const BusinessWithAsidePage: FC = () => {
       ),
     },
   ];
+  const columns1 = [
+    {
+      title: '#',
+      dataIndex: '',
+      key: '',
+      render: (id, record, index) => {
+        return (page1 - 1) * paginationSize1 + index + 1;
+      },
+    },
+    {
+      title: 'Student code',
+      dataIndex: 'student_code',
+      key: 'student_code',
+    },
+    {
+      title: 'Full Name',
+      dataIndex: 'full_name',
+      key: 'full_name',
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle">
+          <RollbackOutlined
+            style={{ color: 'green', marginLeft: '12px' }}
+            value={record.id}
+            onClick={() => showRecoveModal(record)}
+          />
+        </Space>
+      ),
+    },
+  ];
+  const showRecoveModal = e => {
+    console.log(e);
+    // setClassRecover(e);
+    // setIsModalOpenRecoverClass(e);
+  };
   const [loading, setloading] = useState();
 
   useEffect(async () => {
@@ -243,6 +287,33 @@ const BusinessWithAsidePage: FC = () => {
 
     setIsModalOpenEditStudent(false);
   };
+  //modal delete classes
+  const [isModalOpenDeleteStudent, setIsModalOpenDeleteStudent] = useState(false);
+  const [studentDelete, setStudentDelete] = useState();
+  const showDeleteModal = e => {
+    console.log(e);
+
+    setStudentDelete(e);
+    setIsModalOpenDeleteStudent(true);
+  };
+  const handleOkDeleteStudent = async () => {
+    try {
+      classDelete.is_delete = true;
+      const { error } = await supabase.from('classes').update(classDelete).eq('id', classDelete.id);
+
+      if (error) throw error;
+      refreshData();
+      toast.success('Delete class success.', {
+        duration: 5000,
+      });
+    } catch (err) {
+      toast.error('somthing went wrong!', {
+        duration: 5000,
+      });
+    }
+
+    setIsModalOpenDeleteClass(false);
+  };
   const handleCancel = () => {
     setIsModalOpenAddStudent(false);
     setIsModalOpenEditStudent(false);
@@ -252,35 +323,34 @@ const BusinessWithAsidePage: FC = () => {
   const [hiddentProgress, setHidentProgress] = useState(true);
   const handleImport = $event => {
     const files = $event.target.files;
-
     if (files.length) {
       const file = files[0];
       const reader = new FileReader();
-
       reader.onload = event => {
         const wb = read(event.target.result);
         const sheets = wb.SheetNames;
-
         if (sheets.length) {
           const rows = utils.sheet_to_json(wb.Sheets[sheets[0]]);
-          const data = rows.map(e => ({ ...e, class_id: classID }));
+          let data = rows.map(e => ({ ...e, student_code: e.student_code + '', class_id: classID }));
 
-          // Step 2
-          const data1 = data.reduce((unique, index) => {
-            return unique.includes(item) ? unique : [...unique, item];
-          }, []);
+          const dataAffterFormat = uniqBy(data, 'student_code');
 
-          console.log('🚀 ~ file: index.tsx ~ line 272 ~ data1 ~ data1', data1);
+          const dataInsert = differenceBy(
+            dataAffterFormat,
+            liststudent,
+            'student_code',
 
+            // function(arrValue, othValue) {
+            // return arrValue.student_code === othValue.student_code;
+            // }
+          );
           setHidentProgress(false);
-          data1.map(async e => {
-            if (liststudent.filter(k => k.student_code === e.student_code).length > 0) {
-              toast.error('student code is exits!', {
-                duration: 5000,
-              });
-
-              return;
-            } else {
+          if (dataInsert.length === 0) {
+            toast.error('student code is exits!', {
+              duration: 5000,
+            });
+          } else {
+            dataInsert.map(async e => {
               let inteval = 1;
 
               while (inteval !== 100) {
@@ -289,71 +359,168 @@ const BusinessWithAsidePage: FC = () => {
                 }, 1000);
                 inteval += 1;
               }
-
               setliststudent([...liststudent, e]);
               const { error } = await supabase.from('students').insert(e);
-            }
-          });
+            });
+            toast.success('import file success.', {
+              duration: 5000,
+            });
+          }
         }
       };
-      setHidentProgress(true);
       reader.readAsArrayBuffer(file);
     }
   };
-
   return (
     <div css={styles}>
-      <div className="tabs-main">
-        <div className="aside-main">
-          <div style={{ display: 'flex', paddingBottom: '40px' }}>
-            <label style={{ paddingRight: '20px' }}>Please choose a class</label>
-            <Dropdown overlay={menuSchoolYear()} className="dropdown-scroll">
-              <Button>
-                <Space>
-                  {SchoolYear}
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
+    <div className="tabs-main">
+      <div className="aside-main">
+        <div style={{ display: 'flex', padding: '20px' }}>
+  <label style={{ paddingRight: '20px' }}>Please choose a class</label>
+          <Dropdown overlay={menuSchoolYear()} className="dropdown-scroll">
+            <Button>
+              <Space>
+                {SchoolYear}
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
 
-            <Dropdown overlay={menuSemester()} className="dropdown-scroll">
-              <Button>
-                <Space>
-                  {Semester}
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
-            <Dropdown overlay={menuClassCode()} className="dropdown-scroll">
-              <Button>
-                <Space>
-                  {ClassCode}
-                  <DownOutlined />
-                </Space>
-              </Button>
-            </Dropdown>
+          <Dropdown overlay={menuSemester()} className="dropdown-scroll">
+            <Button>
+              <Space>
+                {Semester}
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+          <Dropdown overlay={menuClassCode()} className="dropdown-scroll">
+            <Button>
+              <Space>
+                {ClassCode}
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
 
-            <div style={{ paddingLeft: '300px', justifyContent: 'center' }}>
-              <Search
-                placeholder="Search students..."
-                onSearch={onSearch}
-                enterButton
-                style={{
-                  width: 250,
-                  paddingRight: '10px',
-                }}
-              />
-            </div>
-            <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
-              <Button onClick={showModal}>
-                <PlusCircleFilled style={{ color: '#1E90FF' }} />
-                Add Student
-              </Button>
-            </div>
+          <div style={{ paddingLeft: '300px', justifyContent: 'center' }}>
+            <Search
+              placeholder="Search students..."
+              onSearch={onSearch}
+              enterButton
+              style={{
+                width: 250,
+                paddingRight: '10px',
+              }}
+            />
           </div>
-
+          <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
+            <Button onClick={showModal}>
+              <PlusCircleFilled style={{ color: '#1E90FF' }} />
+              Add Student
+            </Button>
+          </div>           
+   <Modal title="Add Student" open={isModalOpenAddStudent} onOk={form.submit} onCancel={handleCancel}>
+        <Form
+          form={form}
+          onFinish={handleOkForAddStudent}
+          labelCol={{
+            span: 7,
+          }}
+          wrapperCol={{
+            span: 16,
+          }}
+          initialValues={{
+            remember: true,
+          }}
+        >
+          <span>
+            <Form.Item
+              name="student_code"
+              label="Student Code"
+              rules={[
+                {
+                  required: true,
+                  message: 'Input student code',
+                  pattern: new RegExp('^([{20\\21\\22\\23\\24\\25\\26\\27\\28}][0-9]{9,10})$'),
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="full_name"
+              label="Full Name"
+              rules={[
+                {
+                  required: true,
+                  message: 'Input student name',
+                  pattern: new RegExp(
+                    '^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹsW|_]{2,50}$',
+                  ),
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </span>
+        </Form>
+      </Modal>
+      <Modal title="Edit Student" open={isModalOpenEditStudent} onOk={form.submit} onCancel={handleCancel}>
+        <Form form={form} onFinish={handleOkEditForStudent}>
+          <Form.Item
+            name="student_code"
+            label="Student Code"
+            rules={[
+              {
+                required: true,
+                message: 'Input student code',
+              },
+            ]}
+          >
+            <Input disabled={true} />
+          </Form.Item>
+          <Form.Item
+            name="full_name"
+            label="Full Name"
+            rules={[
+              {
+                required: true,
+                message: 'Input student name',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="Delete Class"
+        open={isModalOpenDeleteStudent}
+        onOk={form.submit}
+        onCancel={handleCancel}
+        okButtonProps={{
+          className: 'button-delete-modal',
+          style: {
+            color: 'red',
+          },
+          type: 'ghost',
+        }}
+      >
+        <Form form={form} onFinish={handleOkDeleteStudent}>
+          <h4>Are you sure delete class ?</h4>
+        </Form>
+      </Modal>
+        </div>
+        <div className="content-table" style={{overflow: 'auto',height: '100%',  backgroundColor: '#fdfdfd',
+width: '100%',
+borderRadius: '6px',
+boxShadow: '0 4px 28px rgba(123,151,158,.25)',
+border: '1px solid #d6dee1',
+padding: '1rem'}}>
           <div className="table">
-            <Table
+            <h3>Existing Students</h3>
+       <Table
               // pagination={{ pageSize: 5 }}
               dataSource={liststudent}
               columns={columns}
@@ -366,120 +533,69 @@ const BusinessWithAsidePage: FC = () => {
                   setPage(current);
                   setPaginationSize(pageSize);
                 },
-                defaultPageSize: 4,
+                defaultPageSize: 5,
               }}
               size="small"
             />
-            <div
-              style={{
-                // width: '100%',
-                paddingTop: '40px',
-              }}
-            >
-              <div>
-                <Space>
-                  <input
-                    style={{ margin: 0 }}
-                    type="file"
-                    required
-                    onChange={handleImport}
-                    disabled={classID?.length === 0}
-                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                  />
-
-                  <Progress
-                    percent={progress}
-                    status="active"
-                    type="circle"
-                    width={40}
-                    strokeColor={{
-                      '0%': '#108ee9',
-                      '100%': '#87d068',
-                    }}
-                    hidden={hiddentProgress}
-                  />
-                  <img src="./img/Untitled.png" height="150px" width="150px" alt="" />
-                </Space>
-              </div>
+          </div>
+          <div className='table' style={{marginTop:'0',paddingTop:'0'}}>
+              <h3>Deleted Class</h3>
+              <Table
+                pagination={{
+                  onChange(current, pageSize) {
+                    setpage1(current);
+                    setPaginationSize1(pageSize);
+                  },
+                  defaultPageSize: 5,
+                }}
+                // dataSource={classHasDelete}
+                columns={columns1}
+                bordered
+                loading={loading}
+              />
+            </div>
+          <div className='table' style={{marginTop:'0',paddingTop:'0'}}>
+                        <div
+            style={{
+              // width: '100%',
+              paddingTop: '40px',
+            }}
+          >
+            <div>
+              <Space>
+                <input
+                  style={{ margin: 0 }}
+                  type="file"
+                  required
+                  onChange={handleImport}
+                  onClick={() => {
+                    setHidentProgress(true);
+                  }}
+                  disabled={classID?.length === 0}
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                />
+                <Progress
+                style={{margin:'0px',padding:'0px'}}
+                  percent={progress}
+                  status="active"
+                  type="circle"
+                  width={40}
+                  strokeColor={{
+                    '0%': '#108ee9',
+                    '100%': '#87d068',
+                  }}
+                  hidden={hiddentProgress}
+                />
+                Example file import:
+                <img src={ImgGuideUpLoad} height="auto" width="900px" alt="" />
+              </Space>
             </div>
           </div>
-          <Modal title="Add Student" open={isModalOpenAddStudent} onOk={form.submit} onCancel={handleCancel}>
-            <Form
-              form={form}
-              onFinish={handleOkForAddStudent}
-              labelCol={{
-                span: 7,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              initialValues={{
-                remember: true,
-              }}
-            >
-              <span>
-                <Form.Item
-                  name="student_code"
-                  label="Student Code"
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Input student code',
-                      pattern: new RegExp('^([{20\\21\\22\\23\\24\\25\\26\\27\\28}][0-9]{9,10})$'),
-                    },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-                <Form.Item
-                  name="full_name"
-                  label="Full Name"
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Input student name',
-                      pattern: new RegExp(
-                        '^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹsW|_]{2,50}$',
-                      ),
-                    },
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-              </span>
-            </Form>
-          </Modal>
-          <Modal title="Edit Student" open={isModalOpenEditStudent} onOk={form.submit} onCancel={handleCancel}>
-            <Form form={form} onFinish={handleOkEditForStudent}>
-              <Form.Item
-                name="student_code"
-                label="Student Code"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Input student code',
-                  },
-                ]}
-              >
-                <Input disabled={true} />
-              </Form.Item>
-              <Form.Item
-                name="full_name"
-                label="Full Name"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Input student name',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Form>
-          </Modal>
+          </div>
         </div>
       </div>
     </div>
+  </div>
   );
 };
 const styles = css`
@@ -503,10 +619,10 @@ const styles = css`
     margin: 30px;
   }
 
-  .table {
-    flex: 1;
-    overflow: hidden;
-  }
+  // .table {
+  //   flex: 1;
+  //   overflow: hidden;
+  // }
 `;
 
 export default BusinessWithAsidePage;
