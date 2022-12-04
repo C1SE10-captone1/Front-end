@@ -9,6 +9,7 @@ export { default as ClassScreen } from "./classes/ClassScreen";
 export { default as CreateClass } from "./classes/CreateClass";
 export { default as ClassDetail } from "./classes/ClassDetail";
 
+export { default as CreateExamByClass } from "./exams/CreateExamByClass";
 export { default as CreateExam } from "./exams/CreateExam";
 export { default as ExamDetail } from "./exams/ExamDetail";
 export { default as ListExamByClass } from "./exams/ListExamByClass";

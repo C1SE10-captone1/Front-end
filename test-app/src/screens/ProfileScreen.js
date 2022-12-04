@@ -5,14 +5,77 @@ import {
   Text,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase-service";
 import { theme } from "../core/theme";
+import TextInput from "../components/TextInput";
+import { passwordValidator } from "../helpers/passwordValidator";
+import * as ImagePicker from "expo-image-picker";
 
 const ProfileScreen = ({ navigation }) => {
+  const [imageFromGellary, setImageFromGellary] = useState(null);
   const currentUser = supabase.auth.user();
+  const [password, setPassword] = useState({ value: "", error: "" });
+  const [passwordConfirm, setPasswordConfirm] = useState({
+    value: "",
+    error: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [visible1, setVisible1] = useState(true);
 
+  const [chane, setChange] = useState(false);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      // aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log("image: ", result.uri);
+
+    if (!result.cancelled) {
+      setImageFromGellary(result.uri);
+    }
+  };
+  const Save = async () => {
+    console.log(password.value, passwordConfirm.value);
+    const passwordError = passwordValidator(password.value);
+    const passwordConfirmError = passwordValidator(passwordConfirm.value);
+
+    if (passwordError || passwordConfirmError) {
+      setPassword({ value: password.value, error: passwordError });
+      setPasswordConfirm({
+        value: passwordConfirm.value,
+        error: passwordConfirmError,
+      });
+      return;
+    }
+    if (password.value !== passwordConfirm.value) {
+      setPassword({ value: password.value, error: "Incorrect password." });
+      setPasswordConfirm({
+        value: passwordConfirm.value,
+        error: "Incorrect password.",
+      });
+      return;
+    }
+
+    const { error } = await supabase.auth.api.updateUserById(currentUser.id, {
+      email: currentUser.email,
+      password: password.value,
+    });
+
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("success");
+    }
+  };
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
@@ -34,18 +97,193 @@ const ProfileScreen = ({ navigation }) => {
     //   },
     // ]);
   };
+
+  const chaneImage = async () => {};
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* <ScrollView> */}
       <View>
         {/* information account */}
         <View style={styles.inforUser}>
           <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity
+              style={{
+                justifyContent: "center",
+                alignContent: "center",
+                display: "flex",
+                top: 5,
+                left: "100%",
+                marginBottom: 20,
+                borderRadius: 50,
+                borderColor: "#5F6FC5",
+                // padding: 10,
+                // borderWidth: 0.5,
+              }}
+              onLongPress={pickImage}
+            >
+              {imageFromGellary ? (
+                <Image
+                  style={styles.avt_image}
+                  source={{ uri: imageFromGellary }}
+                />
+              ) : (
+                <Image
+                  source={require("../assets/person.png")}
+                  style={styles.avt_image}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={{ flexDirection: "row", marginBottom: 20 }}>
             <Text style={{ width: "30%" }}>Email: </Text>
             <Text>{currentUser.email}</Text>
           </View>
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", marginBottom: 20 }}>
             <Text style={{ width: "30%" }}>Password: </Text>
             <Text>******</Text>
+          </View>
+
+          {chane ? (
+            <>
+              {/* password */}
+              <View
+                style={{ flexDirection: "row", width: "100%", maxHeight: 10 }}
+              >
+                <View style={{ flexDirection: "column", width: "10%" }}></View>
+                <View style={{ flexDirection: "column", width: "60%" }}>
+                  <TextInput
+                    label="Password"
+                    returnKeyType="done"
+                    value={password.value}
+                    onChangeText={(text) =>
+                      setPassword({ value: text, error: "" })
+                    }
+                    error={!!password.error}
+                    errorText={password.error}
+                    autoCapitalize="none"
+                    autoCompleteType="off"
+                    secureTextEntry={visible}
+                    style={{ padding: 0, height: 30 }}
+                  />
+                  <TouchableOpacity
+                    style={{ position: "absolute", right: -20, top: 15 }}
+                    onPress={() => setVisible(!visible)}
+                  >
+                    {visible ? (
+                      <Image
+                        source={require("../assets/visible.png")}
+                        style={styles.image}
+                      />
+                    ) : (
+                      <Image
+                        source={require("../assets/invisible.png")}
+                        style={styles.image}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* password confirm */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  width: "100%",
+                  marginTop: password.error ? 70 : 30,
+                  marginBottom: 40,
+                }}
+              >
+                <View style={{ flexDirection: "column", width: "10%" }}></View>
+                <View style={{ flexDirection: "column", width: "60%" }}>
+                  <TextInput
+                    label="Password confirm"
+                    returnKeyType="done"
+                    value={passwordConfirm.value}
+                    onChangeText={(text) =>
+                      setPasswordConfirm({ value: text, error: "" })
+                    }
+                    error={!!passwordConfirm.error}
+                    errorText={passwordConfirm.error}
+                    autoCapitalize="none"
+                    autoCompleteType="off"
+                    secureTextEntry={visible1}
+                    style={{ padding: 0, height: 30 }}
+                  />
+                  <TouchableOpacity
+                    style={{ position: "absolute", right: -20, top: 15 }}
+                    onPress={() => setVisible1(!visible1)}
+                  >
+                    {visible1 ? (
+                      <Image
+                        source={require("../assets/visible.png")}
+                        style={styles.image}
+                      />
+                    ) : (
+                      <Image
+                        source={require("../assets/invisible.png")}
+                        style={styles.image}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </>
+          ) : null}
+
+          <View
+            style={{
+              flexDirection: "row",
+              marginBottom: 5,
+              display: "flex",
+              right: "38%",
+              bottom: 0,
+              position: "absolute",
+            }}
+          >
+            {chane ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignContent: "center",
+                }}
+              >
+                <View style={{ flexDirection: "column" }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setChange(!chane);
+                      setPasswordConfirm({ value: "", error: "" });
+                      setPassword({ value: "", error: "" });
+                    }}
+                  >
+                    <Text>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={{ flexDirection: "column", marginLeft: 20 }}>
+                  <TouchableOpacity onPress={Save}>
+                    <Text>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={{
+                  padding: 5,
+                  borderRadius: 10,
+                  alignContent: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#5F6FC5",
+                }}
+                onPress={() => setChange(!chane)}
+              >
+                {/* <Image
+                  source={require("../assets/pencil.png")}
+                  style={styles.image}
+                /> */}
+                <Text style={{ color: "white" }}>Change Password</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -179,13 +417,14 @@ const ProfileScreen = ({ navigation }) => {
               </View>
             </TouchableOpacity>
           </View>
-        </View>
-        {/* version and information teamdev */}
-        <View style={styles.footer}>
-          <Text>Version 1.0.1</Text>
-          <Text>Team Developer: Group 9_IG5</Text>
+          {/* version and information teamdev */}
+          <View style={styles.footer}>
+            <Text>Version 1.0.1</Text>
+            <Text>Team Developer: Group 9_IG5</Text>
+          </View>
         </View>
       </View>
+      {/* </ScrollView> */}
     </SafeAreaView>
   );
 };
@@ -199,12 +438,13 @@ const styles = StyleSheet.create({
     height: "60%",
   },
   inforUser: {
-    paddingTop: 10,
-
+    borderBottomEndRadius: 140,
+    borderBottomStartRadius: 140,
     width: "100%",
     backgroundColor: theme.colors.background,
-    height: 100,
-    marginBottom: 50,
+    minHeight: "40%",
+    height: "auto",
+    marginBottom: 10,
     paddingLeft: 30,
     shadowColor: "#000",
     shadowOffset: {
@@ -239,6 +479,7 @@ const styles = StyleSheet.create({
   text: {
     alignContent: "center",
     paddingLeft: 30,
+    top: 5,
   },
   image: {
     width: 14,
@@ -256,8 +497,13 @@ const styles = StyleSheet.create({
   footer: {
     color: "#516F7F",
     display: "flex",
-    bottom: "-10%",
-    right: 10,
+    bottom: 35,
+    right: 0,
     position: "absolute",
+  },
+  avt_image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
 });

@@ -4,7 +4,6 @@ import {
   ScrollView,
   View,
   Text,
-  StatusBar,
   Image,
   PermissionsAndroid,
   TouchableOpacity,
@@ -18,19 +17,19 @@ import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../utils/supabase-service";
 
 const AnswerKey = ({ route, navigation }) => {
-  let colection = {
-    question: "",
-    answer: "",
-  };
+  let colection = ["A", "B", "C", "D "];
 
+  // let colection = [{A:"", B:"", C:"", D:""}];
   const examId = route.params.id;
   const examName = route.params.name;
   const examOptions = route.params.options;
   const currentUser = supabase.auth.user();
-  const [answers, setAnswers] = useState(colection);
-
+  const [answers, setAnswers] = useState({ index: "", answer: "" });
+  const [disabled, setDisabled] = useState(false);
   const [imageFromGellary, setImageFromGellary] = useState(null);
   const [imageFromCamera, setImageFromCamera] = useState(null);
+
+  const URLpath = "https://a38e-113-162-128-159.ap.ngrok.io/file/upload/";
 
   const loadExamDetails = async () => {
     let { data: exams, error } = await supabase
@@ -49,10 +48,10 @@ const AnswerKey = ({ route, navigation }) => {
     // console.log("answer key: ", exams);
     // console.log("answer key: ", answers);
   };
+  // const lists = [];
   useEffect(() => {
     loadExamDetails();
-    answerRow();
-  }, []);
+  }, [imageFromCamera, imageFromGellary]);
   // select image from gallery
   const pickImage = async () => {
     // try {
@@ -77,9 +76,8 @@ const AnswerKey = ({ route, navigation }) => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.cancelled) {
+      setImageFromCamera(null);
       setImageFromGellary(result.uri);
     }
     // }
@@ -110,111 +108,186 @@ const AnswerKey = ({ route, navigation }) => {
           // aspect: [4, 3],
           quality: 1,
         });
-        console.log("click on camera");
-        console.log(result);
 
         if (!result.cancelled) {
+          setImageFromGellary(null);
           setImageFromCamera(result.uri);
         }
-
-        console.log(imageFromCamera.uri);
       }
     } catch (err) {
       console.warn(err);
     }
   };
 
-  const list = [];
-  const answerRow = () => {
-    for (let i = 1; i <= examOptions; i++) {
-      list.push({ ...colection });
+  const AnswerRow = () => {
+    const res = [];
+    const lists = [];
+    for (let i = 0; i < examOptions; i++) {
+      lists.push(colection);
+      // setAnswers({ index: i, answers: "" });
     }
-    console.log("row: ", list);
-    for (let i = 1; i <= examOptions; i++) {
-      return (
-        <View>
-          <Text style={{ flexDirection: "column" }}>{i}</Text>
-          <CheckBox
-            title="A"
-            center
-            checked={list.answer}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            // onPress={checkedA}
-          />
-          <CheckBox
-            title="B"
-            center
-            // checked={B}
-            checked={list[i].answer}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            // onPress={checkedB}
-          />
-          <CheckBox
-            title="C"
-            center
-            // checked={C}
-            checked={list[i].answer}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            // onPress={checkedC}
-          />
-          <CheckBox
-            title="D"
-            center
-            // checked={D}
-            checked={list[i].answer}
-            checkedIcon="dot-circle-o"
-            uncheckedIcon="circle-o"
-            // onPress={checkedD}
-          />
+
+    for (let i = 0; i < lists.length; i++) {
+      res.push(
+        <View
+          style={{ flexDirection: "row", alignContent: "center" }}
+          key={i + 1}
+        >
+          <View
+            style={{
+              flexDirection: "column",
+              alignContent: "center",
+              width: "7%",
+            }}
+          >
+            <Text
+              style={{
+                display: "flex",
+                bottom: 15,
+                left: 10,
+                position: "absolute",
+                fontSize: 18,
+              }}
+            >
+              {i + 1}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "column", width: "80%" }}>
+            <RenderItem index={i + 1} />
+          </View>
         </View>
       );
     }
+
+    return res;
   };
-  // return (
-  //   <View>
-  //      <Text style={{ flexDirection: "column" }}>{index}</Text>
-  //     <CheckBox
-  //       title="A"
-  //       center
-  //       // checked={A}
-  //       checkedIcon="dot-circle-o"
-  //       uncheckedIcon="circle-o"
-  //       // onPress={checkedA}
-  //     />
-  //     <CheckBox
-  //       title="B"
-  //       center
-  //       // checked={B}
-  //       checkedIcon="dot-circle-o"
-  //       uncheckedIcon="circle-o"
-  //       // onPress={checkedB}
-  //     />
-  //     <CheckBox
-  //       title="C"
-  //       center
-  //       // checked={C}
-  //       checkedIcon="dot-circle-o"
-  //       uncheckedIcon="circle-o"
-  //       // onPress={checkedC}
-  //     />
-  //     <CheckBox
-  //       title="D"
-  //       center
-  //       // checked={D}
-  //       checkedIcon="dot-circle-o"
-  //       uncheckedIcon="circle-o"
-  //       // onPress={checkedD}
-  //     />
-  //     <Text key={index}>{item.label}</Text>
-  //   </View>
-  // );
+  // const [result, setResult] = useState([]);
+  const RenderItem = (props) => {
+    const [A, setA] = useState(false);
+    const [B, setB] = useState(false);
+    const [C, setC] = useState(false);
+    const [D, setD] = useState(false);
+    const checkedA = () => {
+      setA(true);
+      setB(false);
+      setC(false);
+      setD(false);
+      // setAnswers({ ...answers, index: props.index, answer: "A" });
+      // setAnswers((prev) => ({
+      //   ...prev,
+      //   index: props.index,
+      //   answer: "A",
+      // }));
+      setAnswers({ index: props.index, answer: "A" });
+    };
+    const checkedB = () => {
+      setA(false);
+      setB(true);
+      setC(false);
+      setD(false);
+      console.log("---click B---", props.index);
+
+      setAnswers({ index: props.index, answer: "B" });
+    };
+
+    const checkedC = () => {
+      setA(false);
+      setB(false);
+      setC(true);
+      setD(false);
+      console.log("---click C---", props.index);
+      // setAnswers({ ...answers, index: props.index, answer: "C" });
+      // setAnswers((prev) => ({
+      //   ...prev,
+      //   index: props.index,
+      //   answer: "C",
+      // }));
+      setAnswers({ index: props.index, answer: "C" });
+    };
+    const checkedD = () => {
+      setA(false);
+      setB(false);
+      setC(false);
+      setD(true);
+      console.log("---click D---", props.index);
+      // setAnswers({ ...answers, index: props.index, answer: "D" });
+      // setAnswers((prev) => ({
+      //   ...prev,
+      //   index: props.index,
+      //   answer: "D",
+      // }));
+      setAnswers({ index: props.index, answer: "D" });
+    };
+    return (
+      <View style={{ flexDirection: "row" }}>
+        <CheckBox
+          title="A"
+          center
+          checked={A}
+          checkedIcon="dot-circle-o"
+          uncheckedIcon="circle-o"
+          onPress={checkedA}
+        />
+        <CheckBox
+          title="B"
+          center
+          checked={B}
+          checkedIcon="dot-circle-o"
+          uncheckedIcon="circle-o"
+          onPress={checkedB}
+        />
+        <CheckBox
+          title="C"
+          center
+          checked={C}
+          checkedIcon="dot-circle-o"
+          uncheckedIcon="circle-o"
+          onPress={checkedC}
+        />
+        <CheckBox
+          title="D"
+          center
+          checked={D}
+          checkedIcon="dot-circle-o"
+          uncheckedIcon="circle-o"
+          onPress={checkedD}
+        />
+      </View>
+    );
+  };
 
   const Save = () => {
-    console.log("click save");
+    console.log("click save", answers);
+    // console.log("click save2:", result);
+    var urlImage = "";
+    if (imageFromCamera !== null) urlImage = imageFromCamera;
+    if (imageFromGellary !== null) urlImage = imageFromGellary;
+    let match = /\.(\w+)$/.exec(urlImage);
+    let type = match ? `image/${match[1]}` : `image`;
+
+    // var formData = new FormData();
+    // formData.append("file", {
+    //   uri: urlImage,
+    //   name: urlImage.split("/").pop(),
+    //   type: type,
+    // });
+
+    // fetch(URLpath, {
+    //   method: "POST",
+    //   headers: {
+    //     Accept: "application/json",
+    //     "Content-Type": "multipart/form-data",
+    //   },
+    //   body: formData,
+    // })
+    //   .then((responseJson) => {
+    //     console.log("response: ", responseJson);
+    //   })
+    //   .catch((error) => {
+    //     console.log("error: ", error);
+    //   });
   };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* header */}
@@ -239,8 +312,8 @@ const AnswerKey = ({ route, navigation }) => {
           <Image
             source={require("../assets/arrow_back.png")}
             style={{
-              width: 28,
-              height: 28,
+              width: 24,
+              height: 24,
             }}
           />
         </TouchableOpacity>
@@ -277,13 +350,14 @@ const AnswerKey = ({ route, navigation }) => {
 
       {/* Select from gallery */}
       <TouchableOpacity
+        // disabled={disabled}
         onPress={pickImage}
         style={{
           marginTop: 20,
           flexDirection: "row",
           backgroundColor: theme.colors.background,
           minWidth: "100%",
-          minHeight: 40,
+          minHeight: 50,
           // justifyContent: "center",
           paddingLeft: 20,
           alignItems: "center",
@@ -307,15 +381,25 @@ const AnswerKey = ({ route, navigation }) => {
         <View style={{ flexDirection: "column" }}>
           <Text>Select from gallery</Text>
         </View>
-        <View style={{ flexDirection: "column", paddingLeft: "20%" }}>
+        <View
+          style={{
+            flexDirection: "column",
+            display: "flex",
+            top: 0,
+            right: 80,
+            position: "absolute",
+          }}
+        >
           {imageFromGellary && (
             <Image
               source={{ uri: imageFromGellary }}
-              style={{ width: 40, height: 40 }}
+              style={{ width: 50, height: 50 }}
             />
           )}
         </View>
-        <View style={{ paddingLeft: "9%" }}>
+        <View
+          style={{ display: "flex", right: 30, top: 15, position: "absolute" }}
+        >
           <Image
             source={require("../assets/Arrow.png")}
             resizeMode="contain"
@@ -331,13 +415,14 @@ const AnswerKey = ({ route, navigation }) => {
 
       {/* Take from camera */}
       <TouchableOpacity
+        // disabled={disabled}
         onPress={takeFromCamera}
         style={{
           marginTop: 5,
           flexDirection: "row",
           backgroundColor: theme.colors.background,
-          minWidth: "101%",
-          minHeight: 40,
+          minWidth: "100%",
+          minHeight: 50,
           // justifyContent: "center",
           paddingLeft: 20,
           alignItems: "center",
@@ -361,15 +446,25 @@ const AnswerKey = ({ route, navigation }) => {
         <View style={{ flexDirection: "column" }}>
           <Text>Take from camera</Text>
         </View>
-        <View style={{ flexDirection: "column", paddingLeft: "20%" }}>
+        <View
+          style={{
+            flexDirection: "column",
+            display: "flex",
+            top: 0,
+            right: 80,
+            position: "absolute",
+          }}
+        >
           {imageFromCamera && (
             <Image
               source={{ uri: imageFromCamera }}
-              style={{ width: 40, height: 40 }}
+              style={{ width: 50, height: 50 }}
             />
           )}
         </View>
-        <View style={{ paddingLeft: "9%" }}>
+        <View
+          style={{ display: "flex", right: 30, top: 15, position: "absolute" }}
+        >
           <Image
             source={require("../assets/Arrow.png")}
             resizeMode="contain"
@@ -386,12 +481,16 @@ const AnswerKey = ({ route, navigation }) => {
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
           <View style={styles.box}>
-            {/* <FlatList
-            keyExtractor={}
-            data
-            /> */}
-            <Text>ac</Text>
-            {list}
+            {/* <form>
+              {lists.map((index, input) => {
+                return (
+                  <View key={index}>
+                    <RenderItem index={index} />
+                  </View>
+                );
+              })}
+            </form> */}
+            <AnswerRow />
           </View>
         </View>
       </ScrollView>
@@ -406,10 +505,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   box: {
-    backgroundColor: theme.colors.error,
-    marginLeft: "10%",
-    width: "80%",
-    marginRight: "10%",
-    flexDirection: "row",
+    // marginLeft: "10%",
+    width: "100%",
+    // marginRight: "10%",
+    flexDirection: "column",
   },
 });

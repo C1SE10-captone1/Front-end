@@ -68,7 +68,7 @@ const ListExamByClass = ({ route, navigation }) => {
           style={{
             flexDirection: "column",
             alignContent: "center",
-            minWidth: "20%",
+            minWidth: "39%",
           }}
         >
           <Image

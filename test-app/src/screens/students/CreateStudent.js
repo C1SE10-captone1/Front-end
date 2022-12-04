@@ -5,9 +5,7 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
-  KeyboardAvoidingView,
   // Button,
-  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Paragraph from "../../components/Paragraph";
@@ -16,7 +14,7 @@ import { theme } from "../../core/theme";
 import BackButton from "../../components/BackButton";
 import TextInput from "../../components/TextInput";
 import { supabase } from "../../utils/supabase-service";
-import { nameValidator } from "../../helpers/nameValidator";
+import { studentNameValidator } from "../../helpers/studentNameValidator";
 import { studentCodeValidator } from "../../helpers/studentCodeValidator";
 
 const CreateStudent = ({ route, navigation }) => {
@@ -25,33 +23,31 @@ const CreateStudent = ({ route, navigation }) => {
   const [name, setName] = useState({ value: "", error: "" });
   const [studentCode, setStudentCode] = useState({ value: "", error: "" });
 
+  const [students, setStudents] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
   const Done = async () => {
     setLoading(true);
     var check = true;
-    console.log(name.value, " ", studentCode.value);
     const checkStudentCode = studentCodeValidator(studentCode.value);
-    const checkName = nameValidator(name.value);
+    const checkName = studentNameValidator(name.value);
 
     if (checkStudentCode || checkName) {
       var check = false;
+      setLoading(false);
       setName({ value: name.value, error: checkName });
       setStudentCode({ value: studentCode.value, error: checkStudentCode });
       return;
     }
-    console.log("error: ", studentCode.error);
-    console.log("click done");
     let { data: students, error } = await supabase
       .from("students")
-      .select("*")
+      .select(`*`)
       .eq("class_id", classId)
       .eq("is_delete", false);
-    // .eq("classes.is_delete", false);
-    // .eq("classes.uid", currentUser.uid);
 
-    console.log(students);
-    for (let i; i < students.length; i++) {
-      if (students[i].student_code === studentCode) {
+    for (let i = 0; i < students.length; i++) {
+      if (students[i].student_code === studentCode.value) {
         check = false;
         Alert.alert("Create Student failed!", "Student code already exists. ", [
           {
@@ -59,6 +55,7 @@ const CreateStudent = ({ route, navigation }) => {
             onPress: () => {},
           },
         ]);
+        setLoading(false);
         break;
       }
     }
@@ -80,12 +77,13 @@ const CreateStudent = ({ route, navigation }) => {
             },
           },
         ]);
+        setLoading(false);
         return;
       } else {
         setLoading(false);
         Alert.alert("Success", "Create Student successful!", [
           {
-            text: "Back list students",
+            text: "Back students list ",
             onPress: () => {
               navigation.pop();
             },
@@ -180,8 +178,8 @@ const CreateStudent = ({ route, navigation }) => {
           <Button mode="outlined" onPress={Cancel}>
             Cancel
           </Button>
-          <Button mode="outlined" color={"#000000"} onPress={Done}>
-            Create Student
+          <Button disabled={loading} mode="contained" onPress={Done}>
+            {loading ? "Loading" : "Create Student"}
           </Button>
         </View>
         {/* </Background> */}
@@ -202,7 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     marginBottom: 30,
     // margin: "20%",
-    marginHorizontal: "15%",
+    marginHorizontal: "12%",
     marginVertical: "15%",
     color: theme.colors.primary,
   },

@@ -2,47 +2,51 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
+  Modal,
   SafeAreaView,
   Alert,
   Image,
   FlatList,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Button from "../../components/Button";
 import { theme } from "../../core/theme";
-import BackButton from "../../components/BackButton";
+import TextInput from "../../components/TextInput";
 import { supabase } from "../../utils/supabase-service";
-
-let colectionClass = {
-  id: "",
-  name: "",
-  class_code: "",
-  is_delete: "",
-  // created_at: "",
-  // update_at: "",
-  description: "",
-  school_year: "",
-  semester: "",
-  uid: "",
-};
+import { Dropdown } from "react-native-element-dropdown";
+import { classCodeValidator } from "../../helpers/classCodeValidator";
+import { classNameValidator } from "../../helpers/classNameValidator";
 
 const ClassDetail = ({ route, navigation }) => {
+  const ref = useRef(null);
   const classId = route.params.id;
-  const [classe, setClasses] = useState(colectionClass);
+  const [classe, setClasses] = useState([]);
   const currentUser = supabase.auth.user();
   const [numberStudent, setNumberStudent] = useState(0);
   const [numberExam, setNumberExam] = useState(0);
+  const [modalVisible, setVisiBle] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const [name, setName] = useState({ value: "", error: "" });
+  const [classCode, setClassCode] = useState({ value: "", error: "" });
+  const [semetes, setSemetes] = useState();
+  const [schoolYear, setSchoolYear] = useState();
+  const [description, setDescription] = useState({ value: "", error: "" });
+  const [classCur, setClassCur] = useState({
+    classCode: "",
+    year: "",
+    semeter: "",
+  });
   // number exams of a class
   const updateNumberExamOfClass = async () => {
     let { data: exams, error } = await supabase
       .from("exams")
       .select("count()")
+      .eq("is_delete", false)
       .eq("class_id", classId);
 
-    console.log("number exam :", exams[0].count);
     exams[0].count > 0 ? setNumberExam(exams[0].count) : setNumberExam(0);
   };
 
@@ -51,9 +55,9 @@ const ClassDetail = ({ route, navigation }) => {
     let { data: students, error } = await supabase
       .from("students")
       .select("count()")
+      .eq("is_delete", false)
       .eq("class_id", classId);
 
-    console.log("number student :", students[0].count);
     students[0].count > 0
       ? setNumberStudent(students[0].count)
       : setNumberStudent(0);
@@ -69,34 +73,207 @@ const ClassDetail = ({ route, navigation }) => {
 
     setClasses(classes);
   };
+  const Edit = () => {
+    console.log("show modal edit");
+    setVisiBle(true);
+    let sy = 0;
+    let sm = 0;
+    setName({ value: classe[0].name, error: "" });
+    setClassCode({ value: classe[0].class_code, error: "" });
+    school_year.map((e) => {
+      if (e.label == classe[0].school_year) {
+        sy = e.value;
+      }
+    });
+    semeters.map((e) => {
+      if (e.label.includes(classe[0].semester)) {
+        sm = e.value;
+      }
+    });
+    setSemetes(sm);
+    setSchoolYear(sy);
+    setClassCur({
+      classCode: classe[0].class_code,
+      year: sy,
+      semeter: sm,
+    });
+    setDescription({ value: classe[0].description, error: "" });
+  };
+  const Done = async () => {
+    setLoading(true);
+    var check = true;
+    const checkClassCode = classCodeValidator(classCode.value);
+    const checkClassName = classNameValidator(name.value);
+
+    if (checkClassCode || checkClassName) {
+      setLoading(false);
+      setClassCode({ value: classCode.value, error: checkClassCode });
+      setName({ value: name.value, error: checkClassName });
+      return;
+    }
+
+    let { data: classes, err } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("uid", currentUser.id);
+
+    for (let i = 0; i < classes.length; i++) {
+      if (
+        classCur.classCode === classCode.value &&
+        classCur.year === schoolYear &&
+        classCur.semeter === semetes
+      ) {
+        break;
+      }
+      if (
+        classes[i].class_code === classCode.value &&
+        classes[i].school_year === school_year[schoolYear - 1].label &&
+        classes[i].semester === semeters[semetes - 1].label
+      ) {
+        check = false;
+        Alert.alert("Update Class failed!", "Class code already exists. ", [
+          {
+            text: "Back",
+            onPress: () => {
+              navigation.goBack();
+            },
+          },
+        ]);
+        break;
+      } else if (classes[i].name === name.value) {
+        check = false;
+        Alert.alert("Update Class failed!", "Class name already exists. ", [
+          {
+            text: "Back",
+            onPress: () => {
+              navigation.goBack();
+            },
+          },
+        ]);
+        break;
+      }
+    }
+    console.log("click done");
+    if (check) {
+      setLoading(true);
+      const { error } = await supabase
+        .from("classes")
+        .update([
+          {
+            name: name.value,
+            class_code: classCode.value,
+            school_year: school_year[schoolYear - 1].label,
+            semester: semeters[semetes - 1].label,
+            description: description.value,
+            uid: currentUser.id,
+          },
+        ])
+        .eq("id", classe[0].id);
+      if (error !== null) {
+        Alert.alert("Failed!", "Update Class failed.", [
+          {
+            text: "Back",
+            onPress: () => {
+              setLoading(false);
+            },
+          },
+        ]);
+        return;
+      } else {
+        Alert.alert("Success", "Update Class successful!", [
+          {
+            text: "Back list class",
+            onPress: () => {
+              setVisiBle(true);
+              setLoading(false);
+              setTimeout(async () => {
+                loadClassDetail();
+              }, 1000);
+              navigation.goBack();
+            },
+          },
+          {
+            text: "OK",
+          },
+        ]);
+      }
+    }
+  };
+
+  const school_year = [
+    { value: 1, label: "2019-2020" },
+    { value: 2, label: "2020-2021" },
+    { value: 3, label: "2021-2022" },
+    { value: 4, label: "2022-2023" },
+  ];
+
+  const semeters = [
+    { value: 1, label: "I" },
+    { value: 2, label: "II" },
+    { value: 3, label: "Vacation" },
+  ];
+
+  const Cancel = () => {
+    Alert.alert(
+      "Are you sure cancel",
+      "Are you sure you want to reset this text box?",
+      [
+        {
+          text: "Yes",
+          onPress: () => {
+            setName("");
+            setDescription("");
+            return;
+          },
+        },
+        {
+          text: "No",
+        },
+      ]
+    );
+  };
+
+  const renderItem = (item) => {
+    return (
+      <View style={styles.item}>
+        <Text style={styles.textItem}>{item.label}</Text>
+      </View>
+    );
+  };
 
   useEffect(() => {
-    loadClassDetail();
-    updateNumberExamOfClass();
-    updateNumberStudentOfClass();
-  }, []);
+    setTimeout(async () => {
+      loadClassDetail();
+      updateNumberExamOfClass();
+      updateNumberStudentOfClass();
+      setLoading(false);
+    }, 1000);
+  }, [
+    navigation,
+    loadClassDetail,
+    updateNumberExamOfClass,
+    updateNumberStudentOfClass,
+  ]);
 
-  const Edit = () => {
-    console.log("click edit");
-  };
   const listExamOfClass = () => {
-    console.log("click exams");
     // navigation.
     navigation.navigate("ListExamByClass", {
       id: classId,
     });
   };
   const Delete = () => {
+    setLoading(true);
     Alert.alert(
-      "Confirm delete!",
-      "Are you sure delete Class " + classe[0].name + "?",
+      "Are you sure?",
+      "Deleting this class will also delete all associated exams and students! ",
       [
         {
           text: "Yes",
           onPress: async () => {
             const { error } = await supabase
               .from("classes")
-              .insert([{ is_delete: true }]);
+              .update([{ is_delete: true }])
+              .eq("id", classId);
             if (error) {
               Alert.alert(
                 "Error!",
@@ -104,7 +281,9 @@ const ClassDetail = ({ route, navigation }) => {
                 [
                   {
                     text: "OK",
-                    onPress: () => {},
+                    onPress: () => {
+                      setLoading(false);
+                    },
                   },
                 ]
               ); //
@@ -115,7 +294,10 @@ const ClassDetail = ({ route, navigation }) => {
                 [
                   {
                     text: "OK",
-                    onPress: () => {},
+                    onPress: () => {
+                      setLoading(false);
+                      navigation.goBack();
+                    },
                   },
                 ]
               ); //
@@ -227,7 +409,7 @@ const ClassDetail = ({ route, navigation }) => {
 
                 <View style={styles.manage}>
                   <Text style={{ fontsize: 12, color: theme.colors.label }}>
-                    Manager
+                    Manage
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.btn} onPress={listExamOfClass}>
@@ -313,6 +495,148 @@ const ClassDetail = ({ route, navigation }) => {
             );
           }}
         />
+        {/* modal edit class */}
+        <Modal
+          animationType="slide"
+          visible={modalVisible}
+          style={[styles.modal, styles.modal2]}
+          position={"center"}
+          entry={"top"}
+          onRequestClose={() => setVisiBle(false)}
+        >
+          <View style={{ flex: 1 }}>
+            <ScrollView>
+              <Text style={styles.title}>Update Class</Text>
+              <View style={styles.container}>
+                {/* input name class code */}
+                <View style={styles.box}>
+                  <TextInput
+                    keyboardType="text"
+                    label="Class Code"
+                    returnKeyType="next"
+                    value={classCode.value}
+                    onChangeText={(text) =>
+                      setClassCode({ value: text, error: "" })
+                    }
+                    error={!!classCode.error}
+                    errorText={classCode.error}
+                  ></TextInput>
+                </View>
+                {/* input name class  */}
+                <View style={styles.box}>
+                  <TextInput
+                    keyboardType="text"
+                    label="Name Class"
+                    returnKeyType="next"
+                    value={name.value}
+                    onChangeText={(text) => setName({ value: text, error: "" })}
+                    error={!!name.error}
+                    errorText={name.error}
+                  ></TextInput>
+                </View>
+                <View>
+                  <View style={styles.box}>
+                    <View
+                      style={{
+                        width: "63%",
+                        flexDirection: "column",
+                        marginTop: 8,
+                      }}
+                    >
+                      <Dropdown
+                        // disable={true}
+                        ref={ref}
+                        statusBarIsTranslucent={true}
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={school_year}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Select school year..."
+                        searchPlaceholder="Search..."
+                        value={schoolYear}
+                        onChange={(item) => {
+                          setSchoolYear(item.value);
+                        }}
+                        renderItem={renderItem}
+                      />
+                    </View>
+
+                    <View
+                      style={{
+                        width: "37%",
+                        flexDirection: "column",
+                        marginTop: 8,
+                      }}
+                    >
+                      <Dropdown
+                        ref={ref}
+                        statusBarIsTranslucent={true}
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={semeters}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Semeters"
+                        searchPlaceholder="Search..."
+                        value={semetes}
+                        onChange={(item) => {
+                          setSemetes(item.value);
+                        }}
+                        renderItem={renderItem}
+                      />
+                    </View>
+                  </View>
+                </View>
+
+                {/* input description */}
+                <View style={styles.box}>
+                  <TextInput
+                    label="Description"
+                    returnKeyType="done"
+                    value={description.value}
+                    onChangeText={(text) =>
+                      setDescription({ value: text, error: "" })
+                    }
+                    //   error={!!description.error}
+                    //   errorText={description.error}
+                    keyboardType="text"
+                  ></TextInput>
+                </View>
+              </View>
+
+              {/* button handle */}
+              <View style={{ marginHorizontal: 40 }}>
+                <Button
+                  mode="outlined"
+                  style={styles.btn_cancel}
+                  onPress={() => setVisiBle(false)}
+                >
+                  Back
+                </Button>
+                <Button
+                  disabled={loading}
+                  mode="contained"
+                  style={styles.btn_done}
+                  onPress={Done}
+                >
+                  {loading ? "Loading" : "Update Class"}
+                </Button>
+              </View>
+              {/* </Background> */}
+            </ScrollView>
+          </View>
+        </Modal>
       </View>
 
       <View>
@@ -327,12 +651,13 @@ const ClassDetail = ({ route, navigation }) => {
       </View>
       <View>
         <Button
+          disabled={loading}
           mode="outlined"
           style={styles.btn_delete}
           onPress={Delete}
           color={theme.colors.error}
         >
-          Delete class
+          {loading ? "Loading" : "Delete class"}
         </Button>
       </View>
     </SafeAreaView>
@@ -357,6 +682,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     fontWeight: "italic",
     letterSpacing: 1,
+    paddingRight: 10,
     paddingBottom: 6,
     fontSize: 20,
   },
@@ -394,5 +720,63 @@ const styles = StyleSheet.create({
   btn_edit: {
     elevation: 0,
     fontWeight: "normal",
+  },
+  title: {
+    marginTop: 40,
+    top: "2%",
+    left: "21%",
+    fontWeight: "bold",
+    fontSize: 40,
+    marginBottom: 30,
+    color: theme.colors.primary,
+  },
+  box: {
+    maxWidth: "80%",
+    marginTop: 10,
+    marginLeft: "10%",
+    marginRight: "10%",
+    flexDirection: "row",
+  },
+  box_child: {
+    maxWidth: "44%",
+    flexDirection: "column",
+  },
+  btn_cancel: {
+    marginTop: 40,
+  },
+  btn_done: {},
+  dropdown: {
+    // margin: 16,
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  item: {
+    padding: 17,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  textItem: {
+    flex: 1,
+    fontSize: 16,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
   },
 });

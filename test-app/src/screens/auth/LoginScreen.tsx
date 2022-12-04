@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TouchableOpacity,
   StyleSheet,
@@ -6,7 +6,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Image,
-  Text
+  Text,
+  Alert
 } from "react-native";
 import Logo from "../../components/Logo";
 import Header from "../../components/Header";
@@ -17,9 +18,8 @@ import { theme } from "../../core/theme";
 import { emailValidator } from "../../helpers/emailValidator";
 import { passwordValidator } from "../../helpers/passwordValidator";
 import { supabase } from "../../utils/supabase-service";
-// import { NavigationContainer } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Layout, useTheme, themeColor } from "react-native-rapi-ui";
+import { Layout, useTheme } from "react-native-rapi-ui";
 // import { useAuth } from "../utils/AuthContext";
 import { AuthStackParamList } from "../../types/navigation";
 
@@ -31,15 +31,15 @@ export default function ({
   const [password, setPassword] = useState < string > ();
   const [errorE, setErrorE] = useState < string >();
   const [errorP, setErrorP] = useState < string >();
-  // const [email, setEmail] = useState({ value: "", error: "" });
-  // const [password, setPassword] = useState({ value: "", error: "" });
   const [loading, setLoading] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(true);
   // const { signIn } = useAuth();
 
+  useEffect(()=>{
+    setLoading(false)
+  }, []);
   const onLoginPressed = async () => {
     setLoading(true);
-
     const emailError = emailValidator(email);
     const passwordError = passwordValidator(password);
 
@@ -51,6 +51,8 @@ export default function ({
       setErrorP(passwordError);
       return;
     }else {
+      setErrorE("");
+      setErrorP("");
       const {user, error } = await supabase.auth.signIn({ email: email, password: password });
 
     if (!error && !user) {
@@ -59,16 +61,22 @@ export default function ({
     }
     if (error) {
       setLoading(false);
-      alert(error.message);
+      Alert.alert("Login failed!", "Username or password incorrect.", [
+        {
+          text: "Back",
+          onPress: () => {},
+        },
+      ]);
     }
     setLoading(false)
 
     if (user) {
-      navigation.reset({
-        index: 0,
-        routes: [{name: "TabBottom" }],
-      });
-      // navigation.navigate("TabBottom");
+      // navigation.reset({
+      //   index: 0,
+      //   routes: [{name: "TabBottom",],
+
+      // });
+      navigation.navigate( "TabBottom" );
     }
   }
   };
@@ -81,27 +89,32 @@ export default function ({
             flexGrow: 1,
           }}
         >
+          <BackButton goBack={navigation.goBack} />
           <View
             style={{
               // flex: 1,
               justifyContent: "center",
               alignItems: "center",
+              marginTop: 50
               // backgroundColor: isDarkmode ? "#17171E" : themeColor.white100,
             }}
           >
-            <BackButton goBack={navigation.goBack} />
-            <Logo />
-            <Header
+
+            {/* <View >  */}
+               <Logo />
+            {/* </View> */}
+
+            {/* <Header
               style={{
                 fontSize: 30,
                 justifyContent: "center",
                 color: theme.colors.primary,
-                letterSpacing: 9,
+                // letterSpacing: 9,
                 paddingLeft: "-10%",
               }}
             >
-              Welcome
-            </Header>
+              Welcome!
+            </Header> */}
             <Header
               style={{
                 fontSize: 40,
@@ -163,15 +176,15 @@ export default function ({
                   <Text style={styles.forgot}>Forgot your password?</Text>
                 </TouchableOpacity>
               </View>
+
               <Button
-                mode="contained"
-                onPress={onLoginPressed}
-                disabled={loading}
-                style={{}}
-                >
-                {/* Login */}
-                {loading ? "Loading" : "Continue"}
+                  mode="contained"
+                  onPress={onLoginPressed}
+                  disabled={loading}
+                   style={{ }}                >
+                {loading ? "Loading" : "Log in"}
               </Button>
+
               <View style={styles.row}>
                 <Text>Don’t have an account? </Text>
                 <TouchableOpacity

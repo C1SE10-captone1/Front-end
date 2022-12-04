@@ -7,39 +7,73 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import BackButton from "../../components/BackButton";
 import TextInput from "../../components/TextInput";
 import Paragraph from "../../components/Paragraph";
 import Button from "../../components/Button";
 import { theme } from "../../core/theme";
-import SelectList from "react-native-dropdown-select-list";
 import { Dropdown } from "react-native-element-dropdown";
 import { supabase } from "../../utils/supabase-service";
+import { classCodeValidator } from "../../helpers/classCodeValidator";
+import { classNameValidator } from "../../helpers/classNameValidator";
+import { dropdownValidator } from "../../helpers/dropdownValidator";
 
 const CreateClass = ({ navigation }) => {
   const ref = useRef(null);
   const [name, setName] = useState({ value: "", error: "" });
   const [classCode, setClassCode] = useState({ value: "", error: "" });
-  const [semetes, setSemetes] = useState();
-  const [schoolYear, setSchoolYear] = useState();
+  const [semetes, setSemetes] = useState({ value: "", error: "" });
+  const [schoolYear, setSchoolYear] = useState({ value: "", error: "" });
 
   const [description, setDescription] = useState({ value: "", error: "" });
 
-  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const currentUser = supabase.auth.user();
 
+  useEffect(() => {
+    setLoading(false);
+  }, [loading]);
   const Done = async () => {
     var check = true;
-    let { data: classes, err } = await supabase.from("classes").select("*");
+    setLoading(true);
+    const classCodeError = classCodeValidator(classCode.value);
+    const classNameError = classNameValidator(name.value);
+    const schoolYearError = dropdownValidator(schoolYear.value);
+    const semetesError = dropdownValidator(semetes.value);
+    if (classCode.value === name.value) {
+      setLoading(false);
+      setName({
+        value: name.value,
+        error: "Class code and class name can't be the same.",
+      });
+      return;
+    }
+    if (classCodeError || classNameError || schoolYearError || semetesError) {
+      setLoading(false);
+      setName({ value: name.value, error: classNameError });
+      setClassCode({ value: classCode.value, error: classCodeError });
+      setSchoolYear({
+        value: schoolYear.value,
+        error: schoolYearError + " school year.",
+      });
+      setSemetes({ value: semetes.value, error: semetesError + " semester." });
+      return;
+    }
+    let { data: classes, err } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("uid", currentUser.id);
+    const schoolyear = school_year[schoolYear.value - 1].label;
+    const semeter = semeters[semetes.value - 1].label;
     for (let i = 0; i < classes.length; i++) {
       if (
         classes[i].class_code === classCode.value &&
-        classes[i].school_year === school_year[schoolYear - 1].label
+        classes[i].school_year === schoolyear
       ) {
         check = false;
-        Alert.alert("Create Exam failed!", "Class code already exists. ", [
+        setLoading(false);
+        Alert.alert("Create Class failed!", "Class code already exists. ", [
           {
             text: "Back",
             onPress: () => {
@@ -48,9 +82,14 @@ const CreateClass = ({ navigation }) => {
           },
         ]);
         break;
-      } else if (classes[i].name === name.value) {
+      } else if (
+        classes[i].name === name.value &&
+        classes[i].school_year === schoolyear &&
+        classes[i].semester === semeter
+      ) {
+        setLoading(false);
         check = false;
-        Alert.alert("Create Exam failed!", "Class name already exists. ", [
+        Alert.alert("Create Class failed!", "Class name already exists. ", [
           {
             text: "Back",
             onPress: () => {
@@ -62,20 +101,21 @@ const CreateClass = ({ navigation }) => {
       }
     }
     console.log("click done");
-    if (check === true) {
-      const { data, error } = await supabase.from("classes").insert([
+    if (check) {
+      const { error } = await supabase.from("classes").insert([
         {
           name: name.value,
           class_code: classCode.value,
-          school_year: school_year[schoolYear - 1].label,
-          semester: semeters[semetes - 1].label,
+          school_year: school_year[schoolYear.value - 1].label,
+          semester: semeters[semetes.value - 1].label,
           description: description.value,
           uid: currentUser.id,
         },
       ]);
-      console.log(error);
+
       if (error !== null) {
-        Alert.alert("Failed!", "Create Exam failed.", [
+        setLoading(false);
+        Alert.alert("Failed!", "Create Class failed.", [
           {
             text: "Back",
             onPress: () => {
@@ -85,9 +125,10 @@ const CreateClass = ({ navigation }) => {
         ]);
         return;
       } else {
-        Alert.alert("Success", "Create Exam successful!", [
+        setLoading(false);
+        Alert.alert("Success", "Create Class successful!", [
           {
-            text: "Back list class",
+            text: "Back classes list.",
             onPress: () => {
               navigation.pop();
             },
@@ -122,8 +163,12 @@ const CreateClass = ({ navigation }) => {
         {
           text: "Yes",
           onPress: () => {
-            setName("");
-            setDescription("");
+            setLoading(false);
+            setName({ value: "", error: "" });
+            setClassCode({ value: "", error: "" });
+            setSchoolYear({ value: "", error: "" });
+            setSemetes({ value: "", error: "" });
+            setDescription({ value: "", error: "" });
             return;
           },
         },
@@ -154,19 +199,19 @@ const CreateClass = ({ navigation }) => {
           <View style={styles.box}>
             <TextInput
               keyboardType="text"
-              label="Class Code"
+              label="Class Code *"
               returnKeyType="next"
               value={classCode.value}
               onChangeText={(text) => setClassCode({ value: text, error: "" })}
-              error={!!name.error}
-              errorText={name.error}
+              error={!!classCode.error}
+              errorText={classCode.error}
             ></TextInput>
           </View>
           {/* input name class  */}
           <View style={styles.box}>
             <TextInput
               keyboardType="text"
-              label="Name Class"
+              label="Name Class *"
               returnKeyType="next"
               value={name.value}
               onChangeText={(text) => setName({ value: text, error: "" })}
@@ -197,14 +242,17 @@ const CreateClass = ({ navigation }) => {
                   maxHeight={300}
                   labelField="label"
                   valueField="value"
-                  placeholder="Select school year..."
+                  placeholder="Select school year *"
                   searchPlaceholder="Search..."
-                  value={schoolYear}
+                  value={schoolYear.value}
                   onChange={(item) => {
-                    setSchoolYear(item.value);
+                    setSchoolYear({ value: item.value, error: "" });
                   }}
                   renderItem={renderItem}
                 />
+                {schoolYear.error ? (
+                  <Text style={styles.error}>{schoolYear.error}</Text>
+                ) : null}
               </View>
 
               <View
@@ -223,14 +271,17 @@ const CreateClass = ({ navigation }) => {
                   maxHeight={300}
                   labelField="label"
                   valueField="value"
-                  placeholder="Semeters"
+                  placeholder="Semeters *"
                   searchPlaceholder="Search..."
-                  value={semetes}
+                  value={semetes.value}
                   onChange={(item) => {
-                    setSemetes(item.value);
+                    setSemetes({ value: item.value, error: "" });
                   }}
                   renderItem={renderItem}
                 />
+                {semetes.error ? (
+                  <Text style={styles.error}>{semetes.error}</Text>
+                ) : null}
               </View>
             </View>
           </View>
@@ -252,17 +303,17 @@ const CreateClass = ({ navigation }) => {
         </View>
 
         {/* button handle */}
-        <View>
+        <View style={{ marginHorizontal: 40 }}>
           <Button mode="outlined" style={styles.btn_cancel} onPress={Cancel}>
             Cancel
           </Button>
           <Button
-            mode="outlined"
+            disabled={loading}
+            mode="contained"
             style={styles.btn_done}
-            color={"#000000"}
             onPress={Done}
           >
-            Create Class
+            {loading ? "Loading" : "Create Class"}
           </Button>
         </View>
         {/* </Background> */}
@@ -333,5 +384,10 @@ const styles = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 16,
+  },
+  error: {
+    fontSize: 13,
+    color: theme.colors.error,
+    paddingTop: 2,
   },
 });

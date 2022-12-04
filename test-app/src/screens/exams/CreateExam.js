@@ -14,32 +14,37 @@ import TextInput from "../../components/TextInput";
 import Button from "../../components/Button";
 import Paragraph from "../../components/Paragraph";
 import { theme } from "../../core/theme";
-import SelectList from "react-native-dropdown-select-list";
 import { supabase } from "../../utils/supabase-service";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Dropdown } from "react-native-element-dropdown";
-let colectionClass = {
-  id: "",
-  name: "",
-  uid: "",
-};
+import { dropdownValidator } from "../../helpers/dropdownValidator";
+import { examNameValidator } from "../../helpers/examNameValidator";
 const CreateExam = ({ navigation }) => {
   const [name, setName] = useState({ value: "", error: "" });
-  const [date1, setDate1] = useState("");
+  const [date, setDate] = useState({ value: "", error: "" });
   const [description, setDescription] = useState({ value: "", error: "" });
-  const [error, setError] = useState(false);
-  const [checkYear, setCheckYear] = useState();
-  const [checkSemester, setCheckSemester] = useState();
-  const [checkClass, setCheckClass] = useState();
 
-  const [choiceQuestion, setChoiceQuestion] = useState("");
-  const [scaleQuestion, setScaleQuestion] = useState("");
+  const [listDataClassesResponse, setListDataClassesResponse] = useState([]);
+
+  const [ClassCode, setClassCode] = useState("");
+  const [ClassCodeError, setClassCodeError] = useState("");
+  const [SchoolYear, setSchoolYear] = useState("");
+  const [schoolYearError, setSchoolYearError] = useState("");
+
+  const [SemesterError, setSemesterError] = useState("");
+  const [Semester, setSemester] = useState("");
+  const [classID, setClassID] = useState("");
+
+  const [choiceQuestion, setChoiceQuestion] = useState({
+    value: "",
+    error: "",
+  });
+  const [scaleQuestion, setScaleQuestion] = useState({ value: "", error: "" });
 
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const [classe, setClasses] = useState(colectionClass);
   const currentUser = supabase.auth.user();
-  const [disable, setDisable] = useState(false);
+  const [loading, setLoading] = useState(false);
   const ref = useRef(null);
 
   const loadClassOfUser = async () => {
@@ -48,12 +53,57 @@ const CreateExam = ({ navigation }) => {
       .select("*")
       .eq("uid", currentUser.id)
       .eq("is_delete", false);
-    classes.filter((c) => setClasses(c.id, c.name, c.uid));
-    console.log("class-2: ", classe);
+    setListDataClassesResponse(classes);
   };
+
+  const menuSchoolYear = () => {
+    const schoolYear = new Set(
+      listDataClassesResponse.map((e) => e.school_year)
+    );
+
+    const schoolYearList = [...schoolYear];
+
+    const schoolYearListRender = schoolYearList.map((e) => ({
+      value: e,
+      label: e,
+    }));
+    return schoolYearListRender;
+  };
+
+  const menuSemester = () => {
+    const semesterList = listDataClassesResponse.filter(
+      (c) => c.school_year === SchoolYear
+    );
+    const semesterLists = new Set(semesterList.map((e) => e.semester).sort());
+    const semesterListData = [...semesterLists];
+    const semesterListRender = semesterListData.map((c) => ({
+      value: c,
+      label: c,
+    }));
+    return semesterListRender;
+  };
+
+  const menuClassCode = () => {
+    const classCodeList = listDataClassesResponse.filter(
+      (c) => c.school_year === SchoolYear && c.semester === Semester
+    );
+
+    const classCodeListTmp = new Set(
+      classCodeList.map((e) => e.class_code).sort()
+    );
+
+    const classCodeListRender = [...classCodeListTmp].map((c) => ({
+      value: c,
+      label: c,
+    }));
+
+    return classCodeListRender;
+  };
+
   useEffect(() => {
-    // loadClassOfUser().then();
-  }, [navigation]);
+    setLoading(false);
+    loadClassOfUser();
+  }, []);
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -64,18 +114,13 @@ const CreateExam = ({ navigation }) => {
   };
 
   const handleConfirm = (datee) => {
-    console.log(datee);
     var datestring =
-      datee.getDate() +
-      "/" +
+      datee.getFullYear() +
+      "-" +
       (datee.getMonth() + 1) +
-      "/" +
-      datee.getFullYear();
-    // date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
-    setDate1(datee);
-    console.log("date: ", date1);
-    // const datee1 = new Date(datestring);
-    // console.log(datee1);
+      "-" +
+      datee.getDate();
+    setDate({ value: datestring, error: "" });
     hideDatePicker();
   };
 
@@ -89,90 +134,121 @@ const CreateExam = ({ navigation }) => {
     { value: 2, label: "0.2" },
   ];
 
-  const data = [
-    { value: 1, label: "Năm học 2019-2020" },
-    { value: 2, label: "Năm học 2020-2021" },
-    { value: 3, label: "Năm học 2021-2022" },
-    { value: 4, label: "Năm học 2022-2023" },
-  ];
-  const semeters = [
-    { value: 1, label: "Học kỳ 1" },
-    { value: 2, label: "Học kỳ 2" },
-    { value: 3, label: "Học kỳ hè" },
-  ];
-
-  const data2 = [
-    { label: "Item 1", value: "1" },
-    { label: "Item 2", value: "2" },
-    { label: "Item 3", value: "3" },
-    { label: "Item 4", value: "4" },
-    { label: "Item 5", value: "5" },
-    { label: "Item 6", value: "6" },
-    { label: "Item 7", value: "7" },
-    { label: "Item 8", value: "8" },
-  ];
-
   const Done = async () => {
+    setLoading(true);
     console.log("click done");
-    var value =
-      name.value +
-      "," +
-      checkYear +
-      "," +
-      checkSemester +
-      "," +
-      checkClass +
-      "," +
-      choiceQuestion +
-      "," +
-      scaleQuestion +
-      "," +
-      date1 +
-      "," +
-      description.value;
-    console.log(value);
+    const nameError = examNameValidator(name.value);
+    const schoolYearError = dropdownValidator(SchoolYear);
+    const semesterError = dropdownValidator(Semester);
+    const scaleError = dropdownValidator(scaleQuestion.value);
+    const optionError = dropdownValidator(choiceQuestion.value);
+    const classError = dropdownValidator(ClassCode);
+    const dateError = dropdownValidator(date.value);
+    console.log(SchoolYear);
+    if (
+      nameError ||
+      schoolYearError ||
+      semesterError ||
+      scaleError ||
+      optionError ||
+      classError ||
+      dateError
+    ) {
+      setLoading(false);
+      setName({ value: name.value, error: nameError });
+      setChoiceQuestion({
+        value: choiceQuestion.value,
+        error: optionError + " question.",
+      });
+      setDate({ value: date.value, error: dateError + " date of exam." });
+      setScaleQuestion({
+        value: scaleQuestion.value,
+        error: scaleError + " scale.",
+      });
+      setClassCodeError(classError);
+      setSemesterError(semesterError);
+      setSchoolYearError(schoolYearError);
+      return;
+    }
+    let question = "";
+    options.map((e) => {
+      if (e.value === choiceQuestion.value) {
+        question = e.label;
+      }
+    });
+    let scal = "";
+    scale.map((e) => {
+      if (e.value === scaleQuestion.value) {
+        scal = e.label;
+      }
+    });
+    if (SchoolYear && Semester && ClassCode) {
+      const Class = listDataClassesResponse.filter(
+        (c) =>
+          c.school_year === SchoolYear &&
+          c.semester === Semester &&
+          c.class_code === ClassCode
+      );
+      const idClass = Class[0].id;
+      setClassID(idClass);
+    }
 
-    // const { error } = await supabase.from("exams").insert([
-    //   {
-    //     name: name,
-    //     options: choiceQuestion,
-    //     scale: scaleQuestion,
-    //     date: date,
-    //     description: description,
-    //     class_id: "",
-    //   },
-    // ]);
-    // if (error) {
-    //   Alert.alert("Failed!", "Create Exam failed!", [
-    //     {
-    //       text: "Back",
-    //     },
-    //   ]);
-    // } else {
-    //   Alert.alert("Create Exam successful!", [
-    //     {
-    //       text: "OK",
-    //       onPress: () => {
-    //         navigation.goBack();
-    //       },
-    //     },
-    //     {
-    //       text: "No",
-    //     },
-    //   ]);
-    // }
+    const { error } = await supabase.from("exams").insert([
+      {
+        name: name.value,
+        option: question,
+        scale: scal,
+        date_exam: date.value,
+        is_delete: false,
+        description: description.value,
+        class_id: classID,
+      },
+    ]);
+    if (error) {
+      Alert.alert("Failed!", "Create Exam failed.", [
+        {
+          text: "Back",
+          onPress: () => {
+            setLoading(false);
+          },
+        },
+      ]);
+    } else {
+      Alert.alert("Success!", "Create Exam successful!", [
+        {
+          text: "Back exam list.",
+          onPress: () => {
+            setLoading(false);
+            navigation.goBack();
+          },
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            setLoading(false);
+          },
+        },
+      ]);
+    }
   };
 
   const Cancel = () => {
     Alert.alert(
-      "Are you sure cancel",
-      "Are you sure you want to reset this text box?",
+      "Are you sure?",
+      "Are you sure you want to reset this text box!",
       [
         {
           text: "Yes",
           onPress: () => {
-            setName("");
-            setDescription("");
+            setLoading(false);
+            setChoiceQuestion({ value: "", error: "" });
+            setScaleQuestion({ value: "", error: "" });
+            setSchoolYear("");
+            setSemester("");
+            setName({ value: "", error: "" });
+            setClassCode("");
+            setDate({ value: "", error: "" });
+            setDescription({ value: "", error: "" });
             return;
           },
         },
@@ -192,22 +268,22 @@ const CreateExam = ({ navigation }) => {
   };
   return (
     <SafeAreaView>
-      <Paragraph style={{ paddingTop: 30, paddingLeft: 20 }}>
-        <BackButton goBack={navigation.goBack} />
-      </Paragraph>
-      <ScrollView style={{}}>
+      <ScrollView>
+        <Paragraph style={{ paddingTop: 40, paddingLeft: 20 }}>
+          <BackButton goBack={navigation.goBack} />
+        </Paragraph>
         <Text style={styles.title}>Create Exam</Text>
         <View style={styles.container}>
           {/* enter name exam */}
           <View style={styles.box}>
             <TextInput
               keyboardType="text"
-              label="Name Exam"
+              label="Name Exam *"
               returnKeyType="next"
               value={name.value}
               onChangeText={(text) => setName({ value: text, error: "" })}
-              //   error={!!name.error}
-              //   errorText={name.error}
+              error={!!name.error}
+              errorText={name.error}
             ></TextInput>
           </View>
 
@@ -215,13 +291,12 @@ const CreateExam = ({ navigation }) => {
           <View style={styles.box}>
             <View
               style={{
-                width: "58%",
+                width: "63%",
                 flexDirection: "column",
                 marginTop: 8,
               }}
             >
               <Dropdown
-                // disable={true}
                 ref={ref}
                 statusBarIsTranslucent={true}
                 style={styles.dropdown}
@@ -229,23 +304,26 @@ const CreateExam = ({ navigation }) => {
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
-                data={data}
+                data={menuSchoolYear()}
                 search
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder="Select school year..."
+                placeholder="Select school year"
                 searchPlaceholder="Search..."
-                value={checkYear}
+                value={SchoolYear}
                 onChange={(item) => {
-                  setCheckYear(item.value);
+                  setSchoolYear(item.value);
                 }}
                 renderItem={renderItem}
               />
+              {schoolYearError ? (
+                <Text style={styles.error}>{schoolYearError}</Text>
+              ) : null}
             </View>
 
             <View
-              style={{ width: "42%", flexDirection: "column", marginTop: 8 }}
+              style={{ width: "37%", flexDirection: "column", marginTop: 8 }}
             >
               <Dropdown
                 ref={ref}
@@ -255,25 +333,29 @@ const CreateExam = ({ navigation }) => {
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
-                data={semeters}
+                data={menuSemester()}
                 search
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
                 placeholder="Semeters"
                 searchPlaceholder="Search..."
-                value={checkSemester}
+                value={Semester}
                 onChange={(item) => {
-                  setCheckSemester(item.value);
+                  setSemester(item.value);
                 }}
                 renderItem={renderItem}
               />
+              {SemesterError ? (
+                <Text style={styles.error}>{SemesterError}</Text>
+              ) : null}
             </View>
           </View>
 
           {/*  choose class*/}
           <View style={styles.box}>
             <View style={{ width: "100%", marginTop: 10 }}>
+              {/* {Semester ? ( */}
               <Dropdown
                 ref={ref}
                 statusBarIsTranslucent={true}
@@ -282,27 +364,31 @@ const CreateExam = ({ navigation }) => {
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
-                data={data2}
+                data={menuClassCode()}
                 search
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder="Select class"
+                placeholder="Select class *"
                 searchPlaceholder="Search..."
-                value={checkClass}
+                value={ClassCode}
                 onChange={(item) => {
-                  setCheckClass(item.value);
+                  setClassCode(item.value);
                 }}
                 renderItem={renderItem}
               />
+              {/* ) : null} */}
+              {ClassCodeError ? (
+                <Text style={styles.error}>{ClassCodeError}</Text>
+              ) : null}
             </View>
           </View>
 
-          {/* select  number question and scale */}
+          {/* select number question */}
           <View style={styles.box}>
             <View
               style={{
-                width: "58%",
+                width: "63%",
                 flexDirection: "column",
                 marginTop: 10,
               }}
@@ -320,18 +406,21 @@ const CreateExam = ({ navigation }) => {
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder="Choice questions"
+                placeholder="Choice questions *"
                 searchPlaceholder="Search..."
-                value={choiceQuestion}
+                value={choiceQuestion.value}
                 onChange={(item) => {
-                  setChoiceQuestion(item.value);
+                  setChoiceQuestion({ value: item.value, error: "" });
                 }}
                 renderItem={renderItem}
               />
+              {choiceQuestion.error ? (
+                <Text style={styles.error}>{choiceQuestion.error}</Text>
+              ) : null}
             </View>
-
+            {/* selecr scale */}
             <View
-              style={{ width: "42%", flexDirection: "column", marginTop: 10 }}
+              style={{ width: "37%", flexDirection: "column", marginTop: 10 }}
             >
               <Dropdown
                 ref={ref}
@@ -346,14 +435,17 @@ const CreateExam = ({ navigation }) => {
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder="Scale"
+                placeholder="Scale *"
                 searchPlaceholder="Search..."
-                value={scaleQuestion}
+                value={scaleQuestion.value}
                 onChange={(item) => {
-                  setScaleQuestion(item.value);
+                  setScaleQuestion({ value: item.value, error: "" });
                 }}
                 renderItem={renderItem}
               />
+              {scaleQuestion.error ? (
+                <Text style={styles.error}>{scaleQuestion.error}</Text>
+              ) : null}
             </View>
           </View>
 
@@ -367,15 +459,14 @@ const CreateExam = ({ navigation }) => {
               marginBottom: 5,
             }}
           >
-            {/* <Text>{date}</Text> */}
             <View style={{ flexDirection: "column" }}>
               <TextInput
-                label="Date"
+                label="Date *"
                 returnKeyType="next"
-                value={date1}
-                onChangeText={(date) => setDate1(date)}
-                //   error={!!description.error}
-                //   errorText={description.error}
+                value={date.value}
+                onChangeText={(date) => setDate({ value: date, error: "" })}
+                error={!!date.error}
+                errorText={date.error}
                 keyboardType="datetime"
               ></TextInput>
             </View>
@@ -386,13 +477,10 @@ const CreateExam = ({ navigation }) => {
                   isVisible={isDatePickerVisible}
                   // mode="datetime"
                   mode="date"
-                  value={date1}
-                  onChange={(text) => setDate1(text)}
-                  onBlur={(text) => setDate1(text)}
+                  value={date.value}
+                  onChange={(text) => setDate({ value: text, error: "" })}
+                  onBlur={(text) => setDate({ value: text, error: "" })}
                   // Hour="24Hours"
-                  // onChange={() => {
-                  //   setDate(date);
-                  // }}
                   onConfirm={handleConfirm}
                   onCancel={hideDatePicker}
                 />
@@ -425,22 +513,20 @@ const CreateExam = ({ navigation }) => {
                 setDescription({ value: text, error: "" })
               }
               keyboardType="text"
-              //   error={!!description.error}
-              //   errorText={description.error}
             ></TextInput>
           </View>
           {/* button handle */}
-          <View>
+          <View style={{ marginHorizontal: 40 }}>
             <Button mode="outlined" style={styles.btn_cancel} onPress={Cancel}>
               Cancel
             </Button>
             <Button
-              mode="outlined"
+              disabled={loading}
+              mode="contained"
               style={styles.btn_done}
-              color={"#000000"}
               onPress={Done}
             >
-              Create Exam
+              {loading ? "Loading" : "Create Exam"}
             </Button>
           </View>
         </View>
@@ -454,8 +540,7 @@ export default CreateExam;
 const styles = StyleSheet.create({
   container: { flex: 1 },
   title: {
-    top: "2%",
-    left: "22%",
+    left: "17%",
     fontWeight: "bold",
     fontSize: 40,
     marginBottom: 30,
@@ -515,5 +600,10 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
+  },
+  error: {
+    fontSize: 13,
+    color: theme.colors.error,
+    paddingTop: 2,
   },
 });

@@ -14,17 +14,12 @@ import Button from "../../components/Button";
 import { supabase } from "../../utils/supabase-service";
 import { theme } from "../../core/theme";
 
-let colection = {
-  id: "",
-  full_name: "",
-  student_code: "",
-  class_id: "",
-  is_delete: "",
-};
 const StudentScreen = ({ route, navigation }) => {
   const classId = route.params.id;
   const currentUser = supabase.auth.user();
-  const [students, setStudents] = useState(colection || null);
+  const [students, setStudents] = useState([]);
+
+  const [loading, setLoading] = useState(false);
   const loadStudent = async () => {
     let { data: student, error } = await supabase
       .from("students")
@@ -47,8 +42,11 @@ const StudentScreen = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    loadStudent().then();
-  }, []);
+    loadStudent();
+    setTimeout(async () => {
+      setLoading(false);
+    }, 2000);
+  }, [navigation, loadStudent]);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -106,7 +104,7 @@ const StudentScreen = ({ route, navigation }) => {
               alignContent: "center",
               width: "100%",
               height: "100%",
-              paddingLeft: "12%",
+              paddingLeft: "10%",
             }}
           >
             <Text style={{ fontSize: 24 }}>No student for this class yet!</Text>
@@ -154,6 +152,7 @@ const StudentScreen = ({ route, navigation }) => {
                             onPress={() =>
                               navigation.navigate("StudentDetail", {
                                 id: item.id,
+                                idClass: classId,
                               })
                             }
                           >
@@ -180,7 +179,7 @@ const StudentScreen = ({ route, navigation }) => {
       {/* button add new student */}
       <TouchableOpacity
         style={styles.btn_new}
-        onPress={() => navigation.navigate("CreateStudent")}
+        onPress={() => navigation.navigate("CreateStudent", { id: classId })}
       >
         <Image
           source={require("../../assets/Vector.png")}

@@ -6,33 +6,140 @@ import {
   Alert,
   Image,
   FlatList,
+  Modal,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Button from "../../components/Button";
+import TextInput from "../../components/TextInput";
 import { theme } from "../../core/theme";
+import { dropdownValidator } from "../../helpers/dropdownValidator";
+import { examNameValidator } from "../../helpers/examNameValidator";
 import { supabase } from "../../utils/supabase-service";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Dropdown } from "react-native-element-dropdown";
 
-let colection = {
-  id: "",
-  name: "",
-  date_exam: "",
-  class_id: "",
-  description: "",
-  scale: "",
-  option: "",
-};
 const ExamDetail = ({ route, navigation }) => {
   const examId = route.params.id;
-  const [exam, setExam] = useState(colection);
+  const [exam, setExam] = useState([]);
   const [disable, setDisable] = useState(true);
   const currentUser = supabase.auth.user();
+  const ref = useRef(null);
+  const [name, setName] = useState({ value: "", error: "" });
+  const [date, setDate] = useState({ value: "", error: "" });
+  const [description, setDescription] = useState({ value: "", error: "" });
+
+  const [choiceQuestion, setChoiceQuestion] = useState({
+    value: "",
+    error: "",
+  });
+  const [scaleQuestion, setScaleQuestion] = useState({ value: "", error: "" });
+  const [modalVisible, setVisiBle] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (datee) => {
+    var datestring =
+      datee.getFullYear() +
+      "-" +
+      (datee.getMonth() + 1) +
+      "-" +
+      datee.getDate();
+    setDate({ value: datestring, error: "" });
+    hideDatePicker();
+  };
+  const options = [
+    { value: 1, label: "10" },
+    { value: 2, label: "20" },
+  ];
+
+  const scale = [
+    { value: 1, label: "0.4" },
+    { value: 2, label: "0.2" },
+  ];
+
+  const Done = async () => {
+    setLoading(true);
+    console.log("click done");
+    const nameError = examNameValidator(name.value);
+    const scaleError = dropdownValidator(scaleQuestion.value);
+    const optionError = dropdownValidator(choiceQuestion.value);
+    const dateError = dropdownValidator(date.value);
+    if (nameError || scaleError || optionError || dateError) {
+      setLoading(false);
+      setName({ value: name.value, error: nameError });
+      setScaleQuestion({ value: scaleQuestion.value, error: scaleError });
+      setChoiceQuestion({ value: choiceQuestion.value, error: optionError });
+      setDate({ value: date.value, error: dateError });
+      return;
+    }
+    let question = "";
+    options.map((e) => {
+      if (e.value === choiceQuestion.value) {
+        question = e.label;
+      }
+    });
+    let scal = "";
+    scale.map((e) => {
+      if (e.value === scaleQuestion.value) {
+        scal = e.label;
+      }
+    });
+
+    const { error } = await supabase
+      .from("exams")
+      .update([
+        {
+          name: name.value,
+          option: question,
+          scale: scal,
+          date_exam: date.value,
+          description: description.value,
+        },
+      ])
+      .eq("id", examId);
+    if (error) {
+      Alert.alert("Failed!", "Update Exam failed!", [
+        {
+          text: "Back",
+          onPress: () => {
+            setLoading(false);
+          },
+        },
+      ]);
+    } else {
+      Alert.alert("Success!", "Update Exam successful!", [
+        {
+          text: "Back.",
+          onPress: () => {
+            setLoading(false);
+            setVisiBle(false);
+          },
+        },
+        {
+          text: "OK",
+          onPress: () => {
+            setLoading(false);
+          },
+        },
+      ]);
+    }
+  };
 
   const loadExamDetails = async () => {
     let { data: exams, error } = await supabase
       .from("exams")
       .select(
-        `id, name, date_exam, scale, option, description,
+        `*,
             class_id,
             classes (
             id, name, class_code
@@ -43,7 +150,6 @@ const ExamDetail = ({ route, navigation }) => {
       .eq("is_delete", false)
       .eq("classes.uid", currentUser.id);
 
-    // console.log(exams);
     setExam(exams);
   };
 
@@ -52,26 +158,40 @@ const ExamDetail = ({ route, navigation }) => {
       .from("answer_students")
       .select("*")
       .eq("exam_id", examId);
-
-    if (answer_students !== null) {
-      setDisable(true);
-    } else if (answer_students === null) {
-      setDisable(false);
-    }
+    answer_students[0] ? setDisable(false) : setDisable(true);
   };
 
   useEffect(() => {
     loadExamDetails();
     isAnswerStudent();
-  }, []);
+  }, [navigation]);
 
   const Edit = () => {
+    setVisiBle(true);
     console.log("click edit");
+    setName({ value: exam[0].name, error: "" });
+    // setChoiceQuestion
+    setDate({ value: exam[0].date_exam, error: "" });
+    setDescription({ value: exam[0].description, error: "" });
+    let question = 0;
+    options.map((e) => {
+      if (e.label == exam[0].option) {
+        question = e.value;
+      }
+    });
+    let scal = 0;
+    scale.map((e) => {
+      if (e.label == exam[0].scale) {
+        scal = e.value;
+      }
+    });
+    setScaleQuestion({ value: scal, error: "" });
+    setChoiceQuestion({ value: question, error: "" });
   };
   const Delete = () => {
     Alert.alert(
-      "Confirm delete!",
-      "Are you sure delete Exam " + exam[0].name + " ?",
+      "Are you sure?",
+      "deleting this exam will also delete all associated. This cannot be undone!",
       [
         {
           text: "Yes",
@@ -80,7 +200,6 @@ const ExamDetail = ({ route, navigation }) => {
               .from("exams")
               .update({ is_delete: true })
               .eq("id", examId);
-            console.log("error: ", error);
             if (error) {
               Alert.alert("Failed", "Delete failed", [
                 {
@@ -107,6 +226,13 @@ const ExamDetail = ({ route, navigation }) => {
           text: "No",
         },
       ]
+    );
+  };
+  const renderItem = (item) => {
+    return (
+      <View style={styles.item}>
+        <Text style={styles.textItem}>{item.label}</Text>
+      </View>
     );
   };
 
@@ -199,239 +325,430 @@ const ExamDetail = ({ route, navigation }) => {
         {/* manage */}
         <View style={styles.manage}>
           <Text style={{ fontsize: 12, color: theme.colors.label }}>
-            Manager
+            Manage
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() =>
-            navigation.navigate("AnswerKey", {
-              id: examId,
-              name: exam[0].name,
-              options: exam[0].option,
-              // scale: exam[0].scale,
-            })
-          }
-        >
-          <View style={{ flexDirection: "column" }}>
-            <Image
-              source={require("../../assets/Jackdaw.png")}
-              resizeMode="contain"
-              style={{
-                width: 28,
-                height: 28,
-                elevation: 0,
-                borderRadius: 7,
-                color: theme.colors.label,
-                backgroundColor: theme.colors.primary,
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "column",
-              paddingLeft: 20,
-              paddingTop: 3,
-            }}
-          >
-            <Text>Enter answer of exams</Text>
-          </View>
-          <View style={{ flexDirection: "column" }}>
-            <Image
-              source={require("../../assets/Arrow.png")}
-              resizeMode="contain"
-              style={{
-                width: 20,
-                height: 20,
-                paddingLeft: "90%",
-                color: theme.colors.label,
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() =>
-            navigation.navigate("AnswerStudent", {
-              id: examId,
-              name: exam[0].name,
-              options: exam[0].option,
-              // scale: exam[0].scale,
-            })
-          }
-        >
-          <View style={{ flexDirection: "column" }}>
-            <Image
-              source={require("../../assets/Instagram.png")}
-              resizeMode="contain"
-              style={{
-                width: 28,
-                height: 28,
-                backgroundColor: theme.colors.primary,
-                elevation: 0,
-                borderRadius: 7,
-                color: theme.colors.label,
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "column",
-              paddingLeft: 20,
-              paddingTop: 3,
-            }}
-          >
-            <Text>Enter answer of students</Text>
-          </View>
-          <View style={{ flexDirection: "column" }}>
-            <Image
-              source={require("../../assets/Arrow.png")}
-              resizeMode="contain"
-              style={{
-                width: 20,
-                height: 20,
-                paddingLeft: "87%",
-                color: theme.colors.label,
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          disabled={disable}
-          style={styles.btn}
-          onPress={() => navigation.navigate("Result")}
-        >
-          <View style={{ flexDirection: "column" }}>
-            {disable ? (
-              <Image
-                source={require("../../assets/Textbook.png")}
-                resizeMode="contain"
+        {exam !== null ? (
+          <>
+            <TouchableOpacity
+              style={styles.btn}
+              onPress={() =>
+                navigation.navigate("AnswerKey", {
+                  id: examId,
+                  name: exam[0].name,
+                  options: exam[0].option,
+                  // scale: exam[0].scale,
+                })
+              }
+            >
+              <View style={{ flexDirection: "column" }}>
+                <Image
+                  source={require("../../assets/Jackdaw.png")}
+                  resizeMode="contain"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    elevation: 0,
+                    borderRadius: 7,
+                    color: theme.colors.label,
+                    backgroundColor: theme.colors.primary,
+                  }}
+                />
+              </View>
+              <View
                 style={{
-                  width: 28,
-                  height: 28,
-                  elevation: 0,
-                  borderRadius: 7,
-                  //  backgroundColor : theme.colors.primary,
-                  backgroundColor: theme.colors.label,
+                  flexDirection: "column",
+                  paddingLeft: 20,
+                  paddingTop: 3,
                 }}
-              />
-            ) : (
-              <Image
-                source={require("../../assets/Textbook.png")}
-                resizeMode="contain"
+              >
+                <Text>Enter answer of exams</Text>
+              </View>
+              <View style={{ flexDirection: "column" }}>
+                <Image
+                  source={require("../../assets/Arrow.png")}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    paddingLeft: "90%",
+                    color: theme.colors.label,
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btn}
+              onPress={() =>
+                navigation.navigate("AnswerStudent", {
+                  id: examId,
+                  name: exam[0].name,
+                  options: exam[0].option,
+                  // scale: exam[0].scale,
+                })
+              }
+            >
+              <View style={{ flexDirection: "column" }}>
+                <Image
+                  source={require("../../assets/Instagram.png")}
+                  resizeMode="contain"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    backgroundColor: theme.colors.primary,
+                    elevation: 0,
+                    borderRadius: 7,
+                    color: theme.colors.label,
+                  }}
+                />
+              </View>
+              <View
                 style={{
-                  width: 28,
-                  height: 28,
-                  elevation: 0,
-                  borderRadius: 7,
-                  backgroundColor: theme.colors.primary,
-                  // backgroundColor : theme.colors.label,
+                  flexDirection: "column",
+                  paddingLeft: 20,
+                  paddingTop: 3,
                 }}
-              />
-            )}
-          </View>
-          <View
-            style={{
-              flexDirection: "column",
-              paddingLeft: 20,
-              paddingTop: 3,
-            }}
+              >
+                <Text>Enter answer of students</Text>
+              </View>
+              <View style={{ flexDirection: "column" }}>
+                <Image
+                  source={require("../../assets/Arrow.png")}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    paddingLeft: "87%",
+                    color: theme.colors.label,
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              disabled={disable}
+              style={styles.btn}
+              onPress={() =>
+                navigation.navigate("Result", { id: exam[0].class_id })
+              }
+            >
+              <View style={{ flexDirection: "column" }}>
+                {!disable ? (
+                  <Image
+                    source={require("../../assets/Textbook.png")}
+                    resizeMode="contain"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      elevation: 0,
+                      borderRadius: 7,
+                      backgroundColor: theme.colors.primary,
+                      // backgroundColor : theme.colors.label,
+                    }}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../assets/Textbook.png")}
+                    resizeMode="contain"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      elevation: 0,
+                      borderRadius: 7,
+                      //  backgroundColor : theme.colors.primary,
+                      backgroundColor: theme.colors.label,
+                    }}
+                  />
+                )}
+              </View>
+              <View
+                style={{
+                  flexDirection: "column",
+                  paddingLeft: 20,
+                  paddingTop: 3,
+                }}
+              >
+                <Text>Results</Text>
+              </View>
+              <View style={{ flexDirection: "column" }}>
+                <Image
+                  source={require("../../assets/Arrow.png")}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    paddingLeft: "115%",
+                    elevation: 0,
+                    color: theme.colors.label,
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              disabled={disable}
+              style={styles.btn}
+              onPress={() => navigation.navigate("AnalystExam")}
+            >
+              <View style={{ flexDirection: "column" }}>
+                {!disable ? (
+                  <Image
+                    source={require("../../assets/Group.png")}
+                    resizeMode="contain"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      elevation: 0,
+                      borderRadius: 7,
+                      backgroundColor: theme.colors.primary,
+                    }}
+                  />
+                ) : (
+                  <Image
+                    source={require("../../assets/Group.png")}
+                    resizeMode="contain"
+                    style={{
+                      width: 28,
+                      height: 28,
+                      elevation: 0,
+                      borderRadius: 7,
+                      backgroundColor: theme.colors.label,
+                    }}
+                  />
+                )}
+              </View>
+              <View
+                style={{
+                  flexDirection: "column",
+                  paddingLeft: 20,
+                  paddingTop: 3,
+                }}
+              >
+                <Text>Exam analysis</Text>
+              </View>
+              <View style={{ flexDirection: "column" }}>
+                <Image
+                  source={require("../../assets/Arrow.png")}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    paddingLeft: "105%",
+                    elevation: 0,
+                    color: theme.colors.label,
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+          </>
+        ) : null}
+        {/* button edit */}
+        <View>
+          <Button
+            mode="outlined"
+            style={styles.btn_edit}
+            onPress={Edit}
+            color={theme.colors.text}
           >
-            <Text>Results</Text>
-          </View>
-          <View style={{ flexDirection: "column" }}>
-            <Image
-              source={require("../../assets/Arrow.png")}
-              resizeMode="contain"
-              style={{
-                width: 20,
-                height: 20,
-                paddingLeft: "115%",
-                elevation: 0,
-                color: theme.colors.label,
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          disabled={disable}
-          style={styles.btn}
-          onPress={() => navigation.navigate("AnalystExam")}
-        >
-          <View style={{ flexDirection: "column" }}>
-            {disable ? (
-              <Image
-                source={require("../../assets/Group.png")}
-                resizeMode="contain"
-                style={{
-                  width: 28,
-                  height: 28,
-                  elevation: 0,
-                  borderRadius: 7,
-                  backgroundColor: theme.colors.label,
-                }}
-              />
-            ) : (
-              <Image
-                source={require("../../assets/Group.png")}
-                resizeMode="contain"
-                style={{
-                  width: 28,
-                  height: 28,
-                  elevation: 0,
-                  borderRadius: 7,
-                  backgroundColor: theme.colors.primary,
-                }}
-              />
-            )}
-          </View>
-          <View
-            style={{
-              flexDirection: "column",
-              paddingLeft: 20,
-              paddingTop: 3,
-            }}
+            Edit exam
+          </Button>
+        </View>
+        {/* button delete */}
+        <View>
+          <Button
+            mode="outlined"
+            style={styles.btn_delete}
+            onPress={Delete}
+            color={theme.colors.error}
           >
-            <Text>Exam analysis</Text>
-          </View>
-          <View style={{ flexDirection: "column" }}>
-            <Image
-              source={require("../../assets/Arrow.png")}
-              resizeMode="contain"
-              style={{
-                width: 20,
-                height: 20,
-                paddingLeft: "105%",
-                elevation: 0,
-                color: theme.colors.label,
-              }}
-            />
-          </View>
-        </TouchableOpacity>
+            Delete exam
+          </Button>
+        </View>
       </View>
 
-      {/* button edit */}
-      <View>
-        <Button
-          mode="outlined"
-          style={styles.btn_edit}
-          onPress={Edit}
-          color={theme.colors.text}
-        >
-          Edit exam
-        </Button>
-      </View>
-      {/* button delete */}
-      <View>
-        <Button
-          mode="outlined"
-          style={styles.btn_delete}
-          onPress={Delete}
-          color={theme.colors.error}
-        >
-          Delete exam
-        </Button>
-      </View>
+      <Modal
+        animationType="slide"
+        visible={modalVisible}
+        style={[styles.modal, styles.modal2]}
+        position={"center"}
+        entry={"top"}
+        onRequestClose={() => setVisiBle(false)}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={{ justifyContent: "center" }}>
+            <ScrollView style={{}}>
+              <Text style={styles.title}>Update Exam</Text>
+              <View style={styles.container}>
+                {/* enter name exam */}
+                <View style={styles.box}>
+                  <TextInput
+                    keyboardType="text"
+                    label="Name Exam *"
+                    returnKeyType="next"
+                    value={name.value}
+                    onChangeText={(text) => setName({ value: text, error: "" })}
+                    error={!!name.error}
+                    errorText={name.error}
+                  ></TextInput>
+                </View>
+
+                {/* select number question */}
+                <View style={styles.box}>
+                  <View
+                    style={{
+                      width: "58%",
+                      flexDirection: "column",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Dropdown
+                      ref={ref}
+                      statusBarIsTranslucent={true}
+                      style={styles.dropdown}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={options}
+                      search
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Choice questions *"
+                      searchPlaceholder="Search..."
+                      value={choiceQuestion.value}
+                      onChange={(item) => {
+                        setChoiceQuestion({ value: item.value, error: "" });
+                      }}
+                      renderItem={renderItem}
+                    />
+                    {choiceQuestion.error ? (
+                      <Text style={styles.error}>{choiceQuestion.error}</Text>
+                    ) : null}
+                  </View>
+                  {/* selecr scale */}
+                  <View
+                    style={{
+                      width: "42%",
+                      flexDirection: "column",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Dropdown
+                      ref={ref}
+                      statusBarIsTranslucent={true}
+                      style={styles.dropdown}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={scale}
+                      search
+                      maxHeight={300}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Scale *"
+                      searchPlaceholder="Search..."
+                      value={scaleQuestion.value}
+                      onChange={(item) => {
+                        setScaleQuestion({ value: item.value, error: "" });
+                      }}
+                      renderItem={renderItem}
+                    />
+                    {scaleQuestion.error ? (
+                      <Text style={styles.error}>{scaleQuestion.error}</Text>
+                    ) : null}
+                  </View>
+                </View>
+
+                {/* select date */}
+                <View
+                  style={{
+                    maxWidth: "70%",
+                    marginLeft: "10%",
+                    flexDirection: "row",
+                    marginTop: 5,
+                    marginBottom: 5,
+                  }}
+                >
+                  {/* <Text>{date}</Text> */}
+                  <View style={{ flexDirection: "column" }}>
+                    <TextInput
+                      label="Date *"
+                      returnKeyType="next"
+                      value={date.value}
+                      onChangeText={(date) =>
+                        setDate({ value: date, error: "" })
+                      }
+                      error={!!date.error}
+                      errorText={date.error}
+                      keyboardType="datetime"
+                    ></TextInput>
+                  </View>
+
+                  <View style={{ flexDirection: "column" }}>
+                    <TouchableOpacity onPress={showDatePicker}>
+                      <DateTimePickerModal
+                        isVisible={isDatePickerVisible}
+                        // mode="datetime"
+                        mode="date"
+                        value={date}
+                        onChange={(date) => setDate({ value: date, error: "" })}
+                        onConfirm={handleConfirm}
+                        onCancel={hideDatePicker}
+                      />
+                      <View
+                        style={{
+                          paddingTop: 28,
+                          paddingLeft: 3,
+                        }}
+                      >
+                        <Image
+                          source={require("../../assets/schedule.png")}
+                          resizeMode="contain"
+                          style={{
+                            width: 30,
+                            height: 30,
+                          }}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* input description */}
+                <View style={styles.box}>
+                  <TextInput
+                    label="Description"
+                    returnKeyType="done"
+                    value={description.value}
+                    onChangeText={(text) =>
+                      setDescription({ value: text, error: "" })
+                    }
+                    keyboardType="text"
+                  ></TextInput>
+                </View>
+                {/* button handle */}
+                <View style={{ marginHorizontal: 40 }}>
+                  <Button
+                    mode="outlined"
+                    style={styles.btn_cancel}
+                    onPress={() => setVisiBle(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    disabled={loading}
+                    mode="contained"
+                    style={styles.btn_done}
+                    onPress={Done}
+                  >
+                    {loading ? "Loading" : "Update Exam"}
+                  </Button>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -501,5 +818,73 @@ const styles = StyleSheet.create({
   btn_edit: {
     elevation: 0,
     fontWeight: "normal",
+  },
+  title: {
+    marginTop: "10%",
+    top: "2%",
+    left: "17%",
+    fontWeight: "bold",
+    fontSize: 40,
+    marginBottom: 30,
+    color: theme.colors.primary,
+    marginBottom: 50,
+  },
+  box: {
+    maxWidth: "80%",
+    marginLeft: "10%",
+    marginRight: "10%",
+    flexDirection: "row",
+  },
+
+  btn_cancel: {
+    marginTop: 20,
+  },
+  dropdown: {
+    // margin: 16,
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+
+    elevation: 2,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  item: {
+    padding: 17,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  textItem: {
+    flex: 1,
+    fontSize: 16,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  error: {
+    fontSize: 13,
+    color: theme.colors.error,
+    paddingTop: 2,
   },
 });

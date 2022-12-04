@@ -10,11 +10,14 @@ import {
   ScrollView,
   TouchableOpacity,
   View,
+  Text,
   KeyboardAvoidingView,
 } from "react-native";
-import { Layout, Text, useTheme, themeColor } from "react-native-rapi-ui";
+import { Layout, useTheme } from "react-native-rapi-ui";
 import { AuthStackParamList } from "../../types/navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {theme} from "../../core/theme";
+
 export default function ResetPasswordScreen({
   navigation,
 }: NativeStackScreenProps<AuthStackParamList, "ResetPassword">) {
@@ -98,17 +101,17 @@ export default function ResetPasswordScreen({
                 justifyContent: "center",
               }}
             >
-              <Text size="md">Already have an account?</Text>
+              <Text >Already have an account?</Text>
               <TouchableOpacity
                 onPress={() => {
                   navigation.navigate("LoginScreen");
                 }}
               >
                 <Text
-                  size="md"
-                  fontWeight="bold"
                   style={{
                     marginLeft: 5,
+                    fontWeight:"bold",
+                    color: theme.colors.primary
                   }}
                 >
                   Login here

@@ -2,7 +2,6 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView,
   SafeAreaView,
   Image,
   TouchableOpacity,
@@ -10,26 +9,12 @@ import {
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
-import Button from "../../components/Button";
 import { supabase } from "../../utils/supabase-service";
 import { theme } from "../../core/theme";
 import { TextInput } from "react-native-paper";
 
-let colection = {
-  id: "",
-  name: "",
-  class_code: "",
-  is_delete: "",
-  created_at: "",
-  // update_at: "",
-  // description: "",
-  school_year: "",
-  semester: "",
-  uid: "",
-};
-
 const ClassScreen = ({ navigation }) => {
-  const [classList, setClassList] = useState(colection);
+  const [classList, setClassList] = useState([]);
   const currentUser = supabase.auth.user();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,20 +28,23 @@ const ClassScreen = ({ navigation }) => {
       // .order("class_code", { ascending: false })
       .order("school_year", { ascending: false });
     setClassList(classes);
-    // console.log("classes: " + classes);
   };
 
   useEffect(() => {
-    loadClasses();
-    setTimeout(() => {
+    setTimeout(async () => {
       setLoading(false);
-    }, 2000);
-  }, [currentUser]);
+      loadClasses();
+    }, 1000);
+  }, [currentUser, loadClasses]);
 
-  const filterClasses = () =>
-    classList.filter((e) =>
-      e.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
-    );
+  const filterClasses = () => {
+    if (classList) {
+      return classList.filter((e) =>
+        e.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+      );
+    }
+    return "";
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -134,10 +122,7 @@ const ClassScreen = ({ navigation }) => {
                         <View
                           style={{
                             flexDirection: "row",
-                            // flex: 1,
                             flexWrap: "wrap",
-                            // paddingRight: 50,
-                            // width: "95%",
                           }}
                         >
                           <View
@@ -158,10 +143,6 @@ const ClassScreen = ({ navigation }) => {
                             <Text
                               style={{
                                 fontSize: 18,
-                                // paddingLeft: 5,
-                                // justifyContent: "center",
-                                // flex: 0.9,
-                                // flexWrap: "wrap",
                               }}
                             >
                               ({item.class_code})
@@ -171,14 +152,15 @@ const ClassScreen = ({ navigation }) => {
 
                         {/* row semester and school year */}
                         <View style={{ flexDirection: "row" }}>
-                          <View style={{ flexDirection: "column" }}>
+                          <View
+                            style={{ flexDirection: "column", width: "40%" }}
+                          >
                             <Text>Semester: {item.semester} </Text>
                           </View>
 
                           <View
                             style={{
                               flexDirection: "column",
-                              paddingLeft: 40,
                             }}
                           >
                             <Text>{item.school_year}</Text>
@@ -201,11 +183,28 @@ const ClassScreen = ({ navigation }) => {
             }}
           >
             <Text style={{ color: theme.colors.label, fontWeight: "900" }}>
-              Not found class.
+              Not found class yet.
             </Text>
           </View>
         )}
       </View>
+      <TouchableOpacity
+        style={styles.btn_refesh}
+        onPress={() => {
+          setTimeout(async () => loadClasses(), 1000);
+        }}
+      >
+        <Image
+          source={require("../../assets/refresh.png")}
+          resizeMode="contain"
+          style={{
+            width: 16,
+            height: 16,
+            display: "flex",
+            right: -7,
+          }}
+        />
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.btn_new}
@@ -310,7 +309,28 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.41,
     shadowRadius: 9.11,
-
     elevation: 14,
+  },
+
+  btn_refesh: {
+    backgroundColor: theme.colors.backdrop,
+    borderRadius: 100,
+    display: "flex",
+    width: 30,
+    height: 30,
+    bottom: 70,
+    right: 30,
+    justifyContent: "center",
+    alignContent: "center",
+    position: "absolute",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.41,
+    shadowRadius: 7.11,
+    elevation: 16,
   },
 });
