@@ -1,62 +1,190 @@
-import { Space, Tag, Button } from 'antd';
+import { Space, Tag, Button, Dropdown, Table, Menu } from 'antd';
 import { getBusinessUserList } from '@/api/business';
 import MyButton from '@/components/basic/button';
 import MyPage, { MyPageTableOptions } from '@/components/business/page';
 import { BuniesssUser } from '@/interface/business';
-import { FC } from 'react';
+import { FC, useState, useEffect, useContext } from 'react';
 import { supabase } from './../../../config/supabase';
+import { AuthContext } from './../../../context/AuthContext';
+import { DownOutlined } from '@ant-design/icons';
 
-const tableColums: MyPageTableOptions<BuniesssUser> = [
-  {
-    title: 'Name',
-    children: [
-      { title: 'First Name', dataIndex: 'firstName', key: 'firstName' },
-      { title: 'Last Name', dataIndex: 'lastName', key: 'lastName' },
-    ],
-  },
-  { title: 'Age', dataIndex: 'age', key: 'age' },
-  { title: 'Address', dataIndex: 'address', key: 'address' },
-  {
-    title: 'Tags',
-    dataIndex: 'tags',
-    key: 'tags',
-    render: (tags, record) => (
-      <>
-        {record.tags.map(tag => (
-          <Tag color="blue" key={tag}>
-            {tag}
-          </Tag>
-        ))}
-      </>
-    ),
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_, record) => (
-      <Space size="middle">
-        <MyButton type="text">Invite {record.lastName}</MyButton>
-        <MyButton type="text">Delete</MyButton>
-      </Space>
-    ),
-  },
-];
+
 
 const BusinessBasicPage: FC = () => {
-  return (
-    <>
-      <div style={{ padding: '100px' }}>
-        <Button
-          onClick={async e => {
-            const { data, error } = await supabase.auth.updateUser({ role: 'admin' });
+  const [page, setPage] = useState(1);
+  const [paginationSize, setPaginationSize] = useState(4);
+  const currentUser = useContext(AuthContext);
+  const useID = currentUser?.currentUser?.id;
 
-            console.log('🚀 ~ file: index.tsx ~ line 51 ~ error', error);
-          }}
-        >
-          dfghjkl
-        </Button>
+  //list classes 
+  const [listDataClassesResponse, setListDataClassesResponse] = useState<any[]>([]);
+  const [ClassCode, setClassCode] = useState('Class code');
+  //list exam
+
+  const columns = [
+    {
+      title: '#',
+      dataIndex: '',
+      key: '',
+      render: (value, item, index) => {
+        return (page - 1) * paginationSize + index + 1;
+      },
+    },
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      width: 150,
+    },
+    {
+      title: 'Age',
+      dataIndex: 'age',
+      width: 150,
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address',
+    },
+  ];
+  useEffect(async () => {
+    const { data: classes, err } = await supabase
+      .from('classes')
+      .select('*', 'class_code')
+      .eq('uid', useID)
+      .eq('is_delete', false);
+
+    setListDataClassesResponse(classes);
+  }, [useID]);
+    
+// menu class code 
+const menuClassCode = () => {
+
+  const classCodeListTmp = new Set(listDataClassesResponse.map(e => e.class_code).sort());
+
+  const classCodeListRender = [...classCodeListTmp].map(c => ({
+    key: c,
+    label: c,
+  }));
+
+  return (
+    <Menu
+      onClick={async e => {
+        setClassCode(e.key);
+        console.log(e);
+        
+          // const idClass = Class[0].id;
+
+          // setClassID(idClass);
+
+          // const { data: students, err } = await supabase
+          //   .from('students')
+          //   .select('*')
+          //   .eq('class_id', idClass)
+          //   .eq('is_delete', false)
+          //   .order('student_code', { ascending: true });
+
+          // setliststudent(students);
+          // const { data: studentsIsDelete, err1 } = await supabase
+          //   .from('students')
+          //   .select('*')
+          //   .eq('class_id', idClass)
+          //   .eq('is_delete', true)
+          //   .order('student_code', { ascending: true });
+          // setliststudentIsDelete(studentsIsDelete);
+          // setloading(false);
+        }
+      }
+      items={classCodeListRender}
+    />
+  );
+};
+
+  const data = [];
+  for (let i = 0; i < 100; i++) {
+    data.push({
+      key: i,
+      name: `Edward King ${i}`,
+      age: 32,
+      address: `London, Park Lane no. ${i}`,
+    });
+  }
+  return (
+    <div >
+      {/* css={styles} */}
+      <div className="tabs-main">
+        <div className="aside-main">
+          {/* <div style={{ display: 'flex', padding: '20px' }}> */}
+          <Space style={{ padding: '20px' }}>
+            <label style={{ paddingRight: '10px', fontWeight: 'bold', paddingTop: '5px' }}>Please choose a class and exam</label>
+            <Dropdown overlay={menuClassCode()} className="dropdown-scroll">
+              <Button>
+                <Space>
+                {ClassCode}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+
+            {/* <Dropdown overlay={} className="dropdown-scroll">
+              <Button>
+                <Space>
+                  {Semester}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown> */}
+
+            {/* <div style={{ paddingLeft: '200px', justifyContent: 'center' }}>
+            <Search
+              placeholder="Search students by name..."
+              onSearch={onSearch}
+              enterButton
+              style={{
+                width: 250,
+                paddingRight: '10px',
+              }}
+            />
+          </div>
+          <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
+            <Button onClick={showModal}>
+              <PlusCircleFilled style={{ color: '#1E90FF' }} />
+              Add Student
+            </Button>
+          </div> */}
+          </Space>
+          <div
+            className="content-table"
+            style={{
+              overflow: 'auto',
+              height: '100%',
+              backgroundColor: '#fdfdfd',
+              width: '100%',
+              borderRadius: '6px',
+              boxShadow: '0 4px 28px rgba(123,151,158,.25)',
+              border: '1px solid #d6dee1',
+              padding: '1rem',
+            }}
+          >
+            <div className="table" style={{ marginTop: '0', paddingTop: '0' }}>
+              <h3>Deleted Class</h3>
+              <Table
+                columns={columns}
+                dataSource={data}
+                pagination={{
+                  onChange(current, pageSize) {
+                    setPage(current);
+                    setPaginationSize(pageSize);
+                  },
+                  defaultPageSize: 50,
+                }}
+                scroll={{
+                  y: 240,
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

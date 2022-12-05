@@ -561,12 +561,19 @@ const BusinessWithSearchPage: FC = () => {
               </Form>
             </Modal>
           </div>
-          <div className="content-table" style={{overflow: 'auto',height: '100%',  backgroundColor: '#fdfdfd',
-  width: '100%',
-  borderRadius: '6px',
-  boxShadow: '0 4px 28px rgba(123,151,158,.25)',
-  border: '1px solid #d6dee1',
-  padding: '1rem'}}>
+          <div
+            className="content-table"
+            style={{
+              overflow: 'auto',
+              height: '100%',
+              backgroundColor: '#fdfdfd',
+              width: '100%',
+              borderRadius: '6px',
+              boxShadow: '0 4px 28px rgba(123,151,158,.25)',
+              border: '1px solid #d6dee1',
+              padding: '1rem',
+            }}
+          >
             <div className="table">
               <h3>Existing Class</h3>
               <Table
@@ -581,10 +588,12 @@ const BusinessWithSearchPage: FC = () => {
                 columns={columns}
                 bordered
                 loading={loading}
-                scroll={{ x: 10 }}
+                scroll={{
+                  y: 240,
+                }}
               />
             </div>
-            <div className='table' style={{marginTop:'0',paddingTop:'0'}}>
+            <div className="table" style={{ marginTop: '0', paddingTop: '0' }}>
               <h3>Deleted Class</h3>
               <Table
                 pagination={{
@@ -598,6 +607,9 @@ const BusinessWithSearchPage: FC = () => {
                 columns={columns1}
                 bordered
                 loading={loading}
+                scroll={{
+                  y: 240,
+                }}
               />
             </div>
           </div>
@@ -639,18 +651,18 @@ const styles = css`
     ::-webkit-scrollbar {
       width: 20px;
     }
-    
+
     ::-webkit-scrollbar-track {
       background-color: transparent;
     }
-    
+
     ::-webkit-scrollbar-thumb {
       background-color: #d6dee1;
       border-radius: 20px;
       border: 6px solid transparent;
       background-clip: content-box;
     }
-    
+
     ::-webkit-scrollbar-thumb:hover {
       background-color: #a8bbbf;
     }

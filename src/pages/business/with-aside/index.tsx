@@ -646,9 +646,12 @@ const BusinessWithAsidePage: FC = () => {
                     setPage(current);
                     setPaginationSize(pageSize);
                   },
-                  defaultPageSize: 5,
+                  defaultPageSize: 20,
                 }}
                 size="small"
+                scroll={{
+                  y: 200,
+                }}
               />
             </div>
             <div className="table" style={{ marginTop: '0', paddingTop: '0' }}>
@@ -659,12 +662,15 @@ const BusinessWithAsidePage: FC = () => {
                     setpage1(current);
                     setPaginationSize1(pageSize);
                   },
-                  defaultPageSize: 5,
+                  defaultPageSize: 20,
                 }}
                 dataSource={liststudentIsDelete}
                 columns={columns1}
                 bordered
                 loading={loading}
+                scroll={{
+                  y: 200,
+                }}
               />
             </div>
             <div className="table" style={{ marginTop: '0', paddingTop: '0' }}>
