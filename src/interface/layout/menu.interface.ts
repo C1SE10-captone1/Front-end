@@ -3,7 +3,7 @@ interface MenuItem {
   code: string;
   /** menu labels */
   label: {
-    zh_CN: string;
+    vi_vn: string;
     en_US: string;
   };
   /** 图标名称

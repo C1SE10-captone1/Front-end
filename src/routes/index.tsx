@@ -1,5 +1,5 @@
 import { FC, lazy } from 'react';
-import LoginPage from '@/pages/login';
+// import LoginPage from '@/pages/login';
 import LayoutPage from '@/pages/layout';
 import { Navigate, RouteObject } from 'react-router';
 import WrapperRouteComponent from './config';
@@ -20,6 +20,7 @@ import Register from './../pages/register/Register';
 import Admin_page from './../pages/admin/Admin_page';
 import Account from './../pages/profile/Account';
 import PersonalAvatar from './../pages/profile/PersonalAvatar';
+import LoginPage from './../pages/login/index';
 import ForgotPassword from './../pages/forgot-password/ForgotPassword';
 
 const routeList: RouteObject[] = [

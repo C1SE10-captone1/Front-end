@@ -24,8 +24,6 @@ import { toast } from 'react-hot-toast';
 import moment from 'moment';
 
 const { Search } = Input;
-
-// .eq('classes.uid', 'hello')
 const onC = e => {
   console.log(e);
 };
@@ -566,7 +564,6 @@ const BusinessWithSearchPage: FC = () => {
             style={{
               overflow: 'auto',
               height: '100%',
-              backgroundColor: '#fdfdfd',
               width: '100%',
               borderRadius: '6px',
               boxShadow: '0 4px 28px rgba(123,151,158,.25)',
@@ -639,33 +636,33 @@ const styles = css`
     margin: 0 30px 30px 30px;
   }
 
-  .table {
-    flex: 1;
-    overflow: hidden;
-    height: auto;
-  }
-  .button-delete-modal {
-    color: 'red';
-  }
-  .content-table {
-    ::-webkit-scrollbar {
-      width: 20px;
-    }
+  // .table {
+  //   flex: 1;
+  //   overflow: hidden;
+  //   height: auto;
+  // }
+  // .button-delete-modal {
+  //   color: 'red';
+  // }
+  // .content-table {
+  //   ::-webkit-scrollbar {
+  //     width: 20px;
+  //   }
 
-    ::-webkit-scrollbar-track {
-      background-color: transparent;
-    }
+  //   ::-webkit-scrollbar-track {
+  //     background-color: transparent;
+  //   }
 
-    ::-webkit-scrollbar-thumb {
-      background-color: #d6dee1;
-      border-radius: 20px;
-      border: 6px solid transparent;
-      background-clip: content-box;
-    }
+  //   ::-webkit-scrollbar-thumb {
+  //     background-color: #d6dee1;
+  //     border-radius: 20px;
+  //     border: 6px solid transparent;
+  //     background-clip: content-box;
+  //   }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background-color: #a8bbbf;
-    }
+  //   ::-webkit-scrollbar-thumb:hover {
+  //     background-color: #a8bbbf;
+  //   }
   }
 `;
 

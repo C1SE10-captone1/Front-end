@@ -130,6 +130,8 @@ const BusinessWithAsidePage: FC = () => {
     return (
       <Menu
         onClick={e => {
+          console.log(e);
+          
           setloading(true);
           setSchoolYear(e.key);
           setSemester('Semester');
@@ -623,7 +625,6 @@ const BusinessWithAsidePage: FC = () => {
             style={{
               overflow: 'auto',
               height: '100%',
-              backgroundColor: '#fdfdfd',
               width: '100%',
               borderRadius: '6px',
               boxShadow: '0 4px 28px rgba(123,151,158,.25)',

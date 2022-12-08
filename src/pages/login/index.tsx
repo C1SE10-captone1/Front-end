@@ -41,7 +41,9 @@ const LoginForm: FC = () => {
 
   return (
     <>
+
       <div className="form-container">
+      <div className='login-page'> 
         <div className="form-wrapper">
           <span className="logo">SMART GRADE 5</span>
           <span className="title" style={{ fontSize: '25px' }}>
@@ -61,6 +63,7 @@ const LoginForm: FC = () => {
             forgot password Click here <Link to="/forgot-password">Forgot password</Link>
           </p>
         </div>
+      </div>
       </div>
     </>
   );

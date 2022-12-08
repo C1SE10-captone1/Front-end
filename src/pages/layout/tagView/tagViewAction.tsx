@@ -23,9 +23,6 @@ const TagsViewAction: FC = () => {
             <LocaleFormatter id="tagsView.operation.closeAll" />
           </Menu.Item>
           <Menu.Divider />
-          <Menu.Item key="3" onClick={() => dispatch(removeAllTag())}>
-            <LocaleFormatter id="tagsView.operation.dashboard" />
-          </Menu.Item>
         </Menu>
       }
     >

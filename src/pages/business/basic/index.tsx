@@ -13,6 +13,8 @@ import { DownOutlined } from '@ant-design/icons';
 const BusinessBasicPage: FC = () => {
   const [page, setPage] = useState(1);
   const [paginationSize, setPaginationSize] = useState(4);
+  const [loading, setLoading] = useState();
+  
   const currentUser = useContext(AuthContext);
   const useID = currentUser?.currentUser?.id;
 
@@ -20,7 +22,8 @@ const BusinessBasicPage: FC = () => {
   const [listDataClassesResponse, setListDataClassesResponse] = useState<any[]>([]);
   const [ClassCode, setClassCode] = useState('Class code');
   //list exam
-
+  const [exam, setExam] = useState('Exams');
+  const [listDataExamsResponse, setListDataExamsResponse] = useState<any[]>([]);
   const columns = [
     {
       title: '#',
@@ -59,7 +62,6 @@ const BusinessBasicPage: FC = () => {
 const menuClassCode = () => {
 
   const classCodeListTmp = new Set(listDataClassesResponse.map(e => e.class_code).sort());
-
   const classCodeListRender = [...classCodeListTmp].map(c => ({
     key: c,
     label: c,
@@ -69,20 +71,21 @@ const menuClassCode = () => {
     <Menu
       onClick={async e => {
         setClassCode(e.key);
-        console.log(e);
-        
-          // const idClass = Class[0].id;
+        console.log("🚀 ~ file: index.tsx:93 ~ menuClassCode ~ key", e.key)
+        const { data: classID, err } = await supabase
+        .from('classes')
+        .select('id')
+        .eq('class_code', e.key)
+        .eq('is_delete', false);
+        console.log("🚀 ~ file: index.tsx:80 ~ menuClassCode ~ classID", classID)
 
-          // setClassID(idClass);
-
-          // const { data: students, err } = await supabase
-          //   .from('students')
-          //   .select('*')
-          //   .eq('class_id', idClass)
-          //   .eq('is_delete', false)
-          //   .order('student_code', { ascending: true });
-
-          // setliststudent(students);
+        const { data: exams, err1 } = await supabase
+        .from('exams')
+        .select('*')
+        .eq('class_id', classID[0].id)
+        .eq('is_delete', false);
+        console.log("🚀 ~ file: index.tsx:87 ~ menuClassCode ~ exams", exams)
+        setListDataExamsResponse(exams)
           // const { data: studentsIsDelete, err1 } = await supabase
           //   .from('students')
           //   .select('*')
@@ -90,13 +93,42 @@ const menuClassCode = () => {
           //   .eq('is_delete', true)
           //   .order('student_code', { ascending: true });
           // setliststudentIsDelete(studentsIsDelete);
-          // setloading(false);
+          setLoading(false);
         }
       }
       items={classCodeListRender}
     />
   );
 };
+
+const menuExam = () => {
+  console.log("day la list exam tra ve ",listDataExamsResponse);
+  
+  const examsListTmp = new Set(listDataExamsResponse.map(e => e.name).sort());
+
+  const examListRender = [...examsListTmp].map(c => ({
+    key: c,
+    label: c,
+  }));
+
+  return (
+    <Menu
+      onClick={async e => {
+        setExam(e.key);
+        console.log(e);
+      //   const { data: result, error } = await supabase
+      // .from("answer_students")
+      // .select("*, students(full_name, student_code)")
+      // .eq("students.is_delete", false)
+      // .eq("students.class_id", class_id);
+        
+        }
+      }
+      items={examListRender}
+    />
+  );
+};
+
 
   const data = [];
   for (let i = 0; i < 100; i++) {
@@ -124,14 +156,14 @@ const menuClassCode = () => {
               </Button>
             </Dropdown>
 
-            {/* <Dropdown overlay={} className="dropdown-scroll">
+            <Dropdown overlay={menuExam()} className="dropdown-scroll">
               <Button>
                 <Space>
-                  {Semester}
+                  {exam}
                   <DownOutlined />
                 </Space>
               </Button>
-            </Dropdown> */}
+            </Dropdown>
 
             {/* <div style={{ paddingLeft: '200px', justifyContent: 'center' }}>
             <Search
@@ -156,16 +188,15 @@ const menuClassCode = () => {
             style={{
               overflow: 'auto',
               height: '100%',
-              backgroundColor: '#fdfdfd',
               width: '100%',
-              borderRadius: '6px',
+              borderRadius: '2px',
               boxShadow: '0 4px 28px rgba(123,151,158,.25)',
               border: '1px solid #d6dee1',
               padding: '1rem',
             }}
           >
             <div className="table" style={{ marginTop: '0', paddingTop: '0' }}>
-              <h3>Deleted Class</h3>
+              <h3>Result of students</h3>
               <Table
                 columns={columns}
                 dataSource={data}
