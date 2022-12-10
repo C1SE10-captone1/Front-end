@@ -7,18 +7,17 @@ import { FC, useState, useEffect, useContext } from 'react';
 import { supabase } from './../../../config/supabase';
 import { AuthContext } from './../../../context/AuthContext';
 import { DownOutlined } from '@ant-design/icons';
-
-
+import { read, utils, writeFile } from "xlsx";
 
 const BusinessBasicPage: FC = () => {
   const [page, setPage] = useState(1);
   const [paginationSize, setPaginationSize] = useState(4);
   const [loading, setLoading] = useState();
-  
+
   const currentUser = useContext(AuthContext);
   const useID = currentUser?.currentUser?.id;
 
-  //list classes 
+  //list classes
   const [listDataClassesResponse, setListDataClassesResponse] = useState<any[]>([]);
   const [ClassCode, setClassCode] = useState('Class code');
   //list exam
@@ -32,22 +31,32 @@ const BusinessBasicPage: FC = () => {
       render: (value, item, index) => {
         return (page - 1) * paginationSize + index + 1;
       },
+      width: 150,
+    },
+    {
+      title: 'ID',
+      dataIndex: 'students',
+
+      render: (data, item) => {
+        return data?.student_code || '';
+      },
     },
     {
       title: 'Name',
-      dataIndex: 'name',
-      width: 150,
+      dataIndex: 'students',
+      // width: 150,
+      render: (data, item) => {
+        return data?.full_name || '';
+      },
     },
     {
-      title: 'Age',
-      dataIndex: 'age',
-      width: 150,
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
+      title: 'Point',
+      dataIndex: 'point',
     },
   ];
+
+  //list data students
+  const [listDataStudentResponse, setListDataStudentResponse] = useState<any[]>([]);
   useEffect(async () => {
     const { data: classes, err } = await supabase
       .from('classes')
@@ -57,100 +66,117 @@ const BusinessBasicPage: FC = () => {
 
     setListDataClassesResponse(classes);
   }, [useID]);
-    
-// menu class code 
-const menuClassCode = () => {
-
-  const classCodeListTmp = new Set(listDataClassesResponse.map(e => e.class_code).sort());
-  const classCodeListRender = [...classCodeListTmp].map(c => ({
-    key: c,
-    label: c,
-  }));
-
-  return (
-    <Menu
-      onClick={async e => {
-        setClassCode(e.key);
-        console.log("🚀 ~ file: index.tsx:93 ~ menuClassCode ~ key", e.key)
-        const { data: classID, err } = await supabase
-        .from('classes')
-        .select('id')
-        .eq('class_code', e.key)
-        .eq('is_delete', false);
-        console.log("🚀 ~ file: index.tsx:80 ~ menuClassCode ~ classID", classID)
-
-        const { data: exams, err1 } = await supabase
-        .from('exams')
-        .select('*')
-        .eq('class_id', classID[0].id)
-        .eq('is_delete', false);
-        console.log("🚀 ~ file: index.tsx:87 ~ menuClassCode ~ exams", exams)
-        setListDataExamsResponse(exams)
-          // const { data: studentsIsDelete, err1 } = await supabase
-          //   .from('students')
-          //   .select('*')
-          //   .eq('class_id', idClass)
-          //   .eq('is_delete', true)
-          //   .order('student_code', { ascending: true });
-          // setliststudentIsDelete(studentsIsDelete);
-          setLoading(false);
-        }
-      }
-      items={classCodeListRender}
-    />
-  );
-};
-
-const menuExam = () => {
-  console.log("day la list exam tra ve ",listDataExamsResponse);
+  //ClassID
+  const [ClassID, setClassID] = useState('');
+  // menu class code
+  const menuClassCode = () => {
+    const classCodeListTmp = new Set(listDataClassesResponse.map(e => e.class_code).sort());
+    const classCodeListRender = [...classCodeListTmp].map(c => ({
+      key: c,
+      label: c,
+    }));
   
-  const examsListTmp = new Set(listDataExamsResponse.map(e => e.name).sort());
+    return (
+      <Menu
+        onClick={async e => {
+          setClassCode(e.key);
+          const { data: classID, err } = await supabase
+            .from('classes')
+            .select('id')
+            .eq('class_code', e.key)
+            .eq('is_delete', false);
+          setClassID(classID[0].id);
 
-  const examListRender = [...examsListTmp].map(c => ({
-    key: c,
-    label: c,
-  }));
+          const { data: exams, err1 } = await supabase
+            .from('exams')
+            .select('*')
+            .eq('class_id', classID[0].id)
+            .eq('is_delete', false);
+          setListDataExamsResponse(exams);
+          setLoading(true);
+        }}
+        items={classCodeListRender}
+      />
+    );
+  };
 
+  const menuExam = () => {
+    const examsListTmp = new Set(listDataExamsResponse.map(e => e.name).sort());
+
+    const examListRender = [...examsListTmp].map(c => ({
+      key: c,
+      label: c,
+    }));
+
+    return (
+      <Menu
+        onClick={async e => {
+          setExam(e.key);
+          console.log(e);
+          const { data: exams, err1 } = await supabase
+            .from('exams')
+            .select('*')
+            .eq('name', e.key)
+            .eq('class_id', ClassID)
+            .eq('is_delete', false);
+
+          const IDExam = exams[0].id;
+
+          const { data: result, error } = await supabase
+            .from('answer_students')
+            .select('*, students(student_code,full_name)')
+            .eq('students.is_delete', false)
+            // .eq("exam_id", IDExam)
+            .eq('students.class_id', ClassID);
+            
+            console.log("🚀 ~ file: index.tsx:129 ~ menuExam ~ result", result)
+          setListDataStudentResponse(result);
+          setLoading(false);
+        }}
+        items={examListRender}
+      />
+    );
+  };
+
+  // for (let i = 0; i < 100; i++) {
+  //   data.push({
+  //     key: i,
+  //     name: `Edward King ${i}`,
+  //     age: 32,
+  //     address: `London, Park Lane no. ${i}`,
+  //   });
+  // }
+  const handleExport = () => {
+    const listStudentExport = listDataStudentResponse.map(e => ({ student_code:e.students.student_code ,fullname: e.students.full_name, point:e.point}))
+
+    console.log("🚀 ~ file: index.tsx:151 ~ handleExport ~ listStudentExport", listStudentExport)
+    const headings = [["student_code", "full_name", "point"]];
+    const wb = utils.book_new();
+    const ws = utils.json_to_sheet([]);
+    utils.sheet_add_aoa(ws, headings);
+    utils.sheet_add_json(ws, listStudentExport, { origin: "A2", skipHeader: true });
+    utils.book_append_sheet(wb, ws, "Report");
+    const nameFile = ClassCode + "-"+exam +"Students Report.xlsx";
+    writeFile(wb, nameFile);
+    console.log(
+      "🚀 ~ file: homeComponent.jsx ~ line 46 ~ handleExport ~ wb",
+      wb
+    );
+  };
   return (
-    <Menu
-      onClick={async e => {
-        setExam(e.key);
-        console.log(e);
-      //   const { data: result, error } = await supabase
-      // .from("answer_students")
-      // .select("*, students(full_name, student_code)")
-      // .eq("students.is_delete", false)
-      // .eq("students.class_id", class_id);
-        
-        }
-      }
-      items={examListRender}
-    />
-  );
-};
-
-
-  const data = [];
-  for (let i = 0; i < 100; i++) {
-    data.push({
-      key: i,
-      name: `Edward King ${i}`,
-      age: 32,
-      address: `London, Park Lane no. ${i}`,
-    });
-  }
-  return (
-    <div >
+    <div>
       {/* css={styles} */}
       <div className="tabs-main">
         <div className="aside-main">
           {/* <div style={{ display: 'flex', padding: '20px' }}> */}
           <Space style={{ padding: '20px' }}>
-            <label style={{ paddingRight: '10px', fontWeight: 'bold', paddingTop: '5px' }}>Please choose a class and exam</label>
+            <label style={{ paddingRight: '10px', fontWeight: 'bold', paddingTop: '5px' }}>
+              Please choose a class and exam
+            </label>
             <Dropdown overlay={menuClassCode()} className="dropdown-scroll">
               <Button>
                 <Space>
-                {ClassCode}
+                  {ClassCode}
                   <DownOutlined />
                 </Space>
               </Button>
@@ -165,23 +191,27 @@ const menuExam = () => {
               </Button>
             </Dropdown>
 
-            {/* <div style={{ paddingLeft: '200px', justifyContent: 'center' }}>
-            <Search
+            <div style={{ paddingLeft: '200px', justifyContent: 'center' }}>
+            {/* <Search
               placeholder="Search students by name..."
-              onSearch={onSearch}
+              // onSearch={}
               enterButton
               style={{
                 width: 250,
                 paddingRight: '10px',
               }}
-            />
+            /> */}
           </div>
           <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
-            <Button onClick={showModal}>
-              <PlusCircleFilled style={{ color: '#1E90FF' }} />
-              Add Student
-            </Button>
-          </div> */}
+          <div className="col-md-6">
+              <button
+                onClick={handleExport}
+                className="btn btn-primary float-right"
+              >
+                Export <i className="fa fa-download"></i>
+              </button>
+            </div>
+          </div>
           </Space>
           <div
             className="content-table"
@@ -199,7 +229,8 @@ const menuExam = () => {
               <h3>Result of students</h3>
               <Table
                 columns={columns}
-                dataSource={data}
+                dataSource={listDataStudentResponse}
+                loading={loading}
                 pagination={{
                   onChange(current, pageSize) {
                     setPage(current);

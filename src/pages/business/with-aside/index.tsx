@@ -417,26 +417,6 @@ const BusinessWithAsidePage: FC = () => {
 
     const searchField = '%' + e + '%';
 
-    // const { data } = await supabase
-    //   .from('classes')
-    //   .select('*')
-    //   .eq('uid', useID)
-    //   .eq('is_delete', false)
-    //   .like('name', searchField)
-    //   .order('created_at', { ascending: false });
-
-    // setdataSource(data);
-
-    // const { data: dataisdelete } = await supabase
-    //   .from('classes')
-    //   .select('*')
-    //   .eq('uid', useID)
-    //   .eq('is_delete', true)
-    //   .like('name', searchField)
-    //   .order('created_at', { ascending: false });
-
-    // setclassHasDelete(dataisdelete);
-
     const { data } = await supabase
       .from('students')
       .select('*')
@@ -465,7 +445,6 @@ const BusinessWithAsidePage: FC = () => {
     <div css={styles}>
       <div className="tabs-main">
         <div className="aside-main">
-          {/* <div style={{ display: 'flex', padding: '20px' }}> */}
           <Space style={{  padding: '20px' }}>
             <label style={{ paddingRight: '10px',fontWeight: 'bold',paddingTop:'5px'}}>Please choose a class</label>
             <Dropdown overlay={menuSchoolYear()} className="dropdown-scroll">
@@ -569,7 +548,7 @@ const BusinessWithAsidePage: FC = () => {
                     },
                   ]}
                 >
-                  <Input disabled={true} />
+                  <Input/>
                 </Form.Item>
                 <Form.Item
                   name="full_name"
@@ -656,7 +635,7 @@ const BusinessWithAsidePage: FC = () => {
               />
             </div>
             <div className="table" style={{ marginTop: '0', paddingTop: '0' }}>
-              <h3>Deleted Class</h3>
+              <h3>Deleted Students</h3>
               <Table
                 pagination={{
                   onChange(current, pageSize) {

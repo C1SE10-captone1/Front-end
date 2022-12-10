@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
+import './index.less';
 
 const Register = () => {
   const [err, setErr] = useState(false);
@@ -48,6 +49,7 @@ const Register = () => {
   return (
     <>
       <div className="form-container">
+      <div className='login-page'> 
         <div className="form-wrapper">
           <span className="logo">SMART GRADE 5</span>
           <span className="title" style={{ fontSize: '25px' }}>
@@ -69,6 +71,7 @@ const Register = () => {
           <p style={{ fontSize: '15px' }}>
             You do have an account? <Link to="/login">Login</Link>
           </p>
+        </div>
         </div>
       </div>
     </>
