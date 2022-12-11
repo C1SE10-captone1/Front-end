@@ -17,11 +17,12 @@ const BusinessWithRadioCardsPage = lazy(
 const BusinessWithTabsPage = lazy(() => import(/* webpackChunkName: "with-tabs" */ '@/pages/business/with-tabs'));
 
 import Register from './../pages/register/Register';
-import Admin_page from './../pages/admin/Admin_page';
+import Admin_page from '../pages/admin/class-management/Admin_page';
 import Account from './../pages/profile/Account';
 import PersonalAvatar from './../pages/profile/PersonalAvatar';
 import LoginPage from './../pages/login/index';
 import ForgotPassword from './../pages/forgot-password/ForgotPassword';
+import BusinessAdminBasicPage from '@/pages/admin/BusinessAdminBasic';
 
 const routeList: RouteObject[] = [
   {
@@ -83,19 +84,16 @@ const routeList: RouteObject[] = [
     path: '/admin',
     element: <WrapperRouteComponent element={<LayoutPage />} titleId="" />,
     children: [
-    //   // {
-    //   //   path: '',
-    //   //   element: <Navigate to="documentation" />,
-    //   // },
-    //   // {
-    //   //   path: 'documentation',
-    //   //   element: <WrapperRouteComponent element={<Documentation />} titleId="title.documentation" />,
-    //   // },
       {
         path: '',
-    element: <Admin_page />,
-    //     element: <Admin_page />,
+        element: <Admin_page />,
       },
+      {
+        path: '/admin/basic',
+        element:  <BusinessAdminBasicPage /> ,
+      }
+   
+     
     ],
   },
   {

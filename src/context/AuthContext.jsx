@@ -8,6 +8,7 @@ export function useAuth() {
 }
 export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({});
+  // const [isAdmin, setIsAdmin] = useState();
   const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
@@ -17,8 +18,17 @@ export const AuthContextProvider = ({ children }) => {
 
     const c = await session.getSession();
 
-    // console.log(c);
     setCurrentUser(c?.data?.session?.user ?? null);
+
+    // console.log("🚀 ~ file: AuthContext.jsx:20 ~ useEffect ~ c", c?.data?.session?.user?.id)
+
+
+    // const isAdmin =await supabase.from('profiles').select('*').eq('id',c?.data?.session?.user?.id);
+
+    // console.log("🚀isAdmin?.data[0] ~ =---> \n", isAdmin?.data[0]?.is_admin , !!isAdmin?.data[0]?.is_admin)
+
+    // setIsAdmin(!!isAdmin?.data[0]?.is_admin)
+
     setLoading(false);
 
     // xem lai

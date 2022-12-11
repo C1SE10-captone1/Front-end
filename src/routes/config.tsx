@@ -1,7 +1,7 @@
 import { FC, ReactElement, useEffect, useState } from 'react';
 import { RouteProps, Navigate, useLocation } from 'react-router';
-import { useIntl } from 'react-intl';
 import { useAuth } from '../context/AuthContext';
+import { useIntl } from 'react-intl';
 
 export interface WrapperRouteProps extends RouteProps {
   /** document title locale id */
@@ -37,15 +37,6 @@ const WrapperRouteComponent: FC<WrapperRouteProps> = ({ titleId, ...props }) => 
     return <Navigate to="/login" />;
   }
 
-  const isRoleAdmin = pathname.split('/')[1] === 'admin';
-
-  if (isAdmin) {
-    return !isRoleAdmin ? <Navigate to="/admin/" /> : (props.element as ReactElement);
-  }
-
-  if (isRoleAdmin) {
-    return <Navigate to="/" />;
-  }
 
   return props.element as ReactElement;
 };

@@ -46,6 +46,49 @@ const mockMenuList: MenuList = [
       },
     ],
   },
+  {
+    code: 'businessAdmin',
+    label: {
+      zh_CN: 'Chức Năng',
+      en_US: 'BusinessAdmin',
+    },
+    icon: 'permission',
+    path: '/business',
+    children: [
+      {
+        code: 'withSearch',
+        label: {
+          zh_CN: 'Quản lý lớp',
+          en_US: 'Classes Management',
+        },
+        path: '/admin',
+      },
+      {
+        code: 'withSearch',
+        label: {
+          zh_CN: 'Quản lý sinh viên',
+          en_US: 'Students Management',
+        },
+        path: '/admin/with-aside',
+      },
+      {
+        code: 'basic',
+        label: {
+          zh_CN: 'Kết quả',
+          en_US: 'Result',
+        },
+        path: '/admin/basic',
+      },
+      {
+        code: 'account',
+        label: {
+          zh_CN: 'Người dùng',
+          en_US: 'User Account',
+        },
+        path: '/admin/basic',
+      },
+    ],
+  },
 ];
 
 mock.mock('/user/menu', 'get', intercepter(mockMenuList));

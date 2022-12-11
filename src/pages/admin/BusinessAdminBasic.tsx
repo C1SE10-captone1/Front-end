@@ -4,12 +4,12 @@ import MyButton from '@/components/basic/button';
 import MyPage, { MyPageTableOptions } from '@/components/business/page';
 import { BuniesssUser } from '@/interface/business';
 import { FC, useState, useEffect, useContext } from 'react';
-import { supabase } from './../../../config/supabase';
-import { AuthContext } from './../../../context/AuthContext';
+import { supabase } from './../../config/supabase';
+import { AuthContext } from './../../context/AuthContext';
 import { DownOutlined } from '@ant-design/icons';
 import { read, utils, writeFile } from "xlsx";
 
-const BusinessBasicPage: FC = () => {
+const BusinessAdminBasicPage: FC = () => {
   const [page, setPage] = useState(1);
   const [paginationSize, setPaginationSize] = useState(4);
   const [loading, setLoading] = useState();
@@ -165,6 +165,8 @@ const BusinessBasicPage: FC = () => {
   };
   return (
     <div>
+
+    Amin nef
       {/* css={styles} */}
       <div className="tabs-main">
         <div className="aside-main">
@@ -250,4 +252,4 @@ const BusinessBasicPage: FC = () => {
   );
 };
 
-export default BusinessBasicPage;
+export default BusinessAdminBasicPage;
