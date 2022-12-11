@@ -7,29 +7,57 @@ import {
   Image,
   PermissionsAndroid,
   TouchableOpacity,
-  FlatList,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 // import Button from "../components/Button";
 import { theme } from "../core/theme";
 import { CheckBox } from "react-native-elements";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../utils/supabase-service";
 
-const AnswerKey = ({ route, navigation }) => {
-  let colection = ["A", "B", "C", "D "];
+function createArrayWithNumbers(length) {
+  return Array.from({ length }, (_, i) => i);
+}
 
-  // let colection = [{A:"", B:"", C:"", D:""}];
+const AnswerKey = ({ route, navigation }) => {
+  // let colection = ["A", "B", "C", "D "];
+
   const examId = route.params.id;
   const examName = route.params.name;
   const examOptions = route.params.options;
   const currentUser = supabase.auth.user();
-  const [answers, setAnswers] = useState({ index: "", answer: "" });
-  const [disabled, setDisabled] = useState(false);
   const [imageFromGellary, setImageFromGellary] = useState(null);
   const [imageFromCamera, setImageFromCamera] = useState(null);
+  const [disabled, setDisabled] = useState(false);
+  const URLpath =
+    "https://a38e-113-162-128-159.ap.ngrok.io/file/upload-answer-key/";
 
-  const URLpath = "https://a38e-113-162-128-159.ap.ngrok.io/file/upload/";
+  const answered = [];
+
+  const loadAnswerd = () => {
+    return answered.push(
+      { index: 1, answer: "A" },
+      { index: 2, answer: "B" },
+      { index: 3, answer: "C" },
+      { index: 4, answer: "D" },
+      { index: 5, answer: "A" },
+      { index: 6, answer: "A" },
+      { index: 7, answer: "B" },
+      { index: 8, answer: "C" },
+      { index: 9, answer: "D" },
+      { index: 10, answer: "A" },
+      { index: 11, answer: "A" },
+      { index: 12, answer: "B" },
+      { index: 13, answer: "C" },
+      { index: 14, answer: "D" },
+      { index: 15, answer: "A" },
+      { index: 16, answer: "A" },
+      { index: 17, answer: "B" },
+      { index: 18, answer: "C" },
+      { index: 19, answer: "D" },
+      { index: 20, answer: "A" }
+    );
+  };
 
   const loadExamDetails = async () => {
     let { data: exams, error } = await supabase
@@ -45,12 +73,13 @@ const AnswerKey = ({ route, navigation }) => {
       .eq("id", examId)
       .eq("is_delete", false)
       .eq("classes.uid", currentUser.id);
-    // console.log("answer key: ", exams);
-    // console.log("answer key: ", answers);
   };
-  // const lists = [];
+
   useEffect(() => {
     loadExamDetails();
+    setTimeout(async () => {
+      loadAnswerd();
+    }, 1000);
   }, [imageFromCamera, imageFromGellary]);
   // select image from gallery
   const pickImage = async () => {
@@ -70,7 +99,7 @@ const AnswerKey = ({ route, navigation }) => {
 
     // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       // aspect: [4, 3],
       quality: 1,
@@ -88,106 +117,56 @@ const AnswerKey = ({ route, navigation }) => {
 
   // take image from camera
   const takeFromCamera = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: "InstaGrade App Camera Permission",
-          message:
-            "InstaGrade App needs access to your camera " +
-            "so you can take awesome pictures.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        let result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.All,
-          allowsEditing: true,
-          // aspect: [4, 3],
-          quality: 1,
-        });
+    // try {
+    //   const granted = await PermissionsAndroid.request(
+    //     PermissionsAndroid.PERMISSIONS.CAMERA,
+    //     {
+    //       title: "InstaGrade App Camera Permission",
+    //       message:
+    //         "InstaGrade App needs access to your camera " +
+    //         "so you can take awesome pictures.",
+    //       buttonNeutral: "Ask Me Later",
+    //       buttonNegative: "Cancel",
+    //       buttonPositive: "OK",
+    //     }
+    //   );
+    //   if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      // aspect: [4, 3],
+      quality: 1,
+    });
 
-        if (!result.cancelled) {
-          setImageFromGellary(null);
-          setImageFromCamera(result.uri);
-        }
-      }
-    } catch (err) {
-      console.warn(err);
+    if (!result.cancelled) {
+      setImageFromGellary(null);
+      setImageFromCamera(result.uri);
     }
+
+    // } catch (err) {
+    //   console.warn(err);
+    // }
   };
 
-  const AnswerRow = () => {
-    const res = [];
-    const lists = [];
-    for (let i = 0; i < examOptions; i++) {
-      lists.push(colection);
-      // setAnswers({ index: i, answers: "" });
-    }
-
-    for (let i = 0; i < lists.length; i++) {
-      res.push(
-        <View
-          style={{ flexDirection: "row", alignContent: "center" }}
-          key={i + 1}
-        >
-          <View
-            style={{
-              flexDirection: "column",
-              alignContent: "center",
-              width: "7%",
-            }}
-          >
-            <Text
-              style={{
-                display: "flex",
-                bottom: 15,
-                left: 10,
-                position: "absolute",
-                fontSize: 18,
-              }}
-            >
-              {i + 1}
-            </Text>
-          </View>
-          <View style={{ flexDirection: "column", width: "80%" }}>
-            <RenderItem index={i + 1} />
-          </View>
-        </View>
-      );
-    }
-
-    return res;
-  };
-  // const [result, setResult] = useState([]);
+  let arr = new Map();
   const RenderItem = (props) => {
-    const [A, setA] = useState(false);
-    const [B, setB] = useState(false);
-    const [C, setC] = useState(false);
-    const [D, setD] = useState(false);
+    const [A, setA] = useState(props.answer === "A" ? true : false);
+    const [B, setB] = useState(props.answer === "B" ? true : false);
+    const [C, setC] = useState(props.answer === "C" ? true : false);
+    const [D, setD] = useState(props.answer === "D" ? true : false);
     const checkedA = () => {
       setA(true);
       setB(false);
       setC(false);
       setD(false);
-      // setAnswers({ ...answers, index: props.index, answer: "A" });
-      // setAnswers((prev) => ({
-      //   ...prev,
-      //   index: props.index,
-      //   answer: "A",
-      // }));
-      setAnswers({ index: props.index, answer: "A" });
+      arr.set(props.index, "A");
     };
     const checkedB = () => {
       setA(false);
       setB(true);
       setC(false);
       setD(false);
-      console.log("---click B---", props.index);
-
-      setAnswers({ index: props.index, answer: "B" });
+      arr.set(props.index, "B");
     };
 
     const checkedC = () => {
@@ -195,28 +174,14 @@ const AnswerKey = ({ route, navigation }) => {
       setB(false);
       setC(true);
       setD(false);
-      console.log("---click C---", props.index);
-      // setAnswers({ ...answers, index: props.index, answer: "C" });
-      // setAnswers((prev) => ({
-      //   ...prev,
-      //   index: props.index,
-      //   answer: "C",
-      // }));
-      setAnswers({ index: props.index, answer: "C" });
+      arr.set(props.index, "C");
     };
     const checkedD = () => {
       setA(false);
       setB(false);
       setC(false);
       setD(true);
-      console.log("---click D---", props.index);
-      // setAnswers({ ...answers, index: props.index, answer: "D" });
-      // setAnswers((prev) => ({
-      //   ...prev,
-      //   index: props.index,
-      //   answer: "D",
-      // }));
-      setAnswers({ index: props.index, answer: "D" });
+      arr.set(props.index, "D");
     };
     return (
       <View style={{ flexDirection: "row" }}>
@@ -257,8 +222,15 @@ const AnswerKey = ({ route, navigation }) => {
   };
 
   const Save = () => {
-    console.log("click save", answers);
-    // console.log("click save2:", result);
+    console.log("click save");
+    arr.forEach(function (value, key) {
+      console.log(key + " = " + value);
+    });
+
+    answered.map((e) => {
+      console.log(e.index + " , " + e.answer);
+    });
+
     var urlImage = "";
     if (imageFromCamera !== null) urlImage = imageFromCamera;
     if (imageFromGellary !== null) urlImage = imageFromGellary;
@@ -291,6 +263,7 @@ const AnswerKey = ({ route, navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {/* header */}
+
       <View
         style={{
           flexDirection: "row",
@@ -344,7 +317,9 @@ const AnswerKey = ({ route, navigation }) => {
             minWidth: "10%",
           }}
         >
-          <Text onPress={Save}>Save</Text>
+          <TouchableOpacity onPress={Save}>
+            <Text>Save</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -364,7 +339,11 @@ const AnswerKey = ({ route, navigation }) => {
         }}
       >
         <View
-          style={{ flexDirection: "column", paddingLeft: 20, paddingRight: 20 }}
+          style={{
+            flexDirection: "column",
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
         >
           <Image
             source={require("../assets/Photo.png")}
@@ -398,7 +377,12 @@ const AnswerKey = ({ route, navigation }) => {
           )}
         </View>
         <View
-          style={{ display: "flex", right: 30, top: 15, position: "absolute" }}
+          style={{
+            display: "flex",
+            right: 30,
+            top: 15,
+            position: "absolute",
+          }}
         >
           <Image
             source={require("../assets/Arrow.png")}
@@ -429,7 +413,11 @@ const AnswerKey = ({ route, navigation }) => {
         }}
       >
         <View
-          style={{ flexDirection: "column", paddingLeft: 20, paddingRight: 20 }}
+          style={{
+            flexDirection: "column",
+            paddingLeft: 20,
+            paddingRight: 20,
+          }}
         >
           <Image
             source={require("../assets/Instagram.png")}
@@ -463,7 +451,12 @@ const AnswerKey = ({ route, navigation }) => {
           )}
         </View>
         <View
-          style={{ display: "flex", right: 30, top: 15, position: "absolute" }}
+          style={{
+            display: "flex",
+            right: 30,
+            top: 15,
+            position: "absolute",
+          }}
         >
           <Image
             source={require("../assets/Arrow.png")}
@@ -481,16 +474,59 @@ const AnswerKey = ({ route, navigation }) => {
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
           <View style={styles.box}>
-            {/* <form>
-              {lists.map((index, input) => {
-                return (
-                  <View key={index}>
-                    <RenderItem index={index} />
+            {createArrayWithNumbers(examOptions).map((index) => {
+              return (
+                <View style={{ flexDirection: "row" }} key={index + 1}>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      alignContent: "center",
+                      justifyContent: "center",
+                      fontSize: 20,
+                      width: "7%",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 18,
+                      }}
+                    >
+                      {index + 1}.
+                    </Text>
                   </View>
-                );
-              })}
-            </form> */}
-            <AnswerRow />
+                  <View style={{ flexDirection: "column" }}>
+                    <RenderItem index={index + 1} />
+                  </View>
+                </View>
+              );
+            })}
+            {/* <Text>{answered.length}</Text>
+            {answered.map((e) => {
+              return (
+                <View style={{ flexDirection: "row" }} key={index + 1}>
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      alignContent: "center",
+                      justifyContent: "center",
+                      fontSize: 20,
+                      width: "7%",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 18,
+                      }}
+                    >
+                      {index + 1}.
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "column" }}>
+                    <RenderItem index={index + 1} answer={e.answer} />
+                  </View>
+                </View>
+              );
+            })} */}
           </View>
         </View>
       </ScrollView>
@@ -506,6 +542,7 @@ const styles = StyleSheet.create({
   },
   box: {
     // marginLeft: "10%",
+    paddingLeft: 7,
     width: "100%",
     // marginRight: "10%",
     flexDirection: "column",

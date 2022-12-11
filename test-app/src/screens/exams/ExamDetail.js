@@ -337,6 +337,8 @@ const ExamDetail = ({ route, navigation }) => {
                   id: examId,
                   name: exam[0].name,
                   options: exam[0].option,
+                  scale: exam[0].scale,
+                  class_id: exam[0].class_id,
                   // scale: exam[0].scale,
                 })
               }
@@ -382,9 +384,10 @@ const ExamDetail = ({ route, navigation }) => {
               onPress={() =>
                 navigation.navigate("AnswerStudent", {
                   id: examId,
+                  scale: exam[0].scale,
+                  class_id: exam[0].class_id,
                   name: exam[0].name,
                   options: exam[0].option,
-                  // scale: exam[0].scale,
                 })
               }
             >

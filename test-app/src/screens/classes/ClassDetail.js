@@ -100,18 +100,20 @@ const ClassDetail = ({ route, navigation }) => {
     setDescription({ value: classe[0].description, error: "" });
   };
   const Done = async () => {
+    const date = new Date();
+    console.log("updated day: " + date);
     setLoading(true);
     var check = true;
     const checkClassCode = classCodeValidator(classCode.value);
     const checkClassName = classNameValidator(name.value);
-
+    console.log(classCode.value);
     if (checkClassCode || checkClassName) {
       setLoading(false);
       setClassCode({ value: classCode.value, error: checkClassCode });
       setName({ value: name.value, error: checkClassName });
       return;
     }
-
+    setLoading(true);
     let { data: classes, err } = await supabase
       .from("classes")
       .select("*")
@@ -140,20 +142,8 @@ const ClassDetail = ({ route, navigation }) => {
           },
         ]);
         break;
-      } else if (classes[i].name === name.value) {
-        check = false;
-        Alert.alert("Update Class failed!", "Class name already exists. ", [
-          {
-            text: "Back",
-            onPress: () => {
-              navigation.goBack();
-            },
-          },
-        ]);
-        break;
       }
     }
-    console.log("click done");
     if (check) {
       setLoading(true);
       const { error } = await supabase
@@ -165,6 +155,7 @@ const ClassDetail = ({ route, navigation }) => {
             school_year: school_year[schoolYear - 1].label,
             semester: semeters[semetes - 1].label,
             description: description.value,
+            update_at: date,
             uid: currentUser.id,
           },
         ])
@@ -371,7 +362,7 @@ const ClassDetail = ({ route, navigation }) => {
               <View>
                 <View style={styles.content}>
                   <Text style={styles.name_class}>{item.name}</Text>
-                  <Text style={{}}> ({item.class_code})</Text>
+                  <Text style={{}}> {item.class_code}</Text>
                 </View>
 
                 <View

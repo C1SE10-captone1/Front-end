@@ -45,7 +45,7 @@ const StudentScreen = ({ route, navigation }) => {
     loadStudent();
     setTimeout(async () => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
   }, [navigation, loadStudent]);
   return (
     <SafeAreaView style={{ flex: 1 }}>

@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { supabase } from "../../utils/supabase-service";
 import { theme } from "../../core/theme";
 import { TextInput } from "react-native-paper";
+import { themeColor } from "react-native-rapi-ui";
 
 const ClassScreen = ({ navigation }) => {
   const [classList, setClassList] = useState([]);
@@ -142,10 +143,11 @@ const ClassScreen = ({ navigation }) => {
                           >
                             <Text
                               style={{
-                                fontSize: 18,
+                                fontSize: 16,
+                                fontWeight: "500",
                               }}
                             >
-                              ({item.class_code})
+                              {item.class_code}
                             </Text>
                           </View>
                         </View>
@@ -188,7 +190,7 @@ const ClassScreen = ({ navigation }) => {
           </View>
         )}
       </View>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.btn_refesh}
         onPress={() => {
           setTimeout(async () => loadClasses(), 1000);
@@ -204,7 +206,7 @@ const ClassScreen = ({ navigation }) => {
             right: -7,
           }}
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <TouchableOpacity
         style={styles.btn_new}
@@ -275,7 +277,9 @@ const styles = StyleSheet.create({
     alignContent: "center",
     borderColor: 1,
     marginBottom: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.colors.background,
+    borderBottomColor: "#7F5DF0",
+    borderBottomWidth: 0.2,
     shadowColor: "#7F5DF0",
     shadowOffset: {
       width: 0,
