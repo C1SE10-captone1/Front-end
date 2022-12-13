@@ -197,9 +197,7 @@ const semester = [
     .from('classes')
     .select('*')
     .eq('is_delete', false)
-    // .order('created_at', { ascending: false });
-    // console.log("🚀 ~ file: Admin_page.tsx:200 ~ refreshData ~ data", data)
-    // console.log("🚀 ~ file: Admin_page.tsx:198 ~ refreshData ~ err", err)
+    .order('created_at', { ascending: false });
 
     setdataSource(data);
 
@@ -207,8 +205,8 @@ const semester = [
       .from('classes')
       .select('*')
       .eq('is_delete', true)
-      // .order('created_at', { ascending: false });
-      // console.log("🚀 ~ file: Admin_page.tsx:209 ~ refreshData ~ dataisdelete", dataisdelete)
+      .order('created_at', { ascending: false });
+
 
     setclassHasDelete(dataisdelete);
   };
@@ -349,7 +347,6 @@ const semester = [
     const { data } = await supabase
       .from('classes')
       .select('*')
-      .eq('uid', useID)
       .eq('is_delete', false)
       .like('name', searchField)
       .order('created_at', { ascending: false });
@@ -359,7 +356,6 @@ const semester = [
     const { data: dataisdelete } = await supabase
       .from('classes')
       .select('*')
-      .eq('uid', useID)
       .eq('is_delete', true)
       .like('name', searchField)
       .order('created_at', { ascending: false });
@@ -387,13 +383,13 @@ const semester = [
                 setSearch(e.target.value);
               }}
             /> 
-            <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
+            {/* <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
               <Button onClick={showModal}>
                 <PlusCircleFilled style={{ color: '#1E90FF' }} />
                 Add Class
               </Button>
              <Button>Import file</Button> 
-            </div>
+            </div> */}
             <Modal title="Add Class" open={isModalOpenAddClass} onOk={form.submit} onCancel={handleCancel}>
               <Form form={form} onFinish={handleOkForAddClass}>
                 <Form.Item
