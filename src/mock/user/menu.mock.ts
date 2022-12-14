@@ -69,7 +69,7 @@ const mockMenuList: MenuList = [
           zh_CN: 'Quản lý sinh viên',
           en_US: 'Students Management',
         },
-        path: '/admin/with-aside',
+        path: '/admin/student_management',
       },
       {
         code: 'basic',

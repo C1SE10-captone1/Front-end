@@ -25,9 +25,9 @@ const LoginForm: FC = () => {
     console.log('Failed:', errorInfo);
   };
   const handleSubmit = async e => {
-    e.preventDefault();
-    const email = e.target[0].value;
-    const password = e.target[1].value;
+    // e.preventDefault();
+    const email = e.username;
+    const password = e.password;
 
     try {
       const { error } = await signIn({ email, password });
@@ -57,30 +57,31 @@ const LoginForm: FC = () => {
               Login
             </span>
 
-            <form onSubmit={handleSubmit}>
+            {/* <form onSubmit={handleSubmit}>
               <input type="email" placeholder="email" style={{ color: '#000' }} />
               <input type="password" placeholder="password" style={{ color: '#000' }} />
 
               <button>Sign in</button>
               {err && <span style={{ color: 'red' }}>Something went wrong !</span>}
-            </form>
+            </form> */}
             <Form
               name="basic"
-              labelCol={{
-                span: 8,
-              }}
+              // labelCol={{
+              //   span: 8,
+              // }}
               wrapperCol={{
-                span: 16,
+                span: 20,
               }}
               initialValues={{
                 remember: true,
               }}
-              onFinish={onFinish}
+              onFinish={handleSubmit}
               onFinishFailed={onFinishFailed}
               autoComplete="off"
+              style={{ color: '#000' }}
             >
               <Form.Item
-                label="Username"
+                // label="Username"
                 name="username"
                 rules={[
                   {
@@ -89,11 +90,11 @@ const LoginForm: FC = () => {
                   },
                 ]}
               >
-                <Input />
+                <Input placeholder='email'/>
               </Form.Item>
 
               <Form.Item
-                label="Password"
+                // label="Password"
                 name="password"
                 rules={[
                   {
@@ -102,28 +103,28 @@ const LoginForm: FC = () => {
                   },
                 ]}
               >
-                <Input.Password />
+                <Input.Password placeholder='password'/>
               </Form.Item>
-
+{/* 
               <Form.Item
                 name="remember"
                 valuePropName="checked"
                 wrapperCol={{
-                  offset: 8,
+                  // offset: 8,
                   span: 16,
                 }}
               >
                 <Checkbox>Remember me</Checkbox>
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
+                // wrapperCol={{
+                //   offset: 8,
+                //   span: 16,
+                // }}
               >
                 <Button type="primary" htmlType="submit">
-                  Submit
+                  Sign in
                 </Button>
               </Form.Item>
             </Form>

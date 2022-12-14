@@ -23,6 +23,7 @@ import PersonalAvatar from './../pages/profile/PersonalAvatar';
 import LoginPage from './../pages/login/index';
 import ForgotPassword from './../pages/forgot-password/ForgotPassword';
 import BusinessAdminBasicPage from '@/pages/admin/BusinessAdminBasic';
+import Student_page from './../pages/admin/student-management/Student_page';
 
 const routeList: RouteObject[] = [
   {
@@ -91,9 +92,11 @@ const routeList: RouteObject[] = [
       {
         path: '/admin/basic',
         element:  <BusinessAdminBasicPage /> ,
-      }
-   
-     
+      },
+      {
+        path: '/admin/student_management',
+        element:  <Student_page /> ,
+      } 
     ],
   },
   {
