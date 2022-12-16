@@ -5,9 +5,10 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  Linking,
   // Button,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import Paragraph from "../../components/Paragraph";
 import Button from "../../components/Button";
 import { theme } from "../../core/theme";
@@ -19,13 +20,28 @@ import { studentCodeValidator } from "../../helpers/studentCodeValidator";
 
 const CreateStudent = ({ route, navigation }) => {
   const classId = route.params.id;
-  const currentUser = supabase.auth.user();
   const [name, setName] = useState({ value: "", error: "" });
   const [studentCode, setStudentCode] = useState({ value: "", error: "" });
-
-  const [students, setStudents] = useState([]);
-
   const [loading, setLoading] = useState(false);
+
+  const supportedURL = "http://localhost:8889/";
+
+  const OpenURLButton = ({ url, children }) => {
+    const handlePress = useCallback(async () => {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(`Don't know how to open this URL: ${url}`);
+      }
+    }, [url]);
+
+    return (
+      <Button mode="outlined" onPress={handlePress}>
+        {children}
+      </Button>
+    );
+  };
 
   const Done = async () => {
     setLoading(true);
@@ -127,7 +143,6 @@ const CreateStudent = ({ route, navigation }) => {
     );
   };
 
-  const chooseFile = () => {};
   return (
     <SafeAreaView>
       <Paragraph style={{ paddingTop: 30, paddingLeft: 20 }}>
@@ -166,15 +181,18 @@ const CreateStudent = ({ route, navigation }) => {
         </View>
 
         {/* button handle */}
-        <View style={{}}>
-          <Button
+        <View style={{ marginHorizontal: "10%" }}>
+          {/* <Button
             mode="outlined"
             style={{ marginTop: 50 }}
             color={theme.colors.yelow}
             onPress={chooseFile}
-          >
+          > */}
+          {/*  */}
+          <OpenURLButton url={supportedURL}>
             Import file student(s)
-          </Button>
+          </OpenURLButton>
+          {/* </Button> */}
           <Button mode="outlined" onPress={Cancel}>
             Cancel
           </Button>
@@ -195,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    // left: "3%",
+    left: "3%",
     fontWeight: "bold",
     fontSize: 40,
     marginBottom: 30,

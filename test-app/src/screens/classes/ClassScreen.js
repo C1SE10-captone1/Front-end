@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
     borderColor: 1,
     marginBottom: 10,
     backgroundColor: theme.colors.background,
-    borderBottomColor: "#7F5DF0",
-    borderBottomWidth: 0.2,
+    borderColor: "#753E33",
+    borderBottomWidth: 0.8,
     shadowColor: "#7F5DF0",
     shadowOffset: {
       width: 0,

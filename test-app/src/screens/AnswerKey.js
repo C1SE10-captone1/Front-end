@@ -32,10 +32,11 @@ const AnswerKey = ({ route, navigation }) => {
   const URLpath =
     "https://a38e-113-162-128-159.ap.ngrok.io/file/upload-answer-key/";
 
+  const [answered1, setAnswered1] = useState([]);
   const answered = [];
 
-  const loadAnswerd = () => {
-    return answered.push(
+  const loadAnswerd = async () => {
+    answered.push(
       { index: 1, answer: "A" },
       { index: 2, answer: "B" },
       { index: 3, answer: "C" },
@@ -57,6 +58,7 @@ const AnswerKey = ({ route, navigation }) => {
       { index: 19, answer: "D" },
       { index: 20, answer: "A" }
     );
+    setAnswered1(answered);
   };
 
   const loadExamDetails = async () => {
@@ -221,43 +223,93 @@ const AnswerKey = ({ route, navigation }) => {
     );
   };
 
-  const Save = () => {
+  const Save = async () => {
     console.log("click save");
+    let check = false;
+    var urlImage = "";
+    let ans = [];
     arr.forEach(function (value, key) {
-      console.log(key + " = " + value);
+      ans.push({ key, value });
     });
+
+    if (imageFromCamera !== null) {
+      check = true;
+      setDisabled(true);
+      urlImage = imageFromCamera;
+    }
+    if (imageFromGellary !== null) {
+      check = true;
+      setDisabled(true);
+      urlImage = imageFromGellary;
+    }
+    let match = /\.(\w+)$/.exec(urlImage);
+    let type = match ? `image/${match[1]}` : `image`;
+    if (check) {
+      var formData = new FormData();
+      formData.append("file", {
+        uri: urlImage,
+        name: urlImage.split("/").pop(),
+        type: type,
+      });
+
+      fetch(URLpath, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      })
+        .then((responseJson) => {
+          console.log("response: ", responseJson);
+        })
+        .catch((error) => {
+          console.log("error: ", error);
+        });
+    }
 
     answered.map((e) => {
       console.log(e.index + " , " + e.answer);
     });
 
-    var urlImage = "";
-    if (imageFromCamera !== null) urlImage = imageFromCamera;
-    if (imageFromGellary !== null) urlImage = imageFromGellary;
-    let match = /\.(\w+)$/.exec(urlImage);
-    let type = match ? `image/${match[1]}` : `image`;
-
-    // var formData = new FormData();
-    // formData.append("file", {
-    //   uri: urlImage,
-    //   name: urlImage.split("/").pop(),
-    //   type: type,
-    // });
-
-    // fetch(URLpath, {
-    //   method: "POST",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "multipart/form-data",
-    //   },
-    //   body: formData,
-    // })
-    //   .then((responseJson) => {
-    //     console.log("response: ", responseJson);
-    //   })
-    //   .catch((error) => {
-    //     console.log("error: ", error);
-    //   });
+    let { data: answer_exams, err } = await supabase
+      .from("answer_exams")
+      .select("*")
+      .eq("exam_id", examId);
+    console.log(answer_exams[0]);
+    if (answer_exams[0]) {
+      const { error1 } = await supabase
+        .from("answer_exams")
+        .update([
+          {
+            answers: ans.sort(),
+          },
+        ])
+        .eq("exam_id", examId);
+      if (!error1) {
+        Alert.alert("Success!", "Update answer of exam successful!", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      }
+    } else {
+      const { error1 } = await supabase.from("answer_exams").insert([
+        {
+          exam_id: examId,
+          answers: ans.sort(),
+        },
+      ]);
+      if (!error1) {
+        Alert.alert("Success!", "Add answer of exam successful!", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      }
+    }
   };
 
   return (
@@ -474,59 +526,60 @@ const AnswerKey = ({ route, navigation }) => {
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
           <View style={styles.box}>
-            {createArrayWithNumbers(examOptions).map((index) => {
-              return (
-                <View style={{ flexDirection: "row" }} key={index + 1}>
-                  <View
-                    style={{
-                      flexDirection: "column",
-                      alignContent: "center",
-                      justifyContent: "center",
-                      fontSize: 20,
-                      width: "7%",
-                    }}
-                  >
-                    <Text
+            {!disabled &&
+              createArrayWithNumbers(examOptions).map((index) => {
+                return (
+                  <View style={{ flexDirection: "row" }} key={index + 1}>
+                    <View
                       style={{
-                        fontSize: 18,
+                        flexDirection: "column",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        fontSize: 20,
+                        width: "9%",
                       }}
                     >
-                      {index + 1}.
-                    </Text>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                        }}
+                      >
+                        {index + 1}.
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: "column", marginLeft: -10 }}>
+                      <RenderItem index={index + 1} />
+                    </View>
                   </View>
-                  <View style={{ flexDirection: "column" }}>
-                    <RenderItem index={index + 1} />
-                  </View>
-                </View>
-              );
-            })}
-            {/* <Text>{answered.length}</Text>
-            {answered.map((e) => {
-              return (
-                <View style={{ flexDirection: "row" }} key={index + 1}>
-                  <View
-                    style={{
-                      flexDirection: "column",
-                      alignContent: "center",
-                      justifyContent: "center",
-                      fontSize: 20,
-                      width: "7%",
-                    }}
-                  >
-                    <Text
+                );
+              })}
+            {disabled &&
+              answered1.map((e) => {
+                return (
+                  <View style={{ flexDirection: "row" }} key={e.index}>
+                    <View
                       style={{
-                        fontSize: 18,
+                        flexDirection: "column",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        fontSize: 20,
+                        width: "7%",
                       }}
                     >
-                      {index + 1}.
-                    </Text>
+                      <Text
+                        style={{
+                          fontSize: 18,
+                        }}
+                      >
+                        {e.index}.
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: "column" }}>
+                      <RenderItem index={e.index} answer={e.answer} />
+                    </View>
                   </View>
-                  <View style={{ flexDirection: "column" }}>
-                    <RenderItem index={index + 1} answer={e.answer} />
-                  </View>
-                </View>
-              );
-            })} */}
+                );
+              })}
           </View>
         </View>
       </ScrollView>

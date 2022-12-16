@@ -37,8 +37,6 @@ const ProfileScreen = ({ navigation }) => {
       quality: 1,
     });
 
-    console.log("image: ", result.uri);
-
     if (!result.cancelled) {
       setImageFromGellary(result.uri);
     }

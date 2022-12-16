@@ -144,7 +144,6 @@ const CreateExam = ({ navigation }) => {
     const optionError = dropdownValidator(choiceQuestion.value);
     const classError = dropdownValidator(ClassCode);
     const dateError = dropdownValidator(date.value);
-    console.log(SchoolYear);
     if (
       nameError ||
       schoolYearError ||

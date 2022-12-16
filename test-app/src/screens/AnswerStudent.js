@@ -7,6 +7,7 @@ import {
   Image,
   PermissionsAndroid,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 // import Button from "../components/Button";
@@ -26,16 +27,43 @@ const AnswerStudent = ({ route, navigation }) => {
   const scale = route.params.scale;
   const classId = route.params.class_id;
   const currentUser = supabase.auth.user();
-  const [answer, setAnswer] = useState();
   const [student, setStudent] = useState();
+  const [disabled, setDisabled] = useState(false);
   const [answerKey, setAnswerKey] = useState([]);
   let arr = new Map();
   const [imageFromGellary, setImageFromGellary] = useState(null);
   const [imageFromCamera, setImageFromCamera] = useState(null);
+  const [answered1, setAnswered1] = useState([]);
+  const answered = [];
 
+  const loadAnswerd = async () => {
+    answered.push(
+      { index: 1, answer: "A" },
+      { index: 2, answer: "B" },
+      { index: 3, answer: "C" },
+      { index: 4, answer: "D" },
+      { index: 5, answer: "A" },
+      { index: 6, answer: "A" },
+      { index: 7, answer: "B" },
+      { index: 8, answer: "C" },
+      { index: 9, answer: "D" },
+      { index: 10, answer: "A" },
+      { index: 11, answer: "A" },
+      { index: 12, answer: "B" },
+      { index: 13, answer: "C" },
+      { index: 14, answer: "D" },
+      { index: 15, answer: "A" },
+      { index: 16, answer: "A" },
+      { index: 17, answer: "B" },
+      { index: 18, answer: "C" },
+      { index: 19, answer: "D" },
+      { index: 20, answer: "A" }
+    );
+    setAnswered1(answered);
+  };
   // remember url after change domain
   const URLpath =
-    "https://a38e-113-162-128-159.ap.ngrok.io/file/upload-answer-student/";
+    "https://be41-123-19-171-56.ap.ngrok.io/file/upload-answer-student/";
 
   const getAnswerKeyAndScale = async () => {
     let { data: answer_exams, error } = await supabase
@@ -48,7 +76,10 @@ const AnswerStudent = ({ route, navigation }) => {
 
   useEffect(() => {
     getAnswerKeyAndScale();
-  }, []);
+    setTimeout(async () => {
+      loadAnswerd();
+    }, 1000);
+  }, [imageFromCamera, imageFromGellary]);
   // select image from gallery
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -58,8 +89,6 @@ const AnswerStudent = ({ route, navigation }) => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.cancelled) {
       setImageFromGellary(result.uri);
     }
@@ -67,48 +96,142 @@ const AnswerStudent = ({ route, navigation }) => {
 
   // take image from camera
   const takeFromCamera = async () => {
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      let result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        // aspect: [4, 3],
-        quality: 1,
-      });
-      console.log(result);
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      // aspect: [4, 3],
+      quality: 1,
+    });
 
-      if (!result.cancelled) {
-        setImageFromCamera(result.uri);
-      }
+    if (!result.cancelled) {
+      setImageFromCamera(result.uri);
     }
   };
 
-  let ans = new Set();
   const Save = async () => {
+    const URLpath =
+      "https://a38e-113-162-128-159.ap.ngrok.io/file/upload-answer-student/";
+
     console.log("click save");
+    let check = false;
+    let ans = [];
     let count = 0;
+    var urlImage = "";
     arr.forEach(function (value, key) {
-      if (value === answerKey[key]) {
-        count++;
-      }
+      ans.push({ key, value });
     });
-    console.log(answerKey);
-    // console.log(testSet);
-    console.log((count * scale).toFixed(1));
+
+    if (imageFromCamera !== null) {
+      check = true;
+      setDisabled(true);
+      urlImage = imageFromCamera;
+    }
+    if (imageFromGellary !== null) {
+      check = true;
+      setDisabled(true);
+      urlImage = imageFromGellary;
+    }
+
+    let match = /\.(\w+)$/.exec(urlImage);
+    let type = match ? `image/${match[1]}` : `image`;
+    if (check) {
+      var formData = new FormData();
+      formData.append("file", {
+        uri: urlImage,
+        name: urlImage.split("/").pop(),
+        type: type,
+      });
+
+      fetch(URLpath, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      })
+        .then((responseJson) => {
+          console.log("response: ", responseJson);
+        })
+        .catch((error) => {
+          console.log("error: ", error);
+        });
+    }
+
+    answered.map((e) => {
+      console.log(e.index + " , " + e.answer);
+    });
+
+    // check answer is correct!
+    // arr.forEach(function (value, key) {
+    //   ans.push({ key, value });
+    //   if (value === answerKey[key]) {
+    //     count++;
+    //   }
+    // });
+
     let { data: students, error } = await supabase
       .from("students")
-      .select("id")
-      .eq("student_code", "25211216336")
+      .select("id, student_code")
       .eq("class_id", classId);
-    // const { data, error1 } = await supabase.from("answer_students").insert([
-    //   {
-    //     exam_id: examId,
-    //     student_id: students[0].id,
-    //     answers: ans,
-    //     point: (count * scale).toFixed(1),
-    //   },
-    // ]);
+    // students.filter(e=> {
+    //   if()
+    // })
+    console.log(students);
+    // check student_code
+    // if (students[0]) {
+    //   const { error1 } = await supabase
+    //     .from("answer_students")
+    //     .update([
+    //       {
+    //         exam_id: examId,
+    //         answers: ans.sort(),
+    //         point: (count * scale).toFixed(1),
+    //       },
+    //     ])
+    //     .eq("student_id", students[0].id);
 
-    // console.log(error1);
+    //   if (error1) {
+    //     Alert.alert("Failed!", "Update answer of student failed!", [
+    //       {
+    //         text: "OK",
+    //         onPress: () => {},
+    //       },
+    //     ]);
+    //   } else {
+    //     Alert.alert("Success!", "Update answer of student successful!", [
+    //       {
+    //         text: "OK",
+    //         onPress: () => {},
+    //       },
+    //     ]);
+    //   }
+    // } else {
+    //   const { error1 } = await supabase.from("answer_students").insert([
+    //     {
+    //       exam_id: examId,
+    //       student_id: students[0].id,
+    //       answers: ans.sort(),
+    //       point: (count * scale).toFixed(1),
+    //     },
+    //   ]);
+
+    //   if (error1) {
+    //     Alert.alert("Failed!", "Upload answer of student failed!", [
+    //       {
+    //         text: "OK",
+    //         onPress: () => {},
+    //       },
+    //     ]);
+    //   } else {
+    //     Alert.alert("Success!", "Upload answer of student successful!", [
+    //       {
+    //         text: "OK",
+    //         onPress: () => {},
+    //       },
+    //     ]);
+    //   }
+    // }
   };
 
   const RenderItem = (props) => {
@@ -397,7 +520,7 @@ const AnswerStudent = ({ route, navigation }) => {
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
           <View style={styles.box}>
-            {createArrayWithNumbers(examOptions).map((index) => {
+            {/* {createArrayWithNumbers(examOptions).map((index) => {
               return (
                 <View style={{ flexDirection: "row" }} key={index + 1}>
                   <View
@@ -422,34 +545,62 @@ const AnswerStudent = ({ route, navigation }) => {
                   </View>
                 </View>
               );
-            })}
-            {/* <Text>{answered.length}</Text>
-          {answered.map((e) => {
-            return (
-              <View style={{ flexDirection: "row" }} key={index + 1}>
-                <View
-                  style={{
-                    flexDirection: "column",
-                    alignContent: "center",
-                    justifyContent: "center",
-                    fontSize: 20,
-                    width: "7%",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 18,
-                    }}
-                  >
-                    {index + 1}.
-                  </Text>
-                </View>
-                <View style={{ flexDirection: "column" }}>
-                  <RenderItem index={index + 1} answer={e.answer} />
-                </View>
-              </View>
-            );
-          })} */}
+            })} */}
+
+            {!disabled &&
+              createArrayWithNumbers(examOptions).map((index) => {
+                return (
+                  <View style={{ flexDirection: "row" }} key={index + 1}>
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        fontSize: 20,
+                        width: "7%",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                        }}
+                      >
+                        {index + 1}.
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: "column" }}>
+                      <RenderItem index={index + 1} />
+                    </View>
+                  </View>
+                );
+              })}
+            {disabled &&
+              answered1.map((e) => {
+                return (
+                  <View style={{ flexDirection: "row" }} key={e.index}>
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        alignContent: "center",
+                        justifyContent: "center",
+                        fontSize: 20,
+                        width: "7%",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                        }}
+                      >
+                        {e.index}.
+                      </Text>
+                    </View>
+                    <View style={{ flexDirection: "column" }}>
+                      <RenderItem index={e.index} answer={e.answer} />
+                    </View>
+                  </View>
+                );
+              })}
           </View>
         </View>
       </ScrollView>
@@ -465,7 +616,7 @@ const styles = StyleSheet.create({
   },
   box: {
     // marginLeft: "10%",
-    paddingLeft: 7,
+    paddingLeft: 5,
     width: "100%",
     // marginRight: "10%",
     flexDirection: "column",

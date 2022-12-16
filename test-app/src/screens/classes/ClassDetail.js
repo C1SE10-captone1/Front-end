@@ -74,7 +74,6 @@ const ClassDetail = ({ route, navigation }) => {
     setClasses(classes);
   };
   const Edit = () => {
-    console.log("show modal edit");
     setVisiBle(true);
     let sy = 0;
     let sm = 0;
@@ -106,7 +105,6 @@ const ClassDetail = ({ route, navigation }) => {
     var check = true;
     const checkClassCode = classCodeValidator(classCode.value);
     const checkClassName = classNameValidator(name.value);
-    console.log(classCode.value);
     if (checkClassCode || checkClassName) {
       setLoading(false);
       setClassCode({ value: classCode.value, error: checkClassCode });

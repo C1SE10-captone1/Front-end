@@ -49,8 +49,8 @@ const ListExamByClass = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    loadExams().then();
-  }, [navigation]);
+    loadExams();
+  }, [navigation, loadExams]);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View
@@ -189,7 +189,9 @@ const ListExamByClass = ({ route, navigation }) => {
       </View>
       <TouchableOpacity
         style={styles.btn_new}
-        onPress={() => navigation.navigate("CreateExam")}
+        onPress={() =>
+          navigation.navigate("CreateExamByClass", { id: classId })
+        }
       >
         <Image
           source={require("../../assets/Vector.png")}
@@ -212,12 +214,16 @@ export default ListExamByClass;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    borderColor: "#753E33",
+    borderBottomWidth: 0.8,
   },
   box: {
     flexDirection: "column",
     paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 10,
+    // borderColor: "#753E33",
+    // borderBottomWidth: 0.8,
   },
   box_title: {
     marginTop: 5,

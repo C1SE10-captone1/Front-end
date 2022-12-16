@@ -19,21 +19,11 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Dropdown } from "react-native-element-dropdown";
 import { dropdownValidator } from "../../helpers/dropdownValidator";
 import { examNameValidator } from "../../helpers/examNameValidator";
-const CreateExamByClass = ({ navigation }) => {
+const CreateExamByClass = ({ route, navigation }) => {
+  const classID = route.params.id;
   const [name, setName] = useState({ value: "", error: "" });
   const [date, setDate] = useState({ value: "", error: "" });
   const [description, setDescription] = useState({ value: "", error: "" });
-
-  const [listDataClassesResponse, setListDataClassesResponse] = useState([]);
-
-  const [ClassCode, setClassCode] = useState("");
-  const [ClassCodeError, setClassCodeError] = useState("");
-  const [SchoolYear, setSchoolYear] = useState("");
-  const [schoolYearError, setSchoolYearError] = useState("");
-
-  const [SemesterError, setSemesterError] = useState("");
-  const [Semester, setSemester] = useState("");
-  const [classID, setClassID] = useState("");
 
   const [choiceQuestion, setChoiceQuestion] = useState({
     value: "",
@@ -47,62 +37,8 @@ const CreateExamByClass = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const ref = useRef(null);
 
-  const loadClassOfUser = async () => {
-    let { data: classes, error } = await supabase
-      .from("classes")
-      .select("*")
-      .eq("uid", currentUser.id)
-      .eq("is_delete", false);
-    setListDataClassesResponse(classes);
-  };
-
-  const menuSchoolYear = () => {
-    const schoolYear = new Set(
-      listDataClassesResponse.map((e) => e.school_year)
-    );
-
-    const schoolYearList = [...schoolYear];
-
-    const schoolYearListRender = schoolYearList.map((e) => ({
-      value: e,
-      label: e,
-    }));
-    return schoolYearListRender;
-  };
-
-  const menuSemester = () => {
-    const semesterList = listDataClassesResponse.filter(
-      (c) => c.school_year === SchoolYear
-    );
-    const semesterLists = new Set(semesterList.map((e) => e.semester).sort());
-    const semesterListData = [...semesterLists];
-    const semesterListRender = semesterListData.map((c) => ({
-      value: c,
-      label: c,
-    }));
-    return semesterListRender;
-  };
-
-  const menuClassCode = () => {
-    const classCodeList = listDataClassesResponse.filter(
-      (c) => c.school_year === SchoolYear && c.semester === Semester
-    );
-
-    const classCodeListTmp = new Set(
-      classCodeList.map((e) => e.class_code).sort()
-    );
-
-    const classCodeListRender = [...classCodeListTmp].map((c) => ({
-      value: c,
-      label: c,
-    }));
-
-    return classCodeListRender;
-  };
-
   useEffect(() => {
     setLoading(false);
-    loadClassOfUser();
   }, []);
 
   const showDatePicker = () => {
@@ -138,22 +74,11 @@ const CreateExamByClass = ({ navigation }) => {
     setLoading(true);
     console.log("click done");
     const nameError = examNameValidator(name.value);
-    const schoolYearError = dropdownValidator(SchoolYear);
-    const semesterError = dropdownValidator(Semester);
+
     const scaleError = dropdownValidator(scaleQuestion.value);
     const optionError = dropdownValidator(choiceQuestion.value);
-    const classError = dropdownValidator(ClassCode);
     const dateError = dropdownValidator(date.value);
-    console.log(SchoolYear);
-    if (
-      nameError ||
-      schoolYearError ||
-      semesterError ||
-      scaleError ||
-      optionError ||
-      classError ||
-      dateError
-    ) {
+    if (nameError || scaleError || optionError || dateError) {
       setLoading(false);
       setName({ value: name.value, error: nameError });
       setChoiceQuestion({
@@ -165,9 +90,6 @@ const CreateExamByClass = ({ navigation }) => {
         value: scaleQuestion.value,
         error: scaleError + " scale.",
       });
-      setClassCodeError(classError);
-      setSemesterError(semesterError);
-      setSchoolYearError(schoolYearError);
       return;
     }
     let question = "";
@@ -182,22 +104,14 @@ const CreateExamByClass = ({ navigation }) => {
         scal = e.label;
       }
     });
-    if (SchoolYear && Semester && ClassCode) {
-      const Class = listDataClassesResponse.filter(
-        (c) =>
-          c.school_year === SchoolYear &&
-          c.semester === Semester &&
-          c.class_code === ClassCode
-      );
-      const idClass = Class[0].id;
-      setClassID(idClass);
-    }
 
     const { error } = await supabase.from("exams").insert([
       {
         name: name.value,
-        option: question,
-        scale: scal,
+        option: choiceQuestion.value,
+        scale: scaleQuestion.value,
+        // option: question,
+        // scale: scal,
         date_exam: date.value,
         is_delete: false,
         description: description.value,
@@ -243,10 +157,8 @@ const CreateExamByClass = ({ navigation }) => {
             setLoading(false);
             setChoiceQuestion({ value: "", error: "" });
             setScaleQuestion({ value: "", error: "" });
-            setSchoolYear("");
-            setSemester("");
+
             setName({ value: "", error: "" });
-            setClassCode("");
             setDate({ value: "", error: "" });
             setDescription({ value: "", error: "" });
             return;
@@ -287,103 +199,6 @@ const CreateExamByClass = ({ navigation }) => {
             ></TextInput>
           </View>
 
-          {/* choose school year and Semester */}
-          <View style={styles.box}>
-            <View
-              style={{
-                width: "63%",
-                flexDirection: "column",
-                marginTop: 8,
-              }}
-            >
-              <Dropdown
-                ref={ref}
-                statusBarIsTranslucent={true}
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={menuSchoolYear()}
-                search
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder="Select school year"
-                searchPlaceholder="Search..."
-                value={SchoolYear}
-                onChange={(item) => {
-                  setSchoolYear(item.value);
-                }}
-                renderItem={renderItem}
-              />
-              {schoolYearError ? (
-                <Text style={styles.error}>{schoolYearError}</Text>
-              ) : null}
-            </View>
-
-            <View
-              style={{ width: "37%", flexDirection: "column", marginTop: 8 }}
-            >
-              <Dropdown
-                ref={ref}
-                statusBarIsTranslucent={true}
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={menuSemester()}
-                search
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder="Semeters"
-                searchPlaceholder="Search..."
-                value={Semester}
-                onChange={(item) => {
-                  setSemester(item.value);
-                }}
-                renderItem={renderItem}
-              />
-              {SemesterError ? (
-                <Text style={styles.error}>{SemesterError}</Text>
-              ) : null}
-            </View>
-          </View>
-
-          {/*  choose class*/}
-          <View style={styles.box}>
-            <View style={{ width: "100%", marginTop: 10 }}>
-              {/* {Semester ? ( */}
-              <Dropdown
-                ref={ref}
-                statusBarIsTranslucent={true}
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={menuClassCode()}
-                search
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder="Select class *"
-                searchPlaceholder="Search..."
-                value={ClassCode}
-                onChange={(item) => {
-                  setClassCode(item.value);
-                }}
-                renderItem={renderItem}
-              />
-              {/* ) : null} */}
-              {ClassCodeError ? (
-                <Text style={styles.error}>{ClassCodeError}</Text>
-              ) : null}
-            </View>
-          </View>
-
           {/* select number question */}
           <View style={styles.box}>
             <View
@@ -393,7 +208,7 @@ const CreateExamByClass = ({ navigation }) => {
                 marginTop: 10,
               }}
             >
-              <Dropdown
+              {/* <Dropdown
                 ref={ref}
                 statusBarIsTranslucent={true}
                 style={styles.dropdown}
@@ -413,16 +228,38 @@ const CreateExamByClass = ({ navigation }) => {
                   setChoiceQuestion({ value: item.value, error: "" });
                 }}
                 renderItem={renderItem}
-              />
-              {choiceQuestion.error ? (
+              /> */}
+              <TextInput
+                label="Questions number *"
+                returnKeyType="next"
+                value={scale.value}
+                onChangeText={(number) =>
+                  setChoiceQuestion({ value: number, error: "" })
+                }
+                error={!!choiceQuestion.error}
+                errorText={choiceQuestion.error}
+                keyboardType="text"
+              ></TextInput>
+              {/* {choiceQuestion.error ? (
                 <Text style={styles.error}>{choiceQuestion.error}</Text>
-              ) : null}
+              ) : null} */}
             </View>
             {/* selecr scale */}
             <View
               style={{ width: "37%", flexDirection: "column", marginTop: 10 }}
             >
-              <Dropdown
+              <TextInput
+                label="Scale *"
+                returnKeyType="next"
+                value={scaleQuestion.value}
+                onChangeText={(scale) =>
+                  setScaleQuestion({ value: scale, error: "" })
+                }
+                error={!!scaleQuestion.error}
+                errorText={scaleQuestion.error}
+                keyboardType="text"
+              ></TextInput>
+              {/* <Dropdown
                 ref={ref}
                 statusBarIsTranslucent={true}
                 style={styles.dropdown}
@@ -442,10 +279,10 @@ const CreateExamByClass = ({ navigation }) => {
                   setScaleQuestion({ value: item.value, error: "" });
                 }}
                 renderItem={renderItem}
-              />
-              {scaleQuestion.error ? (
+              /> */}
+              {/* {scaleQuestion.error ? (
                 <Text style={styles.error}>{scaleQuestion.error}</Text>
-              ) : null}
+              ) : null} */}
             </View>
           </View>
 

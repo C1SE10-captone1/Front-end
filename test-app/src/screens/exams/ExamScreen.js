@@ -33,10 +33,8 @@ const ExamScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    setTimeout(async () => {
-      setLoading(false);
-      loadExams();
-    }, 1000);
+    setLoading(false);
+    loadExams();
   }, [navigation, loadExams]);
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -150,6 +148,8 @@ export default ExamScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    borderColor: "#753E33",
+    borderBottomWidth: 0.8,
   },
   box: {
     flexDirection: "column",
