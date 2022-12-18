@@ -61,11 +61,11 @@ const BusinessAdminBasicPage: FC = () => {
     const { data: classes, err } = await supabase
       .from('classes')
       .select('*', 'class_code')
-      .eq('uid', useID)
+      // .eq('uid', useID)
       .eq('is_delete', false);
 
     setListDataClassesResponse(classes);
-  }, [useID]);
+  }, []);
   //ClassID
   const [ClassID, setClassID] = useState('');
   // menu class code
@@ -165,8 +165,6 @@ const BusinessAdminBasicPage: FC = () => {
   };
   return (
     <div>
-
-    Amin nef
       {/* css={styles} */}
       <div className="tabs-main">
         <div className="aside-main">

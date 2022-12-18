@@ -24,6 +24,8 @@ import LoginPage from './../pages/login/index';
 import ForgotPassword from './../pages/forgot-password/ForgotPassword';
 import BusinessAdminBasicPage from '@/pages/admin/BusinessAdminBasic';
 import Student_page from './../pages/admin/student-management/Student_page';
+import Result_page_admin from './../pages/admin/result-page/Result_page_admin';
+import Account_manager_page from './../pages/admin/account-management/Account_manager_page';
 
 const routeList: RouteObject[] = [
   {
@@ -96,6 +98,10 @@ const routeList: RouteObject[] = [
       {
         path: '/admin/student_management',
         element:  <Student_page /> ,
+      },
+      {
+        path: '/admin/account_management',
+        element:  <Account_manager_page/> ,
       } 
     ],
   },

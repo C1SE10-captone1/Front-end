@@ -4,18 +4,19 @@ import MyButton from '@/components/basic/button';
 import MyPage, { MyPageTableOptions } from '@/components/business/page';
 import { BuniesssUser } from '@/interface/business';
 import { FC, useState, useEffect, useContext } from 'react';
-import { supabase } from './../../../config/supabase';
 import { AuthContext } from './../../../context/AuthContext';
+import { supabase } from '../../../config/supabase';
 import { DownOutlined } from '@ant-design/icons';
 import { read, utils, writeFile } from "xlsx";
 
-const BusinessBasicPage: FC = () => {
+
+const Result_page_admin: FC = () => {
   const [page, setPage] = useState(1);
   const [paginationSize, setPaginationSize] = useState(4);
   const [loading, setLoading] = useState();
 
   const currentUser = useContext(AuthContext);
-  const useID = currentUser?.currentUser?.id;
+//   const useID = currentUser?.currentUser?.id;
 
   //list classes
   const [listDataClassesResponse, setListDataClassesResponse] = useState<any[]>([]);
@@ -61,11 +62,11 @@ const BusinessBasicPage: FC = () => {
     const { data: classes, err } = await supabase
       .from('classes')
       .select('*', 'class_code')
-      .eq('uid', useID)
+    //   .eq('uid', useID)
       .eq('is_delete', false);
 
     setListDataClassesResponse(classes);
-  }, [useID]);
+  }, []);
   //ClassID
   const [ClassID, setClassID] = useState('');
   // menu class code
@@ -252,4 +253,5 @@ const BusinessBasicPage: FC = () => {
   );
 };
 
-export default BusinessBasicPage;
+
+export default Result_page_admin

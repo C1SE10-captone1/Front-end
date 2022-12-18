@@ -85,7 +85,7 @@ const mockMenuList: MenuList = [
           zh_CN: 'Người dùng',
           en_US: 'User Account',
         },
-        path: '/admin/basic',
+        path: '/admin/account_management',
       },
     ],
   },
