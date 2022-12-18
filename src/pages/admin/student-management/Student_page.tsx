@@ -481,12 +481,12 @@ const Student_page: FC = () => {
                 }}
               />
             </div>
-            <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
+            {/* <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
               <Button onClick={showModal}>
                 <PlusCircleFilled style={{ color: '#1E90FF' }} />
                 Add Student
               </Button>
-            </div>
+            </div> */}
             <Modal title="Add Student" open={isModalOpenAddStudent} onOk={form.submit} onCancel={handleCancel}>
               <Form
                 form={form}

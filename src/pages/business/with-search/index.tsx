@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { AuthContext } from './../../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import moment from 'moment';
+import { differenceBy } from 'lodash';
 
 const { Search } = Input;
 const onC = e => {
@@ -228,9 +229,17 @@ const BusinessWithSearchPage: FC = () => {
     setIsModalOpenAddClass(true);
   };
   const handleOkForAddClass = async e => {
+
+    const datainsert={'classcode':e.class_code,'name':e.name}
+    // const dataInsert = differenceBy(
+    //   datainsert,
+    //   dataSource,
+    //   'student_code',
+    // );
+
     try {
       e.uid = currentUser?.currentUser?.id;
-
+      
       const { error } = await supabase.from('classes').insert(e);
 
       refreshData();
@@ -401,10 +410,13 @@ const BusinessWithSearchPage: FC = () => {
                   label="Class code"
                   rules={[
                     {
-                      required: true,
                       type: 'regexp',
-                      pattern: new RegExp('^[a-zA-Z0-9]{5,15}$'),
-                      message: 'Input class code',
+                      pattern: new RegExp('^[a-zA-Z0-9]{5,25}$'),
+                      message: 'Class code must 5-25 characters',
+                    },
+                    {
+                      required: true,
+                      message: "Class code can't be empty",
                     },
                   ]}
                 >
@@ -416,7 +428,12 @@ const BusinessWithSearchPage: FC = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'Input class name',
+                      message: "Class name can't be empty",
+                    },
+                    {
+                      type: 'regexp',
+                      pattern: new RegExp('^[a-zA-Z0-9]{2,40}$'),
+                      message: 'Class code is wrong format',
                     },
                   ]}
                 >
@@ -428,7 +445,7 @@ const BusinessWithSearchPage: FC = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'Input school year',
+                      message: 'Please choose school year',
                     },
                   ]}
                 >
@@ -445,7 +462,7 @@ const BusinessWithSearchPage: FC = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'choose semester',
+                      message: 'Please choose semester',
                     },
                   ]}
                 >

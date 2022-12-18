@@ -5,14 +5,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { supabase } from './../../config/supabase';
-import { Form, Button, Checkbox,Input } from 'antd';
-// const initialValues: LoginParams = {
-//   username: 'guest',
-//   password: 'guest',
-//   // remember: true
-// };
+import { Form, Button, Checkbox, Input } from 'antd';
 
 const LoginForm: FC = () => {
+  const [CheckEmail, setCheckEmail] = useState('');
+
   const [form] = Form.useForm();
   const [err, setErr] = useState(false);
   const navigate = useNavigate();
@@ -25,8 +22,8 @@ const LoginForm: FC = () => {
     console.log('Failed:', errorInfo);
   };
   const handleSubmit = async e => {
-    // e.preventDefault();
     const email = e.username;
+
     const password = e.password;
 
     try {
@@ -41,7 +38,7 @@ const LoginForm: FC = () => {
       });
       navigate('/');
     } catch (error) {
-      toast.error('User account or password incorrect!', {
+      toast.error('Email or password incorrect!', {
         duration: 5000,
       });
     }
@@ -56,14 +53,6 @@ const LoginForm: FC = () => {
             <span className="title" style={{ fontSize: '25px' }}>
               Login
             </span>
-
-            {/* <form onSubmit={handleSubmit}>
-              <input type="email" placeholder="email" style={{ color: '#000' }} />
-              <input type="password" placeholder="password" style={{ color: '#000' }} />
-
-              <button>Sign in</button>
-              {err && <span style={{ color: 'red' }}>Something went wrong !</span>}
-            </form> */}
             <Form
               name="basic"
               // labelCol={{
@@ -81,31 +70,30 @@ const LoginForm: FC = () => {
               style={{ color: '#000' }}
             >
               <Form.Item
-                // label="Username"
                 name="username"
                 rules={[
                   {
-                    required: true,
-                    message: 'Please input your username!',
+                    type: 'email',
+                    message: 'Email format is incorrect',
                   },
+                  { required: true, message: "Email can't be empty!" },
                 ]}
               >
-                <Input placeholder='email'/>
+                <Input placeholder="email" />
               </Form.Item>
 
               <Form.Item
-                // label="Password"
                 name="password"
                 rules={[
                   {
                     required: true,
-                    message: 'Please input your password!',
+                    message: "Password can't be empty!",
                   },
                 ]}
               >
-                <Input.Password placeholder='password'/>
+                <Input.Password placeholder="password" />
               </Form.Item>
-{/* 
+              {/* 
               <Form.Item
                 name="remember"
                 valuePropName="checked"
@@ -118,10 +106,10 @@ const LoginForm: FC = () => {
               </Form.Item> */}
 
               <Form.Item
-                // wrapperCol={{
-                //   offset: 8,
-                //   span: 16,
-                // }}
+              // wrapperCol={{
+              //   offset: 8,
+              //   span: 16,
+              // }}
               >
                 <Button type="primary" htmlType="submit">
                   Sign in

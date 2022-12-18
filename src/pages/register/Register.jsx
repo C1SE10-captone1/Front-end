@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
 import './index.less';
+import { Form, Button, Checkbox, Input } from 'antd';
 
 const Register = () => {
   const [err, setErr] = useState(false);
@@ -49,29 +50,66 @@ const Register = () => {
   return (
     <>
       <div className="form-container">
-      <div className='login-page'> 
-        <div className="form-wrapper">
-          <span className="logo">SMART GRADE 5</span>
-          <span className="title" style={{ fontSize: '25px' }}>
-            Register
-          </span>
-          <form onSubmit={handleSubmit}>
-            <input required type="email" placeholder="email" />
-            <input required type="password" placeholder="password" />
-            <input required type="password" placeholder="confirm password" />
-            {/* <input required style={{ display: "none" }} type="file" id="file" /> */}
-            {/* <label htmlFor="file">
-              <img src={Add} alt="" />
-              <span>Add an avatar</span>
-            </label> */}
-            <button disabled={loading}>Sign up</button>
-            {/* {loading && "Uploading and compressing the image please wait..."} */}
-            {err && <span>sai mật khẩu vui lòng nhập lại</span>}
-          </form>
-          <p style={{ fontSize: '15px' }}>
-            You do have an account? <Link to="/login">Login</Link>
-          </p>
-        </div>
+        <div className="login-page">
+          <div className="form-wrapper">
+            <span className="logo">SMART GRADE 5</span>
+            <span className="title" style={{ fontSize: '25px' }}>
+              Register
+            </span>
+            <form onSubmit={handleSubmit}>
+              <input required type="email" placeholder="email" />
+              <input required type="password" placeholder="password" />
+              <input required type="password" placeholder="confirm password" />
+              <button disabled={loading}>Sign up</button>
+              {err && <span>sai mật khẩu vui lòng nhập lại</span>}
+            </form>
+            {/* <Form
+              name="basic"
+              wrapperCol={{
+                span: 20,
+              }}
+              initialValues={{
+                remember: true,
+              }}
+              // onFinish={handleSubmit}
+              onFinishFailed={onFinishFailed}
+              autoComplete="off"
+              style={{ color: '#000' }}
+            >
+              <Form.Item
+                name="email"
+                rules={[
+                  {
+                    type: 'email',
+                    message: 'Email format is incorrect',
+                  },
+                  { required: true, message: "Email can't be empty!" },
+                ]}
+              >
+                <Input placeholder="email" />
+              </Form.Item>
+
+              <Form.Item
+                name="password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Password can't be empty!",
+                  },
+                ]}
+              >
+                <Input.Password placeholder="password" />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Sign in
+                </Button>
+              </Form.Item>
+            </Form> */}
+            <p style={{ fontSize: '15px' }}>
+              You do have an account? <Link to="/login">Login</Link>
+            </p>
+          </div>
         </div>
       </div>
     </>

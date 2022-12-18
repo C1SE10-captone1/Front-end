@@ -377,9 +377,6 @@ const BusinessWithAsidePage: FC = () => {
             liststudent,
             'student_code',
 
-            // function(arrValue, othValue) {
-            // return arrValue.student_code === othValue.student_code;
-            // }
           );
           setHidentProgress(false);
           if (dataInsert.length === 0) {
@@ -510,9 +507,12 @@ const BusinessWithAsidePage: FC = () => {
                     label="Student Code"
                     rules={[
                       {
-                        required: true,
-                        message: 'Input student code',
+                        message: 'Student code is invalid',
                         pattern: new RegExp('^([{20\\21\\22\\23\\24\\25\\26\\27\\28}][0-9]{9,10})$'),
+                      },
+                      {
+                        required: true,
+                        message: "Student code can't be empty",
                       },
                     ]}
                   >
@@ -523,11 +523,14 @@ const BusinessWithAsidePage: FC = () => {
                     label="Full Name"
                     rules={[
                       {
-                        required: true,
-                        message: 'Input student name',
+                        message: 'Student name is invalide. Ex: Abc Xyz',
                         pattern: new RegExp(
                           '^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹsW|_]{2,50}$',
                         ),
+                      },
+                      {
+                        required: true,
+                        message: "Student name can't be empty !",
                       },
                     ]}
                   >
