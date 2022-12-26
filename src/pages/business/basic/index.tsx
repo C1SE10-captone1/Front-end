@@ -6,7 +6,7 @@ import { BuniesssUser } from '@/interface/business';
 import { FC, useState, useEffect, useContext } from 'react';
 import { supabase } from './../../../config/supabase';
 import { AuthContext } from './../../../context/AuthContext';
-import { DownOutlined } from '@ant-design/icons';
+import { DownloadOutlined, DownOutlined } from '@ant-design/icons';
 import { read, utils, writeFile } from "xlsx";
 
 const BusinessBasicPage: FC = () => {
@@ -205,14 +205,6 @@ const BusinessBasicPage: FC = () => {
             /> */}
           </div>
           <div style={{ paddingLeft: '300px', justifyContent: 'center' }}>
-          <div className="col-md-6">
-              <button
-                onClick={handleExport}
-                className="btn btn-primary float-right"
-              >
-                Export <i className="fa fa-download"></i>
-              </button>
-            </div>
           </div>
           </Space>
           <div
@@ -245,9 +237,21 @@ const BusinessBasicPage: FC = () => {
                 }}
               />
             </div>
+            
           </div>
+          
         </div>
+        
       </div>
+      <div className="col-md-6" style={{paddingTop:'40px'}}>
+              <Button
+                onClick={handleExport}
+                className="btn btn-primary float-right"
+                style={{backgroundColor:'#00CC99'}}
+              >
+                <b>Export</b> <DownloadOutlined />
+              </Button>
+            </div>
     </div>
   );
 };

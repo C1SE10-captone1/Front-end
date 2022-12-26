@@ -410,13 +410,14 @@ const BusinessWithSearchPage: FC = () => {
                   label="Class code"
                   rules={[
                     {
-                      type: 'regexp',
-                      pattern: new RegExp('^[a-zA-Z0-9]{5,25}$'),
-                      message: 'Class code must 5-25 characters',
+                      message: 'Class code is wrong format. Ex: Abc-123, 234_Xyz',
+                      pattern: new RegExp(
+                        '^[A-Za-z 0-9-|_|(|)]{5,25}$',
+                      ),
                     },
                     {
                       required: true,
-                      message: "Class code can't be empty",
+                      message: "Class code can't be empty !",
                     },
                   ]}
                 >
@@ -427,13 +428,14 @@ const BusinessWithSearchPage: FC = () => {
                   label="Class name"
                   rules={[
                     {
-                      required: true,
-                      message: "Class name can't be empty",
+                      message: 'Class name is invalid. Ex: Abc Xyz',
+                      pattern: new RegExp(
+                        '^[a-z A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ0-9#]{2,40}$',
+                      ),
                     },
                     {
-                      type: 'regexp',
-                      pattern: new RegExp('^[a-zA-Z0-9]{2,40}$'),
-                      message: 'Class code is wrong format',
+                      required: true,
+                      message: "Class name can't be empty !",
                     },
                   ]}
                 >

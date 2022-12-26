@@ -21,14 +21,8 @@ interface MenuProps {
 
 const MenuComponent: FC<MenuProps> = props => {
   const { loading, currentUser} = useAuth();
-  console.log("🚀 ~ file: menu.tsx:23 ~ currentUser", currentUser)
-
   const { pathname } = useLocation();
 
-
-
-
-  // console.log("🚀 ~ file: menu.tsx:29 ~ isAdmin", isAdmin,(isAdmin ?'businessAdmin':'business'))
 
   
   const { menuList, openKey, onChangeOpenKey, selectedKey, onChangeSelectedKey } = props;

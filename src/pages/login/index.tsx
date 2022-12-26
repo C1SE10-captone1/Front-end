@@ -49,15 +49,12 @@ const LoginForm: FC = () => {
       <div className="form-container">
         <div className="login-page">
           <div className="form-wrapper">
-            <span className="logo">SMART GRADE 5</span>
-            <span className="title" style={{ fontSize: '25px' }}>
+            <span className="logo">INSTAGRADE 5</span>
+            <span className="title" style={{ fontSize: '25px',fontWeight:'bold',paddingBottom:'20px' }}>
               Login
             </span>
             <Form
               name="basic"
-              // labelCol={{
-              //   span: 8,
-              // }}
               wrapperCol={{
                 span: 20,
               }}
@@ -66,7 +63,7 @@ const LoginForm: FC = () => {
               }}
               onFinish={handleSubmit}
               onFinishFailed={onFinishFailed}
-              autoComplete="off"
+              autoComplete="on"
               style={{ color: '#000' }}
             >
               <Form.Item
@@ -78,8 +75,15 @@ const LoginForm: FC = () => {
                   },
                   { required: true, message: "Email can't be empty!" },
                 ]}
+                wrapperCol={{
+                  // offset: 1,
+                  span: 22,
+                }}
               >
-                <Input placeholder="email" />
+                <Input placeholder="Email" style={{
+          width: 250,
+          height:50,
+        }}/>
               </Form.Item>
 
               <Form.Item
@@ -89,38 +93,52 @@ const LoginForm: FC = () => {
                     required: true,
                     message: "Password can't be empty!",
                   },
+                  // {
+                  //   message: `Password invalid. \n Ex: Abcd@123!`,
+                  //   pattern: new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*\\.\\_\\-])(?=.{5,30})')
+                  // }
                 ]}
+                wrapperCol={{
+                  // offset: 1,
+                  span: 21,
+                }}
               >
-                <Input.Password placeholder="password" />
+                <Input.Password placeholder="Password" style={{
+          width: 250,
+          height:50,
+        }}/>
               </Form.Item>
-              {/* 
+              
               <Form.Item
                 name="remember"
                 valuePropName="checked"
                 wrapperCol={{
-                  // offset: 8,
+                  // offset: 0,
                   span: 16,
                 }}
               >
                 <Checkbox>Remember me</Checkbox>
-              </Form.Item> */}
+              </Form.Item>
 
               <Form.Item
-              // wrapperCol={{
-              //   offset: 8,
-              //   span: 16,
-              // }}
+              wrapperCol={{
+                // offset: 2,
+                span: 22,
+              }}
               >
-                <Button type="primary" htmlType="submit">
+                <div>
+                {/* type="primary" htmlType="submit" style={{alignItems:'center',textAlign:'center',justifyContent:'center'}} */}
+                <button style={{justifyContent:'center',width:'250px'}}>
                   Sign in
-                </Button>
+                </button>
+                </div>
               </Form.Item>
             </Form>
             <p style={{ fontSize: '15px' }}>
-              You don't have an account? <Link to="/register">Register</Link>
+              You don't have an account? <Link to="/register"><u style={{fontWeight:'bold'}}>Register</u></Link>
             </p>
             <p style={{ fontSize: '15px' }}>
-              forgot password Click here <Link to="/forgot-password">Forgot password</Link>
+              forgot password Click here <Link to="/forgot-password"><u style={{fontWeight:'bold'}}>Forgot password</u></Link>
             </p>
           </div>
         </div>

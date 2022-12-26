@@ -26,11 +26,16 @@ import BusinessAdminBasicPage from '@/pages/admin/BusinessAdminBasic';
 import Student_page from './../pages/admin/student-management/Student_page';
 import Result_page_admin from './../pages/admin/result-page/Result_page_admin';
 import Account_manager_page from './../pages/admin/account-management/Account_manager_page';
+import NotFoundPage from './../pages/404';
 
 const routeList: RouteObject[] = [
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '*',
+    element: <WrapperRouteComponent element={<NotFoundPage/>} titleId="title.notFount" />,
   },
   {
     path: '/forgot-password',
@@ -94,6 +99,10 @@ const routeList: RouteObject[] = [
       {
         path: '/admin/basic',
         element:  <BusinessAdminBasicPage /> ,
+      },
+      {
+        path: 'profile',
+        element: <PersonalAvatar/>,
       },
       {
         path: '/admin/student_management',

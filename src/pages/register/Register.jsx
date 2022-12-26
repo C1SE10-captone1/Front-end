@@ -12,14 +12,20 @@ const Register = () => {
   const [err, setErr] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
-
+  const onFinishFailed = errorInfo => {
+    console.log('Failed:', errorInfo);
+  };
   const handleSubmit = async e => {
     setLoading(true);
-    e.preventDefault();
+    // e.preventDefault();
 
-    const email = e.target[0].value;
-    const password = e.target[1].value;
-    const confirmPassword = e.target[2].value;
+    // const email = e.target[0].value;
+    // const password = e.target[1].value;
+    // const confirmPassword = e.target[2].value;
+    const email = e.username;
+
+    const password = e.password;
+    const confirmPassword = e.confirm;
     // const file = e.target[3].files[0];
 
     try {
@@ -52,32 +58,35 @@ const Register = () => {
       <div className="form-container">
         <div className="login-page">
           <div className="form-wrapper">
-            <span className="logo">SMART GRADE 5</span>
-            <span className="title" style={{ fontSize: '25px' }}>
+            <span className="logo">INSTAGRADE 5</span>
+            <span className="title" style={{ fontSize: '25px',fontWeight:'bold',paddingBottom:'20px' }}>
               Register
             </span>
-            <form onSubmit={handleSubmit}>
+            {/* <form onSubmit={handleSubmit}>
               <input required type="email" placeholder="email" />
               <input required type="password" placeholder="password" />
               <input required type="password" placeholder="confirm password" />
               <button disabled={loading}>Sign up</button>
               {err && <span>sai mật khẩu vui lòng nhập lại</span>}
-            </form>
-            {/* <Form
+            </form> */}
+            <Form
               name="basic"
+              // labelCol={{
+              //   span: 8,
+              // }}
               wrapperCol={{
                 span: 20,
               }}
               initialValues={{
                 remember: true,
               }}
-              // onFinish={handleSubmit}
+              onFinish={handleSubmit}
               onFinishFailed={onFinishFailed}
               autoComplete="off"
-              style={{ color: '#000' }}
+              style={{ color: '#000 !important'}}
             >
               <Form.Item
-                name="email"
+                name="username"
                 rules={[
                   {
                     type: 'email',
@@ -85,8 +94,12 @@ const Register = () => {
                   },
                   { required: true, message: "Email can't be empty!" },
                 ]}
+                wrapperCol={{
+                  offset: 2,
+                  span: 22,
+                }}
               >
-                <Input placeholder="email" />
+                <Input placeholder="Email"  style={{ color: '#000 !important' }}/>
               </Form.Item>
 
               <Form.Item
@@ -96,18 +109,75 @@ const Register = () => {
                     required: true,
                     message: "Password can't be empty!",
                   },
+                  {
+                    message: `Password invalid. \n Ex: Abcd@123!`,
+                    pattern: new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*\\.\\_\\-])(?=.{5,30})'),
+                  },
                 ]}
+                wrapperCol={{
+                  offset: 2,
+                  span: 21,
+                }}
+                // hasFeedback
               >
-                <Input.Password placeholder="password" />
+                <Input.Password
+                  placeholder="Password"
+                  style={{ border: 'none', color: '#000 !important' }}
+                />
               </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Sign in
-                </Button>
+              <Form.Item
+                name="confirm"
+                dependencies={['password']}
+                hasFeedback
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please confirm your password!',
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                    },
+                  }),
+                ]}
+                wrapperCol={{
+                  offset: 2,
+                  span: 21,
+                }}
+              >
+                <Input.Password
+                  placeholder="Confirm Password"
+                  style={{ border: 'none', color: '#000 !important' }}
+                />
               </Form.Item>
-            </Form> */}
+{/* 
+              <Form.Item
+                name="remember"
+                valuePropName="checked"
+                wrapperCol={{
+                  offset: 2,
+                  span: 16,
+                }}
+              >
+                <Checkbox style={{ fontSize: '12px' }}>Remember me</Checkbox>
+              </Form.Item> */}
+
+              <Form.Item
+                wrapperCol={{
+                  offset: 2,
+                  span: 22,
+                }}
+              >
+                <div>
+                  <button style={{ justifyContent: 'center', width: '250px' }}>Sign up</button>
+                </div>
+              </Form.Item>
+            </Form>
             <p style={{ fontSize: '15px' }}>
-              You do have an account? <Link to="/login">Login</Link>
+              You do have an account? <Link to="/login"><u style={{fontWeight:'bold'}}>Login</u></Link>
             </p>
           </div>
         </div>
