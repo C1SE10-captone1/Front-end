@@ -34,7 +34,6 @@ const MenuComponent: FC<MenuProps> = props => {
     const idUser = currentUser?.id;
     const test =await supabase.from('profiles').select('is_admin').eq('id',idUser);
     
-    console.log("🚀 ~ file: menu.tsx:29 ~ isAdmin", test)
     setMenuListFilted(
       [...menuList
         .filter(e => e.code !== (test?.data?.[0]?.is_admin ?  'business':'businessAdmin' ))]

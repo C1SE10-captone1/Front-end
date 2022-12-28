@@ -50,7 +50,7 @@ const LoginForm: FC = () => {
         <div className="login-page">
           <div className="form-wrapper">
             <span className="logo">INSTAGRADE 5</span>
-            <span className="title" style={{ fontSize: '25px',fontWeight:'bold',paddingBottom:'20px' }}>
+            <span className="title" style={{ fontSize: '25px', fontWeight: 'bold', paddingBottom: '20px' }}>
               Login
             </span>
             <Form
@@ -80,14 +80,22 @@ const LoginForm: FC = () => {
                   span: 22,
                 }}
               >
-                <Input placeholder="Email" style={{
-          width: 250,
-          height:50,
-        }}/>
+                <Input
+                  placeholder="Email"
+                  style={{
+                    width: 250,
+                    height: 50,
+                  }}
+                />
               </Form.Item>
 
               <Form.Item
                 name="password"
+                style={{
+                  // width: 250,
+                  // height: 50,
+                  border: 'none',
+                }}
                 rules={[
                   {
                     required: true,
@@ -103,12 +111,16 @@ const LoginForm: FC = () => {
                   span: 21,
                 }}
               >
-                <Input.Password placeholder="Password" style={{
-          width: 250,
-          height:50,
-        }}/>
+                <Input.Password
+                  placeholder="Password"
+                  style={{
+                    width: 250,
+                    height: 50,
+                    border: 'none',
+                  }}
+                />
               </Form.Item>
-              
+
               <Form.Item
                 name="remember"
                 valuePropName="checked"
@@ -121,24 +133,28 @@ const LoginForm: FC = () => {
               </Form.Item>
 
               <Form.Item
-              wrapperCol={{
-                // offset: 2,
-                span: 22,
-              }}
+                wrapperCol={{
+                  // offset: 2,
+                  span: 22,
+                }}
               >
                 <div>
-                {/* type="primary" htmlType="submit" style={{alignItems:'center',textAlign:'center',justifyContent:'center'}} */}
-                <button style={{justifyContent:'center',width:'250px'}}>
-                  Sign in
-                </button>
+                  {/* type="primary" htmlType="submit" style={{alignItems:'center',textAlign:'center',justifyContent:'center'}} */}
+                  <button style={{ justifyContent: 'center', width: '250px' }}>Sign in</button>
                 </div>
               </Form.Item>
             </Form>
             <p style={{ fontSize: '15px' }}>
-              You don't have an account? <Link to="/register"><u style={{fontWeight:'bold'}}>Register</u></Link>
+              You don't have an account?{' '}
+              <Link to="/register">
+                <u style={{ fontWeight: 'bold' }}>Register</u>
+              </Link>
             </p>
             <p style={{ fontSize: '15px' }}>
-              forgot password Click here <Link to="/forgot-password"><u style={{fontWeight:'bold'}}>Forgot password</u></Link>
+              forgot password Click here{' '}
+              <Link to="/forgot-password">
+                <u style={{ fontWeight: 'bold' }}>Forgot password</u>
+              </Link>
             </p>
           </div>
         </div>

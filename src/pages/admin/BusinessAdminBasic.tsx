@@ -6,8 +6,8 @@ import { BuniesssUser } from '@/interface/business';
 import { FC, useState, useEffect, useContext } from 'react';
 import { supabase } from './../../config/supabase';
 import { AuthContext } from './../../context/AuthContext';
-import { DownOutlined } from '@ant-design/icons';
-import { read, utils, writeFile } from "xlsx";
+import { DownOutlined, ExportOutlined, DownloadOutlined } from '@ant-design/icons';
+import { read, utils, writeFile } from 'xlsx';
 
 const BusinessAdminBasicPage: FC = () => {
   const [page, setPage] = useState(1);
@@ -75,7 +75,7 @@ const BusinessAdminBasicPage: FC = () => {
       key: c,
       label: c,
     }));
-  
+
     return (
       <Menu
         onClick={async e => {
@@ -128,8 +128,7 @@ const BusinessAdminBasicPage: FC = () => {
             .eq('students.is_delete', false)
             // .eq("exam_id", IDExam)
             .eq('students.class_id', ClassID);
-            
-            console.log("🚀 ~ file: index.tsx:129 ~ menuExam ~ result", result)
+
           setListDataStudentResponse(result);
           setLoading(false);
         }}
@@ -147,21 +146,19 @@ const BusinessAdminBasicPage: FC = () => {
   //   });
   // }
   const handleExport = () => {
-    const listStudentExport = listDataStudentResponse.map(e => ({ student_code:e.students.student_code ,fullname: e.students.full_name, point:e.point}))
-
-    console.log("🚀 ~ file: index.tsx:151 ~ handleExport ~ listStudentExport", listStudentExport)
-    const headings = [["student_code", "full_name", "point"]];
+    const listStudentExport = listDataStudentResponse.map(e => ({
+      student_code: e.students.student_code,
+      fullname: e.students.full_name,
+      point: e.point,
+    }));
+    const headings = [['student_code', 'full_name', 'point']];
     const wb = utils.book_new();
     const ws = utils.json_to_sheet([]);
     utils.sheet_add_aoa(ws, headings);
-    utils.sheet_add_json(ws, listStudentExport, { origin: "A2", skipHeader: true });
-    utils.book_append_sheet(wb, ws, "Report");
-    const nameFile = ClassCode + "-"+exam +"Students Report.xlsx";
+    utils.sheet_add_json(ws, listStudentExport, { origin: 'A2', skipHeader: true });
+    utils.book_append_sheet(wb, ws, 'Report');
+    const nameFile = ClassCode + '-' + exam + 'Students Report.xlsx';
     writeFile(wb, nameFile);
-    console.log(
-      "🚀 ~ file: homeComponent.jsx ~ line 46 ~ handleExport ~ wb",
-      wb
-    );
   };
   return (
     <div>
@@ -192,7 +189,7 @@ const BusinessAdminBasicPage: FC = () => {
             </Dropdown>
 
             <div style={{ paddingLeft: '200px', justifyContent: 'center' }}>
-            {/* <Search
+              {/* <Search
               placeholder="Search students by name..."
               // onSearch={}
               enterButton
@@ -201,17 +198,7 @@ const BusinessAdminBasicPage: FC = () => {
                 paddingRight: '10px',
               }}
             /> */}
-          </div>
-          <div style={{ paddingLeft: '300px', justifyContent: 'center' }}>
-          <div className="col-md-6">
-              <button
-                onClick={handleExport}
-                className="btn btn-primary float-right"
-              >
-                Export <i className="fa fa-download"></i>
-              </button>
             </div>
-          </div>
           </Space>
           <div
             className="content-table"
@@ -242,6 +229,20 @@ const BusinessAdminBasicPage: FC = () => {
                   y: 240,
                 }}
               />
+            </div>
+            <div style={{ paddingLeft: '30px', justifyContent: 'center', paddingTop:'30px' }}>
+              <div className="col-md-6">
+                <Button
+                  onClick={handleExport}
+                  className="btn btn-primary float-right"
+                  type="primary"
+                  icon={<DownloadOutlined />}
+                  size="medium"
+                  disabled = {listDataStudentResponse?.length===0}
+                >
+                  Export
+                </Button>
+              </div>
             </div>
           </div>
         </div>

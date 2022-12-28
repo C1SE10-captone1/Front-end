@@ -1,4 +1,4 @@
-import { Form, Input, Menu, Space, Modal, Select, Table } from 'antd';
+import { Form, Input, Menu, Space, Modal, Select, Table, AutoComplete } from 'antd';
 import React from 'react';
 import { supabase } from './../../../config/supabase';
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
@@ -100,8 +100,6 @@ const Account_manager_page = () => {
   // function refresh
   const refreshData = async () => {
     const { data: user, error } = await supabase.auth.admin.listUsers();
-    console.log("🚀 ~ file: Account_manager_page.tsx:100 ~ refreshData ~ user", user)
-
     setdataSource(user.users);
   };
 
@@ -231,22 +229,24 @@ const Account_manager_page = () => {
 
     // setIsModalOpenRecoverClass(false);
   };
+  const mockVal = (str, repeat = 1) => ({
+    value: str.repeat(repeat),
+  });
+  const [options, setOptions] = useState([]);
   // function for searching
   const [search, setSearch] = useState('');
   const onSearch = async e => {
-    // if (e === '') refreshData();
-
-    // const searchField = '%' + e + '%';
+  
+    if (e === '') refreshData();
+    setOptions(!e ? [] : [mockVal(e), mockVal(e, 2), mockVal(e, 3)]);
+    const searchField = '%' + e + '%';
     // const useID = currentUser?.currentUser?.id;
-    // const { data } = await supabase
-    //   .from('classes')
-    //   .select('*')
-    //   .eq('is_delete', false)
-    //   .like('name', searchField)
-    //   .order('created_at', { ascending: false });
-
-    // setdataSource(data);
-
+    const  data  =dataSource.filter(a => {
+      return a?.email?.includes(e)
+    }) ;
+    
+    setdataSource(data);
+    
     // const { data: dataisdelete } = await supabase
     //   .from('classes')
     //   .select('*')
@@ -263,7 +263,7 @@ const Account_manager_page = () => {
       <div className="tabs-main">
         <div className="aside-main">
            <div style={{ display: 'flex', paddingBottom: '20px' }}>
-           <Search
+           {/* <Search
               placeholder="find Class by name..."
               onSearch={onSearch}
               enterButton
@@ -276,7 +276,20 @@ const Account_manager_page = () => {
               onChange={e => {
                 setSearch(e.target.value);
               }}
-            /> 
+            />  */}
+            <AutoComplete
+              options={options}
+              style={{
+                width: 300,
+                paddingRight: '10px',
+                color: '#1E90FF',
+              }}
+              // onSelect={onSelect}
+              onSearch={onSearch}
+              onChange={e => {
+                setSearch(e);
+              }}
+            ><Input.Search size="medium" placeholder="find Class by name..." enterButton /></AutoComplete>
             {/* <Modal title="Add Class" open={isModalOpenAddClass} onOk={form.submit} onCancel={handleCancel}>
               <Form form={form} onFinish={handleOkForAddClass}>
                 <Form.Item

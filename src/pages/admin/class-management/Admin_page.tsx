@@ -1,4 +1,4 @@
-import { Space, Table, Input, Button, Dropdown, Menu, message, Modal, Form, Radio, Select } from 'antd';
+import { Space, Table, Input, Button, Dropdown, Menu, message, Modal, Form, Radio, Select, AutoComplete } from 'antd';
 import type { MenuProps } from 'antd';
 import MyButton from '@/components/basic/button';
 import './style.css';
@@ -10,6 +10,7 @@ import {
   PlusCircleFilled,
   PlusOutlined,
   RollbackOutlined,
+  SearchOutlined,
   SmileOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -23,8 +24,6 @@ import { toast } from 'react-hot-toast';
 import moment from 'moment';
 import { supabase } from '../../../config/supabase';
 
-
-
 export const getFullDate = (date: string): string => {
   if (date) {
     const dateAndTime = date.split('T');
@@ -35,37 +34,41 @@ export const getFullDate = (date: string): string => {
   return '';
 };
 const Admin_page: FC = () => {
+  // segestion for search
+  const mockVal = (str, repeat = 1) => ({
+    value: str.repeat(repeat),
+  });
+  const [options, setOptions] = useState([]);
   const { Search } = Input;
 
-const menu = (
-  <Menu
-    items={[
-      {
-        key: '1',
-        label: 'semester 1',
-      },
-      {
-        key: '2',
-        label: 'semester 2',
-      },
-      {
-        key: '3',
-        label: 'semester 3',
-      },
-      {
-        key: '4',
-        danger: true,
-        label: 'a danger item',
-      },
-    ]}
-  />
-);
-const semester = [
-  { lable: 'semester 1', value: '1' },
-  { lable: 'semester 2', value: '2' },
-  { lable: 'semester vacation', value: '3' },
-];
-
+  const menu = (
+    <Menu
+      items={[
+        {
+          key: '1',
+          label: 'semester 1',
+        },
+        {
+          key: '2',
+          label: 'semester 2',
+        },
+        {
+          key: '3',
+          label: 'semester 3',
+        },
+        {
+          key: '4',
+          danger: true,
+          label: 'a danger item',
+        },
+      ]}
+    />
+  );
+  const semester = [
+    { lable: 'semester 1', value: '1' },
+    { lable: 'semester 2', value: '2' },
+    { lable: 'semester vacation', value: '3' },
+  ];
 
   const [form] = Form.useForm();
   const [page, setpage] = useState(1);
@@ -193,11 +196,11 @@ const semester = [
     //   return;
     // }
 
-    const { data,err } = await supabase
-    .from('classes')
-    .select('*')
-    .eq('is_delete', false)
-    .order('created_at', { ascending: false });
+    const { data, err } = await supabase
+      .from('classes')
+      .select('*')
+      .eq('is_delete', false)
+      .order('created_at', { ascending: false });
 
     setdataSource(data);
 
@@ -207,12 +210,11 @@ const semester = [
       .eq('is_delete', true)
       .order('created_at', { ascending: false });
 
-
     setclassHasDelete(dataisdelete);
   };
 
-  useEffect(async() => {
-   await refreshData();
+  useEffect(async () => {
+    await refreshData();
     setTimeout(async () => {
       await setLoading(false);
     }, 2000);
@@ -340,6 +342,7 @@ const semester = [
   // function for searching
   const [search, setSearch] = useState('');
   const onSearch = async e => {
+    setOptions(!e ? [] : [mockVal(e), mockVal(e, 2), mockVal(e, 3)]);
     if (e === '') refreshData();
 
     const searchField = '%' + e + '%';
@@ -368,8 +371,8 @@ const semester = [
     <div css={styles}>
       <div className="tabs-main">
         <div className="aside-main">
-           <div style={{ display: 'flex', paddingBottom: '20px' }}>
-           <Search
+          <div style={{ display: 'flex', paddingBottom: '20px' }}>
+            {/* <Search
               placeholder="find Class by name..."
               onSearch={onSearch}
               enterButton
@@ -382,14 +385,20 @@ const semester = [
               onChange={e => {
                 setSearch(e.target.value);
               }}
-            /> 
-            {/* <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
-              <Button onClick={showModal}>
-                <PlusCircleFilled style={{ color: '#1E90FF' }} />
-                Add Class
-              </Button>
-             <Button>Import file</Button> 
-            </div> */}
+            />  */}
+            <AutoComplete
+              options={options}
+              style={{
+                width: 300,
+                paddingRight: '10px',
+                color: '#1E90FF',
+              }}
+              // onSelect={onSelect}
+              onSearch={onSearch}
+              onChange={e => {
+                setSearch(e);
+              }}
+            ><Input.Search size="medium" placeholder="find Class by name..." enterButton /></AutoComplete>
             <Modal title="Add Class" open={isModalOpenAddClass} onOk={form.submit} onCancel={handleCancel}>
               <Form form={form} onFinish={handleOkForAddClass}>
                 <Form.Item
@@ -554,7 +563,7 @@ const semester = [
                 <h4>Do you want recover class ?</h4>
               </Form>
             </Modal>
-          </div> 
+          </div>
           <div
             className="content-table"
             style={{

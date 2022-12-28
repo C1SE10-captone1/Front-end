@@ -8,7 +8,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import { css } from '@emotion/react';
-import { Button, Dropdown, Input, Menu, Space, Table, Upload, Form, Modal, Select, Progress } from 'antd';
+import { Button, Dropdown, Input, Menu, Space, Table, Upload, Form, Modal, Select, Progress, AutoComplete } from 'antd';
 import { FC, useContext, useEffect, useState } from 'react';
 import { AuthContext } from './../../../context/AuthContext';
 import { supabase } from '../../../config/supabase';
@@ -406,12 +406,17 @@ const Student_page: FC = () => {
       reader.readAsArrayBuffer(file);
     }
   };
-  // function for searching
+  const mockVal = (str, repeat = 1) => ({
+    value: str.repeat(repeat),
+  });
+  const [options, setOptions] = useState([]);
   const [search, setSearch] = useState('');
+  // function for searching
   const onSearch = async e => {
     if(classID){
-    if (e === '') refreshData();
-
+      if (e === '') refreshData();
+      setOptions(!e ? [] : [mockVal(e), mockVal(e, 2), mockVal(e, 3)]);
+      
     const searchField = '%' + e + '%';
 
     const { data } = await supabase
@@ -471,7 +476,7 @@ const Student_page: FC = () => {
             </Dropdown>
 
             <div style={{ paddingLeft: '200px', justifyContent: 'center' }}>
-              <Search
+              {/* <Search
                 placeholder="Search students by name..."
                 onSearch={onSearch}
                 enterButton
@@ -479,7 +484,21 @@ const Student_page: FC = () => {
                   width: 250,
                   paddingRight: '10px',
                 }}
-              />
+              /> */}
+              <AutoComplete
+              disabled= {liststudent?.length===0}
+              options={options}
+              style={{
+                width: 300,
+                paddingRight: '10px',
+                color: '#1E90FF',
+              }}
+              // onSelect={onSelect}
+              onSearch={onSearch}
+              onChange={e => {
+                setSearch(e);
+              }}
+            ><Input.Search size="medium" placeholder="Search students by name..." enterButton /></AutoComplete>
             </div>
             {/* <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
               <Button onClick={showModal}>

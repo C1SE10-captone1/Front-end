@@ -1,4 +1,4 @@
-import { Space, Table, Input, Button, Dropdown, Menu, message, Modal, Form, Radio, Select } from 'antd';
+import { Space, Table, Input, Button, Dropdown, Menu, message, Modal, Form, Radio, Select, AutoComplete } from 'antd';
 import type { MenuProps } from 'antd';
 import MyButton from '@/components/basic/button';
 import './style.css';
@@ -348,11 +348,15 @@ const BusinessWithSearchPage: FC = () => {
 
     setIsModalOpenRecoverClass(false);
   };
+  const mockVal = (str, repeat = 1) => ({
+    value: str.repeat(repeat),
+  });
+  const [options, setOptions] = useState([]);
   // function for searching
   const [search, setSearch] = useState('');
   const onSearch = async e => {
     if (e === '') refreshData();
-
+    setOptions(!e ? [] : [mockVal(e), mockVal(e, 2), mockVal(e, 3)]);
     const searchField = '%' + e + '%';
     const useID = currentUser?.currentUser?.id;
     const { data } = await supabase
@@ -382,20 +386,19 @@ const BusinessWithSearchPage: FC = () => {
       <div className="tabs-main">
         <div className="aside-main">
           <div style={{ display: 'flex', paddingBottom: '20px' }}>
-            <Search
-              placeholder="find Class by name..."
-              onSearch={onSearch}
-              enterButton
+            <AutoComplete
+              options={options}
               style={{
                 width: 300,
                 paddingRight: '10px',
                 color: '#1E90FF',
               }}
-              value={search}
+              // onSelect={onSelect}
+              onSearch={onSearch}
               onChange={e => {
-                setSearch(e.target.value);
+                setSearch(e);
               }}
-            />
+            ><Input.Search size="medium" placeholder="find Class by name..." enterButton /></AutoComplete>
             <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
               <Button onClick={showModal}>
                 <PlusCircleFilled style={{ color: '#1E90FF' }} />
