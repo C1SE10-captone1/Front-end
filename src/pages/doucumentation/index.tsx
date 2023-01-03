@@ -1,6 +1,6 @@
-import { FC } from 'react';
-import { Typography } from 'antd';
 import { LocaleFormatter } from '@/locales';
+import { Typography } from 'antd';
+import { FC } from 'react';
 
 const { Title, Paragraph } = Typography;
 
@@ -30,20 +30,35 @@ const DocumentationPage: FC = () => {
         <Paragraph>
           <ul>
             <li>
-              <a href="#layout">
+              <a href="#layout " >
                 <LocaleFormatter id="app.documentation.catalogue.list.layout1" />
               </a>
             </li>
             <li>
-              <a href="#routes">
-                <LocaleFormatter id="app.documentation.catalogue.list.routes1" />
+              <a href="#routes" style={{color:'#000'}}>
+                <LocaleFormatter id="app.documentation.catalogue.list.routes2" />
               </a>
             </li>
             <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes3" />
+              </a>
+            </li>
+            <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes4" />
+              </a>
+            </li>
+            <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes5" />
+              </a>
+            </li>
+            {/* <li>
               <a href="#request">
                 <LocaleFormatter id="app.documentation.catalogue.list.request1" />
               </a>
-            </li>
+            </li> */}
           </ul>
         </Paragraph>
         <Paragraph>
@@ -52,13 +67,50 @@ const DocumentationPage: FC = () => {
         <Paragraph>
           <ul>
             <li>
-              <a href="#layout">
+              <a href="#layout" >
                 <LocaleFormatter id="app.documentation.catalogue.list.layout2" />
               </a>
             </li>
             <li>
-              <a href="#routes">
+              <a href="#routes" style={{color:'#000'}}>
                 <LocaleFormatter id="app.documentation.catalogue.list.routes2" />
+              </a>
+            </li>
+            <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes3" />
+              </a>
+            </li>
+            <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes4" />
+              </a>
+            </li>
+            <li>
+              <a href="#request">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes5" />
+              </a>
+            </li>
+          </ul>
+          <ul>
+            <li>
+              <a href="#routes" style={{color:'#000'}}>
+                <LocaleFormatter id="app.documentation.catalogue.list.routes10" />
+              </a>
+            </li>
+            <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes3" />
+              </a>
+            </li>
+            <li>
+              <a href="#routes">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes4" />
+              </a>
+            </li>
+            <li>
+              <a href="#request">
+                <LocaleFormatter id="app.documentation.catalogue.list.routes5" />
               </a>
             </li>
             <li>
@@ -66,7 +118,7 @@ const DocumentationPage: FC = () => {
                 <LocaleFormatter id="app.documentation.catalogue.list.request2" />
               </a>
             </li>
-          </ul>
+          </ul> 
         </Paragraph>
         {/* <Title id="layout" level={2}>
           <LocaleFormatter id="app.documentation.catalogue.list.layout1" />

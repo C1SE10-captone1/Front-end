@@ -496,7 +496,7 @@ const BusinessWithAsidePage: FC = () => {
               onChange={e => {
                 setSearch(e);
               }}
-            ><Input.Search size="medium" placeholder="find Class by name..." enterButton /></AutoComplete>
+            ><Input.Search size="medium" placeholder="Find student by name..." enterButton /></AutoComplete>
             </div>
             <div style={{ paddingLeft: '10px', justifyContent: 'center' }}>
               <Button onClick={showModal}>

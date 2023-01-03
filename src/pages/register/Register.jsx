@@ -26,7 +26,11 @@ const Register = () => {
 
     const password = e.password;
     const confirmPassword = e.confirm;
-    // const file = e.target[3].files[0];
+ 
+
+  if (err) {
+    console.log("updload image failed", err);
+  }
 
     try {
       const { error } = await signUp({ email, password });
@@ -44,6 +48,11 @@ const Register = () => {
       toast.success('Account created!\nCheck your email for the login link.', {
         duration: 5000,
       });
+      const currentUser = useContext(AuthContext);
+      const useID = currentUser?.currentUser?.id;
+      const { err } = await supabase
+      .from("profile")
+      .insert({ image_url: '1', uid: useID });
     } catch (error) {
       toast.error('Some thing went wrong !', {
         duration: 5000,
@@ -62,18 +71,8 @@ const Register = () => {
             <span className="title" style={{ fontSize: '25px',fontWeight:'bold',paddingBottom:'20px' }}>
               Register
             </span>
-            {/* <form onSubmit={handleSubmit}>
-              <input required type="email" placeholder="email" />
-              <input required type="password" placeholder="password" />
-              <input required type="password" placeholder="confirm password" />
-              <button disabled={loading}>Sign up</button>
-              {err && <span>sai mật khẩu vui lòng nhập lại</span>}
-            </form> */}
             <Form
               name="basic"
-              // labelCol={{
-              //   span: 8,
-              // }}
               wrapperCol={{
                 span: 20,
               }}

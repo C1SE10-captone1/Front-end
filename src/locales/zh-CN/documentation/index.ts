@@ -11,13 +11,17 @@ export const zhCN_documentation = {
   'app.documentation.catalogue.title': 'Các chức năng chính có trên Android app và trên Website',
   'app.documentation.catalogue.description1': 'Android app',
   'app.documentation.catalogue.list.layout1': 'Đăng nhập, Đăng xuất',
-  'app.documentation.catalogue.list.routes1': 'Người quản lý',
-  'app.documentation.catalogue.list.request1': 'Người dùng',
+  'app.documentation.catalogue.list.routes1': 'Quản lý học sinh',
+  'app.documentation.catalogue.list.routes10': 'Vai trò quản lý :',
+  'app.documentation.catalogue.list.routes3': 'Quản lý học sinh',
+  'app.documentation.catalogue.list.routes4': 'Quản lý kết quả',
+  'app.documentation.catalogue.list.routes5': 'Quản lý lớp học',
+  'app.documentation.catalogue.list.request1': '',
   'app.documentation.catalogue.description2': 'Website',
   'app.documentation.catalogue.list.layout2':
     'Đăng ký (có xác minh bằng email), Đăng nhập, Đăng xuất, thay đổi profiles ',
-  'app.documentation.catalogue.list.routes2': 'Người quản lý',
-  'app.documentation.catalogue.list.request2': 'Người dùng',
+  'app.documentation.catalogue.list.routes2': 'Vai trò người dùng :',
+  'app.documentation.catalogue.list.request2': 'Quản lý người dùng',
 
   // Admin:
   // Quản lý User:
