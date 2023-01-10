@@ -3,9 +3,9 @@ export function studentCodeValidator(name) {
   name = name.trim();
   if (!name) return "Student code can't be empty.";
   if (name.length > 11 || name.length < 10)
-    return "Student code length is 10 or 11.";
+    return "Student code length is 10 or 11 characters.";
 
   if (!regName.test(name))
-    return "Student code is invalid. Ex: 20xxxxxxxx, 28xxxxxxxxx";
+    return "Student code is invalid. Ex: 20xxxxxxxx - 28xxxxxxxxx";
   return "";
 }

@@ -1,6 +1,6 @@
 export function passwordValidator(password) {
-  // const re =
-  // /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*\\.\\_\\-])(?=.{5,30})/;
+  const re =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*\\.\\_\\-])(?=.{5,30})/;
   if (!password) return "Password can't be empty.";
   if (password.length < 6)
     return "Password must be at least 6 characters long.";

@@ -15,6 +15,7 @@ import { theme } from "../core/theme";
 import { CheckBox } from "react-native-elements";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../utils/supabase-service";
+import TextInput from "../components/TextInput";
 
 function createArrayWithNumbers(length) {
   return Array.from({ length }, (_, i) => i);
@@ -27,7 +28,7 @@ const AnswerStudent = ({ route, navigation }) => {
   const scale = route.params.scale;
   const classId = route.params.class_id;
   const currentUser = supabase.auth.user();
-  const [student, setStudent] = useState();
+  // const [studentId, setStudentId] = useState({ value: "", error: "" });
   const [disabled, setDisabled] = useState(false);
   const [answerKey, setAnswerKey] = useState([]);
   let arr = new Map();
@@ -63,7 +64,7 @@ const AnswerStudent = ({ route, navigation }) => {
   };
   // remember url after change domain
   const URLpath =
-    "https://be41-123-19-171-56.ap.ngrok.io/file/upload-answer-student/";
+    "https://84de-2401-d800-9d51-f301-7185-811a-1244-bb2a.ap.ngrok.io/file/upload-answer-student/";
 
   const getAnswerKeyAndScale = async () => {
     let { data: answer_exams, error } = await supabase
@@ -109,9 +110,6 @@ const AnswerStudent = ({ route, navigation }) => {
   };
 
   const Save = async () => {
-    const URLpath =
-      "https://a38e-113-162-128-159.ap.ngrok.io/file/upload-answer-student/";
-
     console.log("click save");
     let check = false;
     let ans = [];
@@ -151,7 +149,7 @@ const AnswerStudent = ({ route, navigation }) => {
         body: formData,
       })
         .then((responseJson) => {
-          console.log("response: ", responseJson);
+          console.log("response: ", JSON.stringify(responseJson));
         })
         .catch((error) => {
           console.log("error: ", error);
@@ -163,12 +161,12 @@ const AnswerStudent = ({ route, navigation }) => {
     });
 
     // check answer is correct!
-    // arr.forEach(function (value, key) {
-    //   ans.push({ key, value });
-    //   if (value === answerKey[key]) {
-    //     count++;
-    //   }
-    // });
+    arr.forEach(function (value, key) {
+      ans.push({ key, value });
+      if (value === answerKey[key]) {
+        count++;
+      }
+    });
 
     let { data: students, error } = await supabase
       .from("students")
@@ -179,59 +177,59 @@ const AnswerStudent = ({ route, navigation }) => {
     // })
     console.log(students);
     // check student_code
-    // if (students[0]) {
-    //   const { error1 } = await supabase
-    //     .from("answer_students")
-    //     .update([
-    //       {
-    //         exam_id: examId,
-    //         answers: ans.sort(),
-    //         point: (count * scale).toFixed(1),
-    //       },
-    //     ])
-    //     .eq("student_id", students[0].id);
+    if (students[0]) {
+      const { error1 } = await supabase
+        .from("answer_students")
+        .update([
+          {
+            exam_id: examId,
+            answers: ans.sort(),
+            point: (count * scale).toFixed(1),
+          },
+        ])
+        .eq("student_id", students[0].id);
 
-    //   if (error1) {
-    //     Alert.alert("Failed!", "Update answer of student failed!", [
-    //       {
-    //         text: "OK",
-    //         onPress: () => {},
-    //       },
-    //     ]);
-    //   } else {
-    //     Alert.alert("Success!", "Update answer of student successful!", [
-    //       {
-    //         text: "OK",
-    //         onPress: () => {},
-    //       },
-    //     ]);
-    //   }
-    // } else {
-    //   const { error1 } = await supabase.from("answer_students").insert([
-    //     {
-    //       exam_id: examId,
-    //       student_id: students[0].id,
-    //       answers: ans.sort(),
-    //       point: (count * scale).toFixed(1),
-    //     },
-    //   ]);
+      if (error1) {
+        Alert.alert("Failed!", "Update answer of student failed!", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      } else {
+        Alert.alert("Success!", "Update answer of student successful!", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      }
+    } else {
+      const { error1 } = await supabase.from("answer_students").insert([
+        {
+          exam_id: examId,
+          student_id: students[0].id,
+          answers: ans.sort(),
+          point: (count * scale).toFixed(1),
+        },
+      ]);
 
-    //   if (error1) {
-    //     Alert.alert("Failed!", "Upload answer of student failed!", [
-    //       {
-    //         text: "OK",
-    //         onPress: () => {},
-    //       },
-    //     ]);
-    //   } else {
-    //     Alert.alert("Success!", "Upload answer of student successful!", [
-    //       {
-    //         text: "OK",
-    //         onPress: () => {},
-    //       },
-    //     ]);
-    //   }
-    // }
+      if (error1) {
+        Alert.alert("Failed!", "Upload answer of student failed!", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      } else {
+        Alert.alert("Success!", "Upload answer of student successful!", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      }
+    }
   };
 
   const RenderItem = (props) => {
@@ -519,6 +517,19 @@ const AnswerStudent = ({ route, navigation }) => {
 
       <ScrollView style={{ width: "100%" }}>
         <View style={styles.container}>
+          {/* <View style={{ marginHorizontal: 50, marginBottom: 20 }}>
+            <TextInput
+              label="Student Code"
+              returnKeyType="done"
+              value={studentId.value}
+              onChangeText={(text) => setStudentId({ value: text, error: "" })}
+              error={!!studentId.error}
+              errorText={studentId.error}
+              autoCapitalize="none"
+              autoCompleteType="off"
+              style={{ padding: 0, height: 30 }}
+            />
+          </View> */}
           <View style={styles.box}>
             {/* {createArrayWithNumbers(examOptions).map((index) => {
               return (
@@ -547,6 +558,7 @@ const AnswerStudent = ({ route, navigation }) => {
               );
             })} */}
 
+            {/* answer when instructor input manual */}
             {!disabled &&
               createArrayWithNumbers(examOptions).map((index) => {
                 return (
@@ -574,6 +586,8 @@ const AnswerStudent = ({ route, navigation }) => {
                   </View>
                 );
               })}
+
+            {/* answer when instructor input from file */}
             {disabled &&
               answered1.map((e) => {
                 return (

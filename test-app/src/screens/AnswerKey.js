@@ -5,6 +5,7 @@ import {
   View,
   Text,
   Image,
+  Alert,
   PermissionsAndroid,
   TouchableOpacity,
 } from "react-native";
@@ -22,6 +23,7 @@ function createArrayWithNumbers(length) {
 const AnswerKey = ({ route, navigation }) => {
   // let colection = ["A", "B", "C", "D "];
 
+  let arr = new Map();
   const examId = route.params.id;
   const examName = route.params.name;
   const examOptions = route.params.options;
@@ -30,10 +32,11 @@ const AnswerKey = ({ route, navigation }) => {
   const [imageFromCamera, setImageFromCamera] = useState(null);
   const [disabled, setDisabled] = useState(false);
   const URLpath =
-    "https://a38e-113-162-128-159.ap.ngrok.io/file/upload-answer-key/";
+    "https://84de-2401-d800-9d51-f301-7185-811a-1244-bb2a.ap.ngrok.io/file/upload-answer-key/";
 
   const [answered1, setAnswered1] = useState([]);
   const answered = [];
+  let ans = [];
 
   const loadAnswerd = async () => {
     answered.push(
@@ -61,27 +64,22 @@ const AnswerKey = ({ route, navigation }) => {
     setAnswered1(answered);
   };
 
-  const loadExamDetails = async () => {
-    let { data: exams, error } = await supabase
-      .from("exams")
-      .select(
-        `id, name, date_exam, scale, option, description,
-          class_id,
-          classes (
-          id, name, class_code
-        )
-      `
-      )
-      .eq("id", examId)
-      .eq("is_delete", false)
-      .eq("classes.uid", currentUser.id);
+  const getAnswered = async () => {
+    const { data: answers } = await supabase
+      .from("answer_exams")
+      .select("answers")
+      .eq("exam_id", examId);
+    answers.forEach(function (value, key) {
+      ans.push({ key, value });
+    });
+    ans.map((e) => {
+      console.log(e.value);
+    });
   };
 
   useEffect(() => {
-    loadExamDetails();
-    setTimeout(async () => {
-      loadAnswerd();
-    }, 1000);
+    loadAnswerd();
+    getAnswered();
   }, [imageFromCamera, imageFromGellary]);
   // select image from gallery
   const pickImage = async () => {
@@ -150,7 +148,6 @@ const AnswerKey = ({ route, navigation }) => {
     // }
   };
 
-  let arr = new Map();
   const RenderItem = (props) => {
     const [A, setA] = useState(props.answer === "A" ? true : false);
     const [B, setB] = useState(props.answer === "B" ? true : false);
@@ -225,9 +222,9 @@ const AnswerKey = ({ route, navigation }) => {
 
   const Save = async () => {
     console.log("click save");
+
     let check = false;
     var urlImage = "";
-    let ans = [];
     arr.forEach(function (value, key) {
       ans.push({ key, value });
     });
@@ -261,7 +258,7 @@ const AnswerKey = ({ route, navigation }) => {
         body: formData,
       })
         .then((responseJson) => {
-          console.log("response: ", responseJson);
+          console.log("response: ", JSON.stringify(responseJson));
         })
         .catch((error) => {
           console.log("error: ", error);

@@ -134,8 +134,8 @@ const Result = ({ route, navigation }) => {
                     <View
                       style={{
                         flexDirection: "column",
-                        width: "10%",
-                        paddingLeft: "5%",
+                        // width: "10%",
+                        // paddingLeft: "5%",
                       }}
                     >
                       <Text>{item.point}</Text>

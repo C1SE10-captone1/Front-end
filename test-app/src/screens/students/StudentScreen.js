@@ -92,7 +92,7 @@ const StudentScreen = ({ route, navigation }) => {
               fontSize: 22,
             }}
           >
-            Student
+            Student(s)
           </Text>
         </View>
       </View>

@@ -29,6 +29,14 @@ const ProfileScreen = ({ navigation }) => {
 
   const [chane, setChange] = useState(false);
 
+  const getImageFromDB = async () => {
+    const { data: profile, error } = await supabase
+      .from("profile")
+      .select("*")
+      .eq("uid", currentUser.id);
+    setImageFromGellary(profile[0].image_url);
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -39,9 +47,18 @@ const ProfileScreen = ({ navigation }) => {
 
     if (!result.cancelled) {
       setImageFromGellary(result.uri);
+      const { err } = await supabase
+        .from("profile")
+        .update({ image_url: imageFromGellary })
+        .eq("uid", currentUser.id);
+
+      if (err) {
+        console.log("updload image failed", err);
+      }
     }
   };
   const Save = async () => {
+    setLoading(true);
     console.log(password.value, passwordConfirm.value);
     const passwordError = passwordValidator(password.value);
     const passwordConfirmError = passwordValidator(passwordConfirm.value);
@@ -52,14 +69,16 @@ const ProfileScreen = ({ navigation }) => {
         value: passwordConfirm.value,
         error: passwordConfirmError,
       });
+      setLoading(false);
       return;
     }
     if (password.value !== passwordConfirm.value) {
-      setPassword({ value: password.value, error: "Incorrect password." });
+      setPassword({ value: password.value, error: "Password incorrect." });
       setPasswordConfirm({
         value: passwordConfirm.value,
-        error: "Incorrect password.",
+        error: "Password incorrect.",
       });
+      setLoading(false);
       return;
     }
 
@@ -69,9 +88,29 @@ const ProfileScreen = ({ navigation }) => {
     });
 
     if (error) {
-      console.log(error);
+      Alert.alert("Failed!", "Change your password failed!", [
+        {
+          text: "Back",
+          onPress: () => {
+            setLoading(false);
+            return;
+          },
+        },
+      ]);
     } else {
       console.log("success");
+      Alert.alert("Success!", "Change your password successful!", [
+        {
+          text: "Ok",
+          onPress: () => {
+            setPassword({ value: "", error: "" });
+            setPasswordConfirm({ value: "", error: "" });
+            setLoading(false);
+            setChange(!chane);
+            return;
+          },
+        },
+      ]);
     }
   };
   const logout = async () => {
@@ -96,7 +135,9 @@ const ProfileScreen = ({ navigation }) => {
     // ]);
   };
 
-  const chaneImage = async () => {};
+  useEffect(() => {
+    getImageFromDB();
+  }, [getImageFromDB]);
 
   return (
     <SafeAreaView style={styles.container}>

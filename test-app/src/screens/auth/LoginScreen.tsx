@@ -7,7 +7,9 @@ import {
   KeyboardAvoidingView,
   Image,
   Text,
-  Alert
+  Alert,
+  ActivityIndicator,
+  SafeAreaView
 } from "react-native";
 import Logo from "../../components/Logo";
 import Header from "../../components/Header";
@@ -22,11 +24,12 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Layout, useTheme } from "react-native-rapi-ui";
 // import { useAuth } from "../utils/AuthContext";
 import { AuthStackParamList } from "../../types/navigation";
+import { StatusBar } from "expo-status-bar";
 
 export default function ({
   navigation,
 }: NativeStackScreenProps<AuthStackParamList, "Login">) {
-  const { isDarkmode, setTheme } = useTheme();
+
   const [email, setEmail] = useState < string > ();
   const [password, setPassword] = useState < string > ();
   const [errorE, setErrorE] = useState < string >();
@@ -34,7 +37,8 @@ export default function ({
   const [loading, setLoading] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(true);
   // const { signIn } = useAuth();
-
+  const themeContainerStyle =
+  loading ? styles.background : theme.colors.background;
   useEffect(()=>{
     setLoading(false)
   }, []);
@@ -82,8 +86,10 @@ export default function ({
   };
 
   return (
-    <KeyboardAvoidingView behavior="height" enabled style={{ flex: 1 }}>
-      <Layout>
+    <SafeAreaView style={[styles.container, themeContainerStyle]}>
+      <StatusBar style="light"/>
+    {/* <KeyboardAvoidingView behavior="height" enabled > */}
+      {/* <Layout> */}
         <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
@@ -95,26 +101,11 @@ export default function ({
               // flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              marginTop: 50
-              // backgroundColor: isDarkmode ? "#17171E" : themeColor.white100,
+              marginTop: '30%'
             }}
           >
 
-            {/* <View >  */}
                <Logo />
-            {/* </View> */}
-
-            {/* <Header
-              style={{
-                fontSize: 30,
-                justifyContent: "center",
-                color: theme.colors.primary,
-                // letterSpacing: 9,
-                paddingLeft: "-10%",
-              }}
-            >
-              Welcome!
-            </Header> */}
             <Header
               style={{
                 fontSize: 40,
@@ -124,13 +115,11 @@ export default function ({
                 fontWeight: "bold",
               }}
             >
-              InstaGrade
+              InstaGrade5
             </Header>
             <View
               style={{
                 marginHorizontal: 50,
-                // flex: 1,
-                // marginTop: 50,
                 justifyContent: "center",
                 alignItems: "center",
               }}
@@ -148,6 +137,7 @@ export default function ({
                   textContentType="emailAddress"
                   keyboardType="email-address"
                   description=""
+                  style={themeContainerStyle}
                   />
               </View>
               <View style={{ marginTop: 20, flexDirection: 'row'}}>
@@ -162,6 +152,7 @@ export default function ({
                   autoCompleteType="off"
                   secureTextEntry={visible}
                   description=""
+                  style={themeContainerStyle}
                 />
                 <TouchableOpacity style={{position: 'absolute',  right: -35, top: 0}} onPress={()=> setVisible(!visible)}>
                   {visible?<Image source={require("../../assets/visible.png")} style={styles.image} />:
@@ -181,9 +172,14 @@ export default function ({
                   mode="contained"
                   onPress={onLoginPressed}
                   disabled={loading}
-                   style={{ }}                >
+                   style={{ width: 200}}>
                 {loading ? "Loading" : "Log in"}
               </Button>
+              <ActivityIndicator
+                animating={loading}
+                color = '#bc2b78'
+                size = "large"
+                style = {styles.activityIndicator}/>
 
               <View style={styles.row}>
                 <Text>Don’t have an account? </Text>
@@ -193,30 +189,22 @@ export default function ({
                   <Text style={styles.link}>Sign up</Text>
                 </TouchableOpacity>
               </View>
-              {/* <TouchableOpacity
-                onPress={() => {
-                  isDarkmode ? setTheme("light") : setTheme("dark");
-                }}
-              >
-                <Text
-                  size="md"
-                  fontWeight="bold"
-                  style={{
-                    marginLeft: 5,
-                  }}
-                >
-                  {isDarkmode ? "☀️ light theme" : "🌑 dark theme"}
-                </Text>
-              </TouchableOpacity> */}
             </View>
           </View>
         </ScrollView>
-      </Layout>
-    </KeyboardAvoidingView>
+      {/* </Layout> */}
+    {/* </KeyboardAvoidingView> */}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   forgotPassword: {
     width: "100%",
     alignItems: "flex-end",
@@ -243,4 +231,16 @@ const styles = StyleSheet.create({
     right: 10,
     // positions: 'absolute'
   },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 80,
+    position: 'absolute',
+    top: "45%",
+    left: "45%",
+ },
+ background: {
+  backgroundColor: '#C0C0C0'
+},
 });

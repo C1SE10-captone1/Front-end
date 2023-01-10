@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import BackButton from "../../components/BackButton";
@@ -46,6 +47,9 @@ const CreateExam = ({ navigation }) => {
   const currentUser = supabase.auth.user();
   const [loading, setLoading] = useState(false);
   const ref = useRef(null);
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
 
   const loadClassOfUser = async () => {
     let { data: classes, error } = await supabase
@@ -157,18 +161,21 @@ const CreateExam = ({ navigation }) => {
       setName({ value: name.value, error: nameError });
       setChoiceQuestion({
         value: choiceQuestion.value,
-        error: optionError + " question.",
+        error: optionError + " question number.",
       });
       setDate({ value: date.value, error: dateError + " date of exam." });
       setScaleQuestion({
         value: scaleQuestion.value,
         error: scaleError + " scale.",
       });
-      setClassCodeError(classError);
-      setSemesterError(semesterError);
-      setSchoolYearError(schoolYearError);
+      setClassCodeError(classError + " class code.");
+      setSemesterError(semesterError + " semester.");
+      setSchoolYearError(schoolYearError + " school year.");
       return;
     }
+    setClassCodeError("");
+    setSemesterError("");
+    setSchoolYearError("");
     let question = "";
     options.map((e) => {
       if (e.value === choiceQuestion.value) {
@@ -204,7 +211,7 @@ const CreateExam = ({ navigation }) => {
       },
     ]);
     if (error) {
-      Alert.alert("Failed!", "Create Exam failed.", [
+      Alert.alert("Failed!", "Create exam " + name.value + " failed.", [
         {
           text: "Back",
           onPress: () => {
@@ -213,9 +220,9 @@ const CreateExam = ({ navigation }) => {
         },
       ]);
     } else {
-      Alert.alert("Success!", "Create Exam successful!", [
+      Alert.alert("Success!", "Create exam " + name.value + " successful!", [
         {
-          text: "Back exam list.",
+          text: "Back exam list",
           onPress: () => {
             setLoading(false);
             navigation.goBack();
@@ -232,30 +239,29 @@ const CreateExam = ({ navigation }) => {
   };
 
   const Cancel = () => {
-    Alert.alert(
-      "Are you sure?",
-      "Are you sure you want to reset this text box!",
-      [
-        {
-          text: "Yes",
-          onPress: () => {
-            setLoading(false);
-            setChoiceQuestion({ value: "", error: "" });
-            setScaleQuestion({ value: "", error: "" });
-            setSchoolYear("");
-            setSemester("");
-            setName({ value: "", error: "" });
-            setClassCode("");
-            setDate({ value: "", error: "" });
-            setDescription({ value: "", error: "" });
-            return;
-          },
+    Alert.alert("Cancel?", "Are you sure you want to reset this text box!", [
+      {
+        text: "Yes",
+        onPress: () => {
+          setLoading(false);
+          setChoiceQuestion({ value: "", error: "" });
+          setScaleQuestion({ value: "", error: "" });
+          setSchoolYear("");
+          setSemester("");
+          setName({ value: "", error: "" });
+          setClassCode("");
+          setDate({ value: "", error: "" });
+          setDescription({ value: "", error: "" });
+          setClassCodeError("");
+          setSemesterError("");
+          setSchoolYearError("");
+          return;
         },
-        {
-          text: "No",
-        },
-      ]
-    );
+      },
+      {
+        text: "No",
+      },
+    ]);
   };
 
   const renderItem = (item) => {
@@ -266,7 +272,7 @@ const CreateExam = ({ navigation }) => {
     );
   };
   return (
-    <SafeAreaView>
+    <SafeAreaView style={[styles.container, themeContainerStyle]}>
       <ScrollView>
         <Paragraph style={{ paddingTop: 40, paddingLeft: 20 }}>
           <BackButton goBack={navigation.goBack} />
@@ -528,6 +534,12 @@ const CreateExam = ({ navigation }) => {
               {loading ? "Loading" : "Create Exam"}
             </Button>
           </View>
+          <ActivityIndicator
+            animating={loading}
+            color="#bc2b78"
+            size="large"
+            style={styles.activityIndicator}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -604,5 +616,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.error,
     paddingTop: 2,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

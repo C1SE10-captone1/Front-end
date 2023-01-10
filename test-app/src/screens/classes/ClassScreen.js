@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
@@ -33,7 +34,7 @@ const ClassScreen = ({ navigation }) => {
 
   useEffect(() => {
     setTimeout(async () => {
-      setLoading(false);
+      classList ? setLoading(false) : setLoading(true);
       loadClasses();
     }, 1000);
   }, [currentUser, loadClasses]);
@@ -190,24 +191,14 @@ const ClassScreen = ({ navigation }) => {
           </View>
         )}
       </View>
-      {/* <TouchableOpacity
-        style={styles.btn_refesh}
-        onPress={() => {
-          setTimeout(async () => loadClasses(), 1000);
-        }}
-      >
-        <Image
-          source={require("../../assets/refresh.png")}
-          resizeMode="contain"
-          style={{
-            width: 16,
-            height: 16,
-            display: "flex",
-            right: -7,
-          }}
-        />
-      </TouchableOpacity> */}
+      <ActivityIndicator
+        animating={loading}
+        color="#bc2b78"
+        size="large"
+        style={styles.activityIndicator}
+      />
 
+      {/* button create class */}
       <TouchableOpacity
         style={styles.btn_new}
         onPress={() => navigation.navigate("CreateClass")}
@@ -336,5 +327,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.41,
     shadowRadius: 7.11,
     elevation: 16,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

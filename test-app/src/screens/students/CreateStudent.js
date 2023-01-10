@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Alert,
   Linking,
+  ActivityIndicator,
   // Button,
 } from "react-native";
 import React, { useCallback, useState } from "react";
@@ -25,6 +26,10 @@ const CreateStudent = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const supportedURL = "http://localhost:8889/";
+
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
 
   const OpenURLButton = ({ url, children }) => {
     const handlePress = useCallback(async () => {
@@ -65,7 +70,7 @@ const CreateStudent = ({ route, navigation }) => {
     for (let i = 0; i < students.length; i++) {
       if (students[i].student_code === studentCode.value) {
         check = false;
-        Alert.alert("Create Student failed!", "Student code already exists. ", [
+        Alert.alert("Failed!", "Student code already exists. ", [
           {
             text: "Back",
             onPress: () => {},
@@ -85,7 +90,7 @@ const CreateStudent = ({ route, navigation }) => {
         },
       ]);
       if (err) {
-        Alert.alert("Failed!", "Create Student failed.", [
+        Alert.alert("Failed!", "Create student failed.", [
           {
             text: "Back",
             onPress: () => {
@@ -97,23 +102,27 @@ const CreateStudent = ({ route, navigation }) => {
         return;
       } else {
         setLoading(false);
-        Alert.alert("Success", "Create Student successful!", [
-          {
-            text: "Back students list ",
-            onPress: () => {
-              navigation.pop();
+        Alert.alert(
+          "Success!",
+          "Create student " + name.value + " successful!",
+          [
+            {
+              text: "Back students list ",
+              onPress: () => {
+                navigation.pop();
+              },
             },
-          },
-          {
-            text: "OK",
-            onPress: () => {
-              setName({ value: "", error: "" });
-              setStudentCode({ value: "", error: "" });
-              setLoading(false);
-              return;
+            {
+              text: "OK",
+              onPress: () => {
+                setName({ value: "", error: "" });
+                setStudentCode({ value: "", error: "" });
+                setLoading(false);
+                return;
+              },
             },
-          },
-        ]);
+          ]
+        );
         return;
       }
     } else {
@@ -123,28 +132,24 @@ const CreateStudent = ({ route, navigation }) => {
   };
 
   const Cancel = () => {
-    Alert.alert(
-      "Are you sure cancel",
-      "Are you sure you want to reset this text box?",
-      [
-        {
-          text: "Yes",
-          onPress: () => {
-            setName({ value: "", error: "" });
-            setStudentCode({ value: "", error: "" });
-            setLoading(false);
-            return;
-          },
+    Alert.alert("Cancel!", "Are you sure you want to reset this text box?", [
+      {
+        text: "Yes",
+        onPress: () => {
+          setName({ value: "", error: "" });
+          setStudentCode({ value: "", error: "" });
+          setLoading(false);
+          return;
         },
-        {
-          text: "No",
-        },
-      ]
-    );
+      },
+      {
+        text: "No",
+      },
+    ]);
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={[styles.container, themeContainerStyle]}>
       <Paragraph style={{ paddingTop: 30, paddingLeft: 20 }}>
         <BackButton goBack={navigation.goBack} />
         {/* <Header>Class</Header> */}
@@ -181,7 +186,7 @@ const CreateStudent = ({ route, navigation }) => {
         </View>
 
         {/* button handle */}
-        <View style={{ marginHorizontal: "10%" }}>
+        <View style={{ marginHorizontal: "10%", marginTop: 50 }}>
           {/* <Button
             mode="outlined"
             style={{ marginTop: 50 }}
@@ -200,6 +205,12 @@ const CreateStudent = ({ route, navigation }) => {
             {loading ? "Loading" : "Create Student"}
           </Button>
         </View>
+        <ActivityIndicator
+          animating={loading}
+          color="#bc2b78"
+          size="large"
+          style={styles.activityIndicator}
+        />
         {/* </Background> */}
       </ScrollView>
     </SafeAreaView>
@@ -228,5 +239,17 @@ const styles = StyleSheet.create({
     marginLeft: "10%",
     marginRight: "10%",
     flexDirection: "row",
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

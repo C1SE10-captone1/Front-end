@@ -9,6 +9,7 @@ import {
   FlatList,
   Modal,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
@@ -34,6 +35,10 @@ const StudentDetail = ({ route, navigation }) => {
     value: "",
     error: "",
   });
+
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
 
   const loadData = async () => {
     let { data: student, error } = await supabase
@@ -344,54 +349,64 @@ const StudentDetail = ({ route, navigation }) => {
                     entry={"top"}
                     onRequestClose={() => setVisiBle(false)}
                   >
-                    <View style={{ flex: 1 }}>
-                      <View style={{ justifyContent: "center" }}>
-                        <Text style={styles.title}>Edit Student</Text>
+                    <SafeAreaView
+                      style={[styles.container, themeContainerStyle]}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <View style={{ justifyContent: "center" }}>
+                          <Text style={styles.title}>Edit Student</Text>
+                        </View>
+                        <View style={styles.box}>
+                          <TextInput
+                            required
+                            keyboardType="text"
+                            label="Student Code"
+                            returnKeyType="next"
+                            value={studentCodeEdit.value}
+                            onChangeText={(text) =>
+                              setStudentCodeEdit({ value: text, error: "" })
+                            }
+                            error={!!studentCodeEdit.error}
+                            errorText={studentCodeEdit.error}
+                          ></TextInput>
+                        </View>
+                        {/* input name class  */}
+                        <View style={styles.box}>
+                          <TextInput
+                            keyboardType="text"
+                            label="Student Name"
+                            returnKeyType="done"
+                            value={nameEdit.value}
+                            onChangeText={(text) =>
+                              setNameEdit({ value: text, error: "" })
+                            }
+                            error={!!nameEdit.error}
+                            errorText={nameEdit.error}
+                          ></TextInput>
+                        </View>
+                        <View style={{ marginHorizontal: 40, marginTop: 40 }}>
+                          <Button
+                            mode="outlined"
+                            onPress={() => setVisiBle(false)}
+                          >
+                            Back
+                          </Button>
+                          <Button
+                            disabled={loading}
+                            mode="contained"
+                            onPress={update}
+                          >
+                            {loading ? "Loading" : "Update Student"}
+                          </Button>
+                        </View>
                       </View>
-                      <View style={styles.box}>
-                        <TextInput
-                          required
-                          keyboardType="text"
-                          label="Student Code"
-                          returnKeyType="next"
-                          value={studentCodeEdit.value}
-                          onChangeText={(text) =>
-                            setStudentCodeEdit({ value: text, error: "" })
-                          }
-                          error={!!studentCodeEdit.error}
-                          errorText={studentCodeEdit.error}
-                        ></TextInput>
-                      </View>
-                      {/* input name class  */}
-                      <View style={styles.box}>
-                        <TextInput
-                          keyboardType="text"
-                          label="Student Name"
-                          returnKeyType="done"
-                          value={nameEdit.value}
-                          onChangeText={(text) =>
-                            setNameEdit({ value: text, error: "" })
-                          }
-                          error={!!nameEdit.error}
-                          errorText={nameEdit.error}
-                        ></TextInput>
-                      </View>
-                      <View style={{ marginHorizontal: 40, marginTop: 40 }}>
-                        <Button
-                          mode="outlined"
-                          onPress={() => setVisiBle(false)}
-                        >
-                          Back
-                        </Button>
-                        <Button
-                          disabled={loading}
-                          mode="contained"
-                          onPress={update}
-                        >
-                          {loading ? "Loading" : "Update Student"}
-                        </Button>
-                      </View>
-                    </View>
+                      <ActivityIndicator
+                        animating={loading}
+                        color="#bc2b78"
+                        size="large"
+                        style={styles.activityIndicator}
+                      />
+                    </SafeAreaView>
                   </Modal>
                 </View>
               </View>
@@ -463,5 +478,17 @@ const styles = StyleSheet.create({
     marginLeft: "10%",
     marginRight: "10%",
     flexDirection: "row",
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

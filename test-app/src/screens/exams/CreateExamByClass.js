@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import BackButton from "../../components/BackButton";
@@ -36,6 +37,10 @@ const CreateExamByClass = ({ route, navigation }) => {
   const currentUser = supabase.auth.user();
   const [loading, setLoading] = useState(false);
   const ref = useRef(null);
+
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
 
   useEffect(() => {
     setLoading(false);
@@ -83,7 +88,7 @@ const CreateExamByClass = ({ route, navigation }) => {
       setName({ value: name.value, error: nameError });
       setChoiceQuestion({
         value: choiceQuestion.value,
-        error: optionError + " question.",
+        error: optionError + " question number.",
       });
       setDate({ value: date.value, error: dateError + " date of exam." });
       setScaleQuestion({
@@ -108,10 +113,10 @@ const CreateExamByClass = ({ route, navigation }) => {
     const { error } = await supabase.from("exams").insert([
       {
         name: name.value,
-        option: choiceQuestion.value,
-        scale: scaleQuestion.value,
-        // option: question,
-        // scale: scal,
+        // option: choiceQuestion.value,
+        // scale: scaleQuestion.value,
+        option: question,
+        scale: scal,
         date_exam: date.value,
         is_delete: false,
         description: description.value,
@@ -119,7 +124,7 @@ const CreateExamByClass = ({ route, navigation }) => {
       },
     ]);
     if (error) {
-      Alert.alert("Failed!", "Create Exam failed.", [
+      Alert.alert("Failed!", "Create exam failed.", [
         {
           text: "Back",
           onPress: () => {
@@ -128,7 +133,7 @@ const CreateExamByClass = ({ route, navigation }) => {
         },
       ]);
     } else {
-      Alert.alert("Success!", "Create Exam successful!", [
+      Alert.alert("Success!", "Create exam " + name.value + "successful!", [
         {
           text: "Back exam list.",
           onPress: () => {
@@ -179,7 +184,7 @@ const CreateExamByClass = ({ route, navigation }) => {
     );
   };
   return (
-    <SafeAreaView>
+    <SafeAreaView style={[styles.container, themeContainerStyle]}>
       <ScrollView>
         <Paragraph style={{ paddingTop: 40, paddingLeft: 20 }}>
           <BackButton goBack={navigation.goBack} />
@@ -208,7 +213,7 @@ const CreateExamByClass = ({ route, navigation }) => {
                 marginTop: 10,
               }}
             >
-              {/* <Dropdown
+              <Dropdown
                 ref={ref}
                 statusBarIsTranslucent={true}
                 style={styles.dropdown}
@@ -228,8 +233,8 @@ const CreateExamByClass = ({ route, navigation }) => {
                   setChoiceQuestion({ value: item.value, error: "" });
                 }}
                 renderItem={renderItem}
-              /> */}
-              <TextInput
+              />
+              {/* <TextInput
                 label="Questions number *"
                 returnKeyType="next"
                 value={scale.value}
@@ -239,16 +244,16 @@ const CreateExamByClass = ({ route, navigation }) => {
                 error={!!choiceQuestion.error}
                 errorText={choiceQuestion.error}
                 keyboardType="text"
-              ></TextInput>
-              {/* {choiceQuestion.error ? (
+              ></TextInput> */}
+              {choiceQuestion.error ? (
                 <Text style={styles.error}>{choiceQuestion.error}</Text>
-              ) : null} */}
+              ) : null}
             </View>
             {/* selecr scale */}
             <View
               style={{ width: "37%", flexDirection: "column", marginTop: 10 }}
             >
-              <TextInput
+              {/* <TextInput
                 label="Scale *"
                 returnKeyType="next"
                 value={scaleQuestion.value}
@@ -258,8 +263,8 @@ const CreateExamByClass = ({ route, navigation }) => {
                 error={!!scaleQuestion.error}
                 errorText={scaleQuestion.error}
                 keyboardType="text"
-              ></TextInput>
-              {/* <Dropdown
+              ></TextInput> */}
+              <Dropdown
                 ref={ref}
                 statusBarIsTranslucent={true}
                 style={styles.dropdown}
@@ -279,10 +284,10 @@ const CreateExamByClass = ({ route, navigation }) => {
                   setScaleQuestion({ value: item.value, error: "" });
                 }}
                 renderItem={renderItem}
-              /> */}
-              {/* {scaleQuestion.error ? (
+              />
+              {scaleQuestion.error ? (
                 <Text style={styles.error}>{scaleQuestion.error}</Text>
-              ) : null} */}
+              ) : null}
             </View>
           </View>
 
@@ -366,6 +371,12 @@ const CreateExamByClass = ({ route, navigation }) => {
               {loading ? "Loading" : "Create Exam"}
             </Button>
           </View>
+          <ActivityIndicator
+            animating={loading}
+            color="#bc2b78"
+            size="large"
+            style={styles.activityIndicator}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -442,5 +453,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.error,
     paddingTop: 2,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

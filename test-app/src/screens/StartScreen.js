@@ -27,7 +27,7 @@ export default function StartScreen({ navigation }) {
   return (
     <Background>
       <Logo />
-      <Header>InstaGrade</Header>
+      <Header>InstaGrade5</Header>
       <Paragraph>
         The easiest way to start with your amazing application.
       </Paragraph>

@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
 import BackButton from "../../components/BackButton";
@@ -31,9 +32,10 @@ const CreateClass = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const currentUser = supabase.auth.user();
 
-  useEffect(() => {
-    setLoading(false);
-  }, [loading]);
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
+
   const Done = async () => {
     var check = true;
     setLoading(true);
@@ -41,14 +43,7 @@ const CreateClass = ({ navigation }) => {
     const classNameError = classNameValidator(name.value);
     const schoolYearError = dropdownValidator(schoolYear.value);
     const semetesError = dropdownValidator(semetes.value);
-    if (classCode.value === name.value) {
-      setLoading(false);
-      setName({
-        value: name.value,
-        error: "Class code and class name can't be the same.",
-      });
-      return;
-    }
+
     if (classCodeError || classNameError || schoolYearError || semetesError) {
       setLoading(false);
       setName({ value: name.value, error: classNameError });
@@ -58,6 +53,16 @@ const CreateClass = ({ navigation }) => {
         error: schoolYearError + " school year.",
       });
       setSemetes({ value: semetes.value, error: semetesError + " semester." });
+      return;
+    }
+    setSchoolYear({ value: schoolYear.value, error: "" });
+    setSemetes({ value: semetes.value, error: "" });
+    if (classCode.value === name.value) {
+      setLoading(false);
+      setName({
+        value: name.value,
+        error: "Class code and class name can't be the same.",
+      });
       return;
     }
     let { data: classes, err } = await supabase
@@ -102,6 +107,8 @@ const CreateClass = ({ navigation }) => {
     }
     console.log("click done");
     if (check) {
+      console.log(semeters[semetes.value - 1].label);
+      console.log(school_year[schoolYear.value - 1].label);
       const { error } = await supabase.from("classes").insert([
         {
           name: name.value,
@@ -187,7 +194,7 @@ const CreateClass = ({ navigation }) => {
     );
   };
   return (
-    <SafeAreaView>
+    <SafeAreaView style={[styles.container, themeContainerStyle]}>
       <Paragraph style={{ paddingTop: 30, paddingLeft: 20 }}>
         <BackButton goBack={navigation.goBack} />
         {/* <Header>Class</Header> */}
@@ -223,7 +230,7 @@ const CreateClass = ({ navigation }) => {
             <View style={styles.box}>
               <View
                 style={{
-                  width: "58%",
+                  width: "60%",
                   flexDirection: "column",
                   marginTop: 8,
                 }}
@@ -242,7 +249,7 @@ const CreateClass = ({ navigation }) => {
                   maxHeight={300}
                   labelField="label"
                   valueField="value"
-                  placeholder="Select school year *"
+                  placeholder="Select school year*"
                   searchPlaceholder="Search..."
                   value={schoolYear.value}
                   onChange={(item) => {
@@ -256,7 +263,7 @@ const CreateClass = ({ navigation }) => {
               </View>
 
               <View
-                style={{ width: "42%", flexDirection: "column", marginTop: 8 }}
+                style={{ width: "40%", flexDirection: "column", marginTop: 8 }}
               >
                 <Dropdown
                   ref={ref}
@@ -271,7 +278,7 @@ const CreateClass = ({ navigation }) => {
                   maxHeight={300}
                   labelField="label"
                   valueField="value"
-                  placeholder="Semeters *"
+                  placeholder="Semeters*"
                   searchPlaceholder="Search..."
                   value={semetes.value}
                   onChange={(item) => {
@@ -301,6 +308,12 @@ const CreateClass = ({ navigation }) => {
             ></TextInput>
           </View>
         </View>
+        <ActivityIndicator
+          animating={loading}
+          color="#bc2b78"
+          size="large"
+          style={styles.activityIndicator}
+        />
 
         {/* button handle */}
         <View style={{ marginHorizontal: 40 }}>
@@ -350,7 +363,9 @@ const styles = StyleSheet.create({
   btn_cancel: {
     marginTop: 40,
   },
-  btn_done: {},
+  btn_done: {
+    marginBottom: 50,
+  },
   dropdown: {
     // margin: 16,
     height: 50,
@@ -389,5 +404,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.error,
     paddingTop: 2,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

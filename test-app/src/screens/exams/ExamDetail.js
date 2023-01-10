@@ -9,6 +9,7 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import Button from "../../components/Button";
@@ -38,6 +39,9 @@ const ExamDetail = ({ route, navigation }) => {
   const [modalVisible, setVisiBle] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [loading, setLoading] = useState(false);
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -108,7 +112,7 @@ const ExamDetail = ({ route, navigation }) => {
       ])
       .eq("id", examId);
     if (error) {
-      Alert.alert("Failed!", "Update Exam failed!", [
+      Alert.alert("Failed!", "Updated exam " + name.value + "failed!", [
         {
           text: "Back",
           onPress: () => {
@@ -117,18 +121,12 @@ const ExamDetail = ({ route, navigation }) => {
         },
       ]);
     } else {
-      Alert.alert("Success!", "Update Exam successful!", [
-        {
-          text: "Back.",
-          onPress: () => {
-            setLoading(false);
-            setVisiBle(false);
-          },
-        },
+      Alert.alert("Success!", "Updated exam " + name.value + " successful!", [
         {
           text: "OK",
           onPress: () => {
             setLoading(false);
+            navigation.goBack();
           },
         },
       ]);
@@ -190,8 +188,8 @@ const ExamDetail = ({ route, navigation }) => {
   };
   const Delete = () => {
     Alert.alert(
-      "Are you sure?",
-      "deleting this exam will also delete all associated. This cannot be undone!",
+      "Are you sure delete?",
+      "Deleting this exam will also delete all associated. This cannot be undone!",
       [
         {
           text: "Yes",
@@ -201,7 +199,7 @@ const ExamDetail = ({ route, navigation }) => {
               .update({ is_delete: true })
               .eq("id", examId);
             if (error) {
-              Alert.alert("Failed", "Delete failed", [
+              Alert.alert("Failed", "Delete " + exam[0].name + " failed", [
                 {
                   text: "Back",
                 },
@@ -209,7 +207,7 @@ const ExamDetail = ({ route, navigation }) => {
             } else {
               Alert.alert(
                 "Success!",
-                "Delete Exam " + exam[0].name + " success.",
+                "Deleted exam " + exam[0].name + " success.",
                 [
                   {
                     text: "OK",
@@ -575,182 +573,194 @@ const ExamDetail = ({ route, navigation }) => {
         entry={"top"}
         onRequestClose={() => setVisiBle(false)}
       >
-        <View style={{ flex: 1 }}>
-          <View style={{ justifyContent: "center" }}>
-            <ScrollView style={{}}>
-              <Text style={styles.title}>Update Exam</Text>
-              <View style={styles.container}>
-                {/* enter name exam */}
-                <View style={styles.box}>
-                  <TextInput
-                    keyboardType="text"
-                    label="Name Exam *"
-                    returnKeyType="next"
-                    value={name.value}
-                    onChangeText={(text) => setName({ value: text, error: "" })}
-                    error={!!name.error}
-                    errorText={name.error}
-                  ></TextInput>
-                </View>
-
-                {/* select number question */}
-                <View style={styles.box}>
-                  <View
-                    style={{
-                      width: "58%",
-                      flexDirection: "column",
-                      marginTop: 10,
-                    }}
-                  >
-                    <Dropdown
-                      ref={ref}
-                      statusBarIsTranslucent={true}
-                      style={styles.dropdown}
-                      placeholderStyle={styles.placeholderStyle}
-                      selectedTextStyle={styles.selectedTextStyle}
-                      inputSearchStyle={styles.inputSearchStyle}
-                      iconStyle={styles.iconStyle}
-                      data={options}
-                      search
-                      maxHeight={300}
-                      labelField="label"
-                      valueField="value"
-                      placeholder="Choice questions *"
-                      searchPlaceholder="Search..."
-                      value={choiceQuestion.value}
-                      onChange={(item) => {
-                        setChoiceQuestion({ value: item.value, error: "" });
-                      }}
-                      renderItem={renderItem}
-                    />
-                    {choiceQuestion.error ? (
-                      <Text style={styles.error}>{choiceQuestion.error}</Text>
-                    ) : null}
-                  </View>
-                  {/* selecr scale */}
-                  <View
-                    style={{
-                      width: "42%",
-                      flexDirection: "column",
-                      marginTop: 10,
-                    }}
-                  >
-                    <Dropdown
-                      ref={ref}
-                      statusBarIsTranslucent={true}
-                      style={styles.dropdown}
-                      placeholderStyle={styles.placeholderStyle}
-                      selectedTextStyle={styles.selectedTextStyle}
-                      inputSearchStyle={styles.inputSearchStyle}
-                      iconStyle={styles.iconStyle}
-                      data={scale}
-                      search
-                      maxHeight={300}
-                      labelField="label"
-                      valueField="value"
-                      placeholder="Scale *"
-                      searchPlaceholder="Search..."
-                      value={scaleQuestion.value}
-                      onChange={(item) => {
-                        setScaleQuestion({ value: item.value, error: "" });
-                      }}
-                      renderItem={renderItem}
-                    />
-                    {scaleQuestion.error ? (
-                      <Text style={styles.error}>{scaleQuestion.error}</Text>
-                    ) : null}
-                  </View>
-                </View>
-
-                {/* select date */}
-                <View
-                  style={{
-                    maxWidth: "70%",
-                    marginLeft: "10%",
-                    flexDirection: "row",
-                    marginTop: 5,
-                    marginBottom: 5,
-                  }}
-                >
-                  {/* <Text>{date}</Text> */}
-                  <View style={{ flexDirection: "column" }}>
+        <SafeAreaView style={[styles.container, themeContainerStyle]}>
+          <View style={{ flex: 1 }}>
+            <View style={{ justifyContent: "center" }}>
+              <ScrollView style={{}}>
+                <Text style={styles.title}>Update Exam</Text>
+                <View style={styles.container}>
+                  {/* enter name exam */}
+                  <View style={styles.box}>
                     <TextInput
-                      label="Date *"
+                      keyboardType="text"
+                      label="Name Exam *"
                       returnKeyType="next"
-                      value={date.value}
-                      onChangeText={(date) =>
-                        setDate({ value: date, error: "" })
+                      value={name.value}
+                      onChangeText={(text) =>
+                        setName({ value: text, error: "" })
                       }
-                      error={!!date.error}
-                      errorText={date.error}
-                      keyboardType="datetime"
+                      error={!!name.error}
+                      errorText={name.error}
                     ></TextInput>
                   </View>
 
-                  <View style={{ flexDirection: "column" }}>
-                    <TouchableOpacity onPress={showDatePicker}>
-                      <DateTimePickerModal
-                        isVisible={isDatePickerVisible}
-                        // mode="datetime"
-                        mode="date"
-                        value={date}
-                        onChange={(date) => setDate({ value: date, error: "" })}
-                        onConfirm={handleConfirm}
-                        onCancel={hideDatePicker}
-                      />
-                      <View
-                        style={{
-                          paddingTop: 28,
-                          paddingLeft: 3,
+                  {/* select number question */}
+                  <View style={styles.box}>
+                    <View
+                      style={{
+                        width: "58%",
+                        flexDirection: "column",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Dropdown
+                        ref={ref}
+                        statusBarIsTranslucent={true}
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={options}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Choice questions *"
+                        searchPlaceholder="Search..."
+                        value={choiceQuestion.value}
+                        onChange={(item) => {
+                          setChoiceQuestion({ value: item.value, error: "" });
                         }}
-                      >
-                        <Image
-                          source={require("../../assets/schedule.png")}
-                          resizeMode="contain"
-                          style={{
-                            width: 30,
-                            height: 30,
-                          }}
+                        renderItem={renderItem}
+                      />
+                      {choiceQuestion.error ? (
+                        <Text style={styles.error}>{choiceQuestion.error}</Text>
+                      ) : null}
+                    </View>
+                    {/* selecr scale */}
+                    <View
+                      style={{
+                        width: "42%",
+                        flexDirection: "column",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Dropdown
+                        ref={ref}
+                        statusBarIsTranslucent={true}
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={scale}
+                        search
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder="Scale *"
+                        searchPlaceholder="Search..."
+                        value={scaleQuestion.value}
+                        onChange={(item) => {
+                          setScaleQuestion({ value: item.value, error: "" });
+                        }}
+                        renderItem={renderItem}
+                      />
+                      {scaleQuestion.error ? (
+                        <Text style={styles.error}>{scaleQuestion.error}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+
+                  {/* select date */}
+                  <View
+                    style={{
+                      maxWidth: "70%",
+                      marginLeft: "10%",
+                      flexDirection: "row",
+                      marginTop: 5,
+                      marginBottom: 5,
+                    }}
+                  >
+                    {/* <Text>{date}</Text> */}
+                    <View style={{ flexDirection: "column" }}>
+                      <TextInput
+                        label="Date *"
+                        returnKeyType="next"
+                        value={date.value}
+                        onChangeText={(date) =>
+                          setDate({ value: date, error: "" })
+                        }
+                        error={!!date.error}
+                        errorText={date.error}
+                        keyboardType="datetime"
+                      ></TextInput>
+                    </View>
+
+                    <View style={{ flexDirection: "column" }}>
+                      <TouchableOpacity onPress={showDatePicker}>
+                        <DateTimePickerModal
+                          isVisible={isDatePickerVisible}
+                          // mode="datetime"
+                          mode="date"
+                          value={date}
+                          onChange={(date) =>
+                            setDate({ value: date, error: "" })
+                          }
+                          onConfirm={handleConfirm}
+                          onCancel={hideDatePicker}
                         />
-                      </View>
-                    </TouchableOpacity>
+                        <View
+                          style={{
+                            paddingTop: 28,
+                            paddingLeft: 3,
+                          }}
+                        >
+                          <Image
+                            source={require("../../assets/schedule.png")}
+                            resizeMode="contain"
+                            style={{
+                              width: 30,
+                              height: 30,
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* input description */}
+                  <View style={styles.box}>
+                    <TextInput
+                      label="Description"
+                      returnKeyType="done"
+                      value={description.value}
+                      onChangeText={(text) =>
+                        setDescription({ value: text, error: "" })
+                      }
+                      keyboardType="text"
+                    ></TextInput>
+                  </View>
+                  {/* button handle */}
+                  <View style={{ marginHorizontal: 40 }}>
+                    <Button
+                      mode="outlined"
+                      style={styles.btn_cancel}
+                      onPress={() => setVisiBle(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      disabled={loading}
+                      mode="contained"
+                      style={styles.btn_done}
+                      onPress={Done}
+                    >
+                      {loading ? "Loading" : "Update Exam"}
+                    </Button>
                   </View>
                 </View>
-
-                {/* input description */}
-                <View style={styles.box}>
-                  <TextInput
-                    label="Description"
-                    returnKeyType="done"
-                    value={description.value}
-                    onChangeText={(text) =>
-                      setDescription({ value: text, error: "" })
-                    }
-                    keyboardType="text"
-                  ></TextInput>
-                </View>
-                {/* button handle */}
-                <View style={{ marginHorizontal: 40 }}>
-                  <Button
-                    mode="outlined"
-                    style={styles.btn_cancel}
-                    onPress={() => setVisiBle(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={loading}
-                    mode="contained"
-                    style={styles.btn_done}
-                    onPress={Done}
-                  >
-                    {loading ? "Loading" : "Update Exam"}
-                  </Button>
-                </View>
-              </View>
-            </ScrollView>
+              </ScrollView>
+            </View>
+            <ActivityIndicator
+              animating={loading}
+              color="#bc2b78"
+              size="large"
+              style={styles.activityIndicator}
+            />
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -889,5 +899,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.error,
     paddingTop: 2,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

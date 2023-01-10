@@ -11,7 +11,9 @@ import {
   TouchableOpacity,
   View,
   Text,
+  ActivityIndicator,
   KeyboardAvoidingView,
+  StyleSheet
 } from "react-native";
 import { Layout, useTheme } from "react-native-rapi-ui";
 import { AuthStackParamList } from "../../types/navigation";
@@ -21,7 +23,6 @@ import {theme} from "../../core/theme";
 export default function ResetPasswordScreen({
   navigation,
 }: NativeStackScreenProps<AuthStackParamList, "ResetPassword">) {
-  const { isDarkmode, setTheme } = useTheme();
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -126,21 +127,11 @@ export default function ResetPasswordScreen({
                 justifyContent: "center",
               }}
             >
-              {/* <TouchableOpacity
-                onPress={() => {
-                  isDarkmode ? setTheme("light") : setTheme("dark");
-                }}
-              >
-                <Text
-                  size="md"
-                  fontWeight="bold"
-                  style={{
-                    marginLeft: 5,
-                  }}
-                >
-                  {isDarkmode ? "☀️ light theme" : "🌑 dark theme"}
-                </Text>
-              </TouchableOpacity> */}
+              <ActivityIndicator
+                animating={loading}
+                color = '#bc2b78'
+                size = "large"
+                style = {styles.activityIndicator}/>
             </View>
           </View>
         </ScrollView>
@@ -148,3 +139,16 @@ export default function ResetPasswordScreen({
     </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  background: {
+    backgroundColor: '#C0C0C0'
+  },
+
+  activityIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 80
+ }
+});

@@ -9,6 +9,7 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import Button from "../../components/Button";
@@ -39,6 +40,11 @@ const ClassDetail = ({ route, navigation }) => {
     year: "",
     semeter: "",
   });
+
+  const themeContainerStyle = loading
+    ? styles.background
+    : theme.colors.background;
+
   // number exams of a class
   const updateNumberExamOfClass = async () => {
     let { data: exams, error } = await supabase
@@ -111,13 +117,13 @@ const ClassDetail = ({ route, navigation }) => {
       setName({ value: name.value, error: checkClassName });
       return;
     }
-    setLoading(true);
     let { data: classes, err } = await supabase
       .from("classes")
       .select("*")
       .eq("uid", currentUser.id);
 
     for (let i = 0; i < classes.length; i++) {
+      // check class code current
       if (
         classCur.classCode === classCode.value &&
         classCur.year === schoolYear &&
@@ -125,25 +131,29 @@ const ClassDetail = ({ route, navigation }) => {
       ) {
         break;
       }
+      // check class code is already exists
       if (
         classes[i].class_code === classCode.value &&
         classes[i].school_year === school_year[schoolYear - 1].label &&
         classes[i].semester === semeters[semetes - 1].label
       ) {
         check = false;
-        Alert.alert("Update Class failed!", "Class code already exists. ", [
-          {
-            text: "Back",
-            onPress: () => {
-              navigation.goBack();
+        Alert.alert(
+          "Update class failed!",
+          "Class code " + classe[0].class_code + " already exists. ",
+          [
+            {
+              text: "Back",
+              onPress: () => {
+                navigation.goBack();
+              },
             },
-          },
-        ]);
+          ]
+        );
         break;
       }
     }
     if (check) {
-      setLoading(true);
       const { error } = await supabase
         .from("classes")
         .update([
@@ -159,32 +169,44 @@ const ClassDetail = ({ route, navigation }) => {
         ])
         .eq("id", classe[0].id);
       if (error !== null) {
-        Alert.alert("Failed!", "Update Class failed.", [
-          {
-            text: "Back",
-            onPress: () => {
-              setLoading(false);
+        Alert.alert(
+          "Failed!",
+          "Update class " + classe[0].class_code + " failed.",
+          [
+            {
+              text: "Back",
+              onPress: () => {
+                setLoading(false);
+              },
             },
-          },
-        ]);
+          ]
+        );
         return;
       } else {
-        Alert.alert("Success", "Update Class successful!", [
-          {
-            text: "Back list class",
-            onPress: () => {
-              setVisiBle(true);
-              setLoading(false);
-              setTimeout(async () => {
-                loadClassDetail();
-              }, 1000);
-              navigation.goBack();
+        Alert.alert(
+          "Success!",
+          "Update class " + classe[0].class_code + " successful!",
+          [
+            {
+              text: "Back list class",
+              onPress: () => {
+                setVisiBle(true);
+                setLoading(false);
+                setTimeout(async () => {
+                  loadClassDetail();
+                }, 1000);
+                navigation.goBack();
+              },
             },
-          },
-          {
-            text: "OK",
-          },
-        ]);
+            {
+              text: "OK",
+              onPress: () => {
+                setLoading(false);
+                loadClassDetail();
+              },
+            },
+          ]
+        );
       }
     }
   };
@@ -202,26 +224,6 @@ const ClassDetail = ({ route, navigation }) => {
     { value: 3, label: "Vacation" },
   ];
 
-  const Cancel = () => {
-    Alert.alert(
-      "Are you sure cancel",
-      "Are you sure you want to reset this text box?",
-      [
-        {
-          text: "Yes",
-          onPress: () => {
-            setName("");
-            setDescription("");
-            return;
-          },
-        },
-        {
-          text: "No",
-        },
-      ]
-    );
-  };
-
   const renderItem = (item) => {
     return (
       <View style={styles.item}>
@@ -231,12 +233,9 @@ const ClassDetail = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    setTimeout(async () => {
-      loadClassDetail();
-      updateNumberExamOfClass();
-      updateNumberStudentOfClass();
-      setLoading(false);
-    }, 1000);
+    loadClassDetail();
+    updateNumberExamOfClass();
+    updateNumberStudentOfClass();
   }, [
     navigation,
     loadClassDetail,
@@ -266,7 +265,7 @@ const ClassDetail = ({ route, navigation }) => {
             if (error) {
               Alert.alert(
                 "Error!",
-                "Delete Class " + classe[0].name + " failed?",
+                "Deleted class " + classe[0].name + " failed?",
                 [
                   {
                     text: "OK",
@@ -493,138 +492,148 @@ const ClassDetail = ({ route, navigation }) => {
           entry={"top"}
           onRequestClose={() => setVisiBle(false)}
         >
-          <View style={{ flex: 1 }}>
-            <ScrollView>
-              <Text style={styles.title}>Update Class</Text>
-              <View style={styles.container}>
-                {/* input name class code */}
-                <View style={styles.box}>
-                  <TextInput
-                    keyboardType="text"
-                    label="Class Code"
-                    returnKeyType="next"
-                    value={classCode.value}
-                    onChangeText={(text) =>
-                      setClassCode({ value: text, error: "" })
-                    }
-                    error={!!classCode.error}
-                    errorText={classCode.error}
-                  ></TextInput>
-                </View>
-                {/* input name class  */}
-                <View style={styles.box}>
-                  <TextInput
-                    keyboardType="text"
-                    label="Name Class"
-                    returnKeyType="next"
-                    value={name.value}
-                    onChangeText={(text) => setName({ value: text, error: "" })}
-                    error={!!name.error}
-                    errorText={name.error}
-                  ></TextInput>
-                </View>
-                <View>
+          <SafeAreaView style={[styles.container, themeContainerStyle]}>
+            <View style={{ flex: 1 }}>
+              <ScrollView>
+                <Text style={styles.title}>Update Class</Text>
+                <View style={styles.container}>
+                  {/* input name class code */}
                   <View style={styles.box}>
-                    <View
-                      style={{
-                        width: "63%",
-                        flexDirection: "column",
-                        marginTop: 8,
-                      }}
-                    >
-                      <Dropdown
-                        // disable={true}
-                        ref={ref}
-                        statusBarIsTranslucent={true}
-                        style={styles.dropdown}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        inputSearchStyle={styles.inputSearchStyle}
-                        iconStyle={styles.iconStyle}
-                        data={school_year}
-                        search
-                        maxHeight={300}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Select school year..."
-                        searchPlaceholder="Search..."
-                        value={schoolYear}
-                        onChange={(item) => {
-                          setSchoolYear(item.value);
+                    <TextInput
+                      keyboardType="text"
+                      label="Class Code"
+                      returnKeyType="next"
+                      value={classCode.value}
+                      onChangeText={(text) =>
+                        setClassCode({ value: text, error: "" })
+                      }
+                      error={!!classCode.error}
+                      errorText={classCode.error}
+                    ></TextInput>
+                  </View>
+                  {/* input name class  */}
+                  <View style={styles.box}>
+                    <TextInput
+                      keyboardType="text"
+                      label="Name Class"
+                      returnKeyType="next"
+                      value={name.value}
+                      onChangeText={(text) =>
+                        setName({ value: text, error: "" })
+                      }
+                      error={!!name.error}
+                      errorText={name.error}
+                    ></TextInput>
+                  </View>
+                  <View>
+                    <View style={styles.box}>
+                      <View
+                        style={{
+                          width: "63%",
+                          flexDirection: "column",
+                          marginTop: 8,
                         }}
-                        renderItem={renderItem}
-                      />
-                    </View>
+                      >
+                        <Dropdown
+                          // disable={true}
+                          ref={ref}
+                          statusBarIsTranslucent={true}
+                          style={styles.dropdown}
+                          placeholderStyle={styles.placeholderStyle}
+                          selectedTextStyle={styles.selectedTextStyle}
+                          inputSearchStyle={styles.inputSearchStyle}
+                          iconStyle={styles.iconStyle}
+                          data={school_year}
+                          search
+                          maxHeight={300}
+                          labelField="label"
+                          valueField="value"
+                          placeholder="Select school year..."
+                          searchPlaceholder="Search..."
+                          value={schoolYear}
+                          onChange={(item) => {
+                            setSchoolYear(item.value);
+                          }}
+                          renderItem={renderItem}
+                        />
+                      </View>
 
-                    <View
-                      style={{
-                        width: "37%",
-                        flexDirection: "column",
-                        marginTop: 8,
-                      }}
-                    >
-                      <Dropdown
-                        ref={ref}
-                        statusBarIsTranslucent={true}
-                        style={styles.dropdown}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        inputSearchStyle={styles.inputSearchStyle}
-                        iconStyle={styles.iconStyle}
-                        data={semeters}
-                        search
-                        maxHeight={300}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Semeters"
-                        searchPlaceholder="Search..."
-                        value={semetes}
-                        onChange={(item) => {
-                          setSemetes(item.value);
+                      <View
+                        style={{
+                          width: "37%",
+                          flexDirection: "column",
+                          marginTop: 8,
                         }}
-                        renderItem={renderItem}
-                      />
+                      >
+                        <Dropdown
+                          ref={ref}
+                          statusBarIsTranslucent={true}
+                          style={styles.dropdown}
+                          placeholderStyle={styles.placeholderStyle}
+                          selectedTextStyle={styles.selectedTextStyle}
+                          inputSearchStyle={styles.inputSearchStyle}
+                          iconStyle={styles.iconStyle}
+                          data={semeters}
+                          search
+                          maxHeight={300}
+                          labelField="label"
+                          valueField="value"
+                          placeholder="Semeters"
+                          searchPlaceholder="Search..."
+                          value={semetes}
+                          onChange={(item) => {
+                            setSemetes(item.value);
+                          }}
+                          renderItem={renderItem}
+                        />
+                      </View>
                     </View>
+                  </View>
+
+                  {/* input description */}
+                  <View style={styles.box}>
+                    <TextInput
+                      label="Description"
+                      returnKeyType="done"
+                      value={description.value}
+                      onChangeText={(text) =>
+                        setDescription({ value: text, error: "" })
+                      }
+                      //   error={!!description.error}
+                      //   errorText={description.error}
+                      keyboardType="text"
+                    ></TextInput>
                   </View>
                 </View>
 
-                {/* input description */}
-                <View style={styles.box}>
-                  <TextInput
-                    label="Description"
-                    returnKeyType="done"
-                    value={description.value}
-                    onChangeText={(text) =>
-                      setDescription({ value: text, error: "" })
-                    }
-                    //   error={!!description.error}
-                    //   errorText={description.error}
-                    keyboardType="text"
-                  ></TextInput>
+                {/* button handle */}
+                <View style={{ marginHorizontal: 40 }}>
+                  <Button
+                    mode="outlined"
+                    style={styles.btn_cancel}
+                    onPress={() => setVisiBle(false)}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    disabled={loading}
+                    mode="contained"
+                    style={styles.btn_done}
+                    onPress={Done}
+                  >
+                    {loading ? "Loading" : "Update Class"}
+                  </Button>
+                  <ActivityIndicator
+                    animating={loading}
+                    color="#bc2b78"
+                    size="large"
+                    style={styles.activityIndicator}
+                  />
                 </View>
-              </View>
-
-              {/* button handle */}
-              <View style={{ marginHorizontal: 40 }}>
-                <Button
-                  mode="outlined"
-                  style={styles.btn_cancel}
-                  onPress={() => setVisiBle(false)}
-                >
-                  Back
-                </Button>
-                <Button
-                  disabled={loading}
-                  mode="contained"
-                  style={styles.btn_done}
-                  onPress={Done}
-                >
-                  {loading ? "Loading" : "Update Class"}
-                </Button>
-              </View>
-              {/* </Background> */}
-            </ScrollView>
-          </View>
+                {/* </Background> */}
+              </ScrollView>
+            </View>
+          </SafeAreaView>
         </Modal>
       </View>
 
@@ -767,5 +776,17 @@ const styles = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 16,
+  },
+  activityIndicator: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+  },
+  background: {
+    backgroundColor: "#C0C0C0",
   },
 });

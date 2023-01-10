@@ -83,11 +83,9 @@ const ExamScreen = ({ navigation }) => {
                         <View style={styles.box}>
                           <View style={{ flexDirection: "column" }}>
                             <View style={{ flexDirection: "row" }}>
-                              {/* {item.filter((e) => ( */}
                               <Text style={styles.name_class}>
                                 {item.classes.name}
                               </Text>
-                              {/* ))} */}
                             </View>
                             <View style={{ flexDirection: "row" }}>
                               <Text style={styles.name_exam}>{item.name}</Text>
@@ -167,6 +165,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
     textTransform: "uppercase",
+    maxWidth: "100%",
+    flexWrap: "wrap",
+    paddingRight: 100,
   },
   name_exam: {
     color: theme.colors.text,

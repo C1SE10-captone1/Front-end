@@ -59,7 +59,7 @@ const ListExamByClass = ({ route, navigation }) => {
           alignContent: "center",
           paddingLeft: 20,
           paddingTop: 30,
-          minWidth: "100%",
+          minWidth: "10%",
           backgroundColor: theme.colors.background,
         }}
       >
@@ -107,6 +107,7 @@ const ListExamByClass = ({ route, navigation }) => {
           }}
         ></View>
       </View>
+
       <View style={{ minHeight: "90%" }}>
         {exam !== null ? (
           <FlatList
@@ -235,6 +236,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
     textTransform: "uppercase",
+    paddingRight: 100,
   },
   name_exam: {
     color: theme.colors.text,
